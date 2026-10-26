@@ -205,16 +205,26 @@
     walk(heroTitle);
   }
 
-  /* ---------- mascot --------------------------------------------- */
+  /* ---------- mascot: eyes follow the cursor, squash on click ------ */
+  // Works for any #mascot SVG with .pupil elements (rect x/y or circle cx/cy).
+  // data-range on #mascot = how far a pupil may travel, in viewBox units.
   const mascotWrap = $("#mascotWrap"), mascot = $("#mascot");
-  const pupils = $$(".pupil", mascot), sparkle = $("#sparkle"), mouth = $("#mouth");
+  const pupils = mascot ? $$(".pupil", mascot) : [], sparkle = $("#sparkle"), mouth = $("#mouth");
   const eyeSpring = makeSpring({ tension: 180, friction: 14 });
   const ex = { value: 0, velocity: 0, target: 0, done: true }, ey = { value: 0, velocity: 0, target: 0, done: true };
   let eyeRaf = 0;
-  const baseX = [6, 10], baseY = 9;
+  const eyeRange = mascot ? parseFloat(mascot.dataset.range || "0.6") : 0;
+  pupils.forEach((p) => {
+    const circle = p.hasAttribute("cx");
+    p.dataset.ax = circle ? "cx" : "x"; p.dataset.ay = circle ? "cy" : "y";
+    p.dataset.bx = p.getAttribute(p.dataset.ax); p.dataset.by = p.getAttribute(p.dataset.ay);
+  });
   function eyeFrame() {
     eyeSpring(ex); eyeSpring(ey);
-    pupils.forEach((p, i) => { p.setAttribute("x", (baseX[i] - 0.5 + ex.value * 0.6).toFixed(2)); p.setAttribute("y", (baseY - 0.5 + ey.value * 0.6).toFixed(2)); });
+    pupils.forEach((p) => {
+      p.setAttribute(p.dataset.ax, (parseFloat(p.dataset.bx) + ex.value * eyeRange).toFixed(2));
+      p.setAttribute(p.dataset.ay, (parseFloat(p.dataset.by) + ey.value * eyeRange).toFixed(2));
+    });
     if (!ex.done || !ey.done) eyeRaf = requestAnimationFrame(eyeFrame); else eyeRaf = 0;
   }
   function lookAt(cx, cy) {
@@ -224,7 +234,7 @@
     ex.target = (dx / dist) * k; ey.target = (dy / dist) * k;
     if (!eyeRaf) eyeRaf = requestAnimationFrame(eyeFrame);
   }
-  if (!reduced) {
+  if (mascotWrap && mascot && !reduced) {
     mascotWrap.classList.add("is-idle");
     window.addEventListener("pointermove", (e) => lookAt(e.clientX, e.clientY), { passive: true });
     window.addEventListener("scroll", () => { ey.target = 0.7; ex.target = 0; if (!eyeRaf) eyeRaf = requestAnimationFrame(eyeFrame); }, { passive: true });
@@ -232,17 +242,20 @@
   const MOUTH_SMILE = '<rect x="6" y="13" width="1" height="1" fill="var(--paper)"/><rect x="7" y="14" width="2" height="1" fill="var(--paper)"/><rect x="9" y="13" width="1" height="1" fill="var(--paper)"/>';
   const MOUTH_BIG = '<rect x="5" y="13" width="1" height="1" fill="var(--paper)"/><rect x="6" y="14" width="4" height="1" fill="var(--pink)"/><rect x="10" y="13" width="1" height="1" fill="var(--paper)"/>';
   let happy = 0, happyTimer = 0;
-  mascotWrap.addEventListener("click", (e) => {
+  if (mascotWrap && mascot) mascotWrap.addEventListener("click", (e) => {
     snd.pop();
     const b = mascot.getBoundingClientRect();
     burst(b.left + b.width / 2, b.top + b.height * 0.45, { n: 20, r: 120 });
+    const pixel = mascot.hasAttribute("shape-rendering");
     mascot.animate(
       [{ transform: "scale(1,1)" }, { transform: "scale(1.18,0.82)" }, { transform: "scale(0.92,1.1)" }, { transform: "scale(1.04,0.98)" }, { transform: "scale(1,1)" }],
-      { duration: 520, easing: "steps(4, jump-none)" }
+      { duration: 520, easing: pixel ? "steps(4, jump-none)" : "cubic-bezier(.3,1.6,.5,1)" }
     );
-    sparkle.setAttribute("opacity", "1"); mouth.innerHTML = MOUTH_BIG;
+    mascotWrap.classList.add("is-happy");
+    if (sparkle) sparkle.setAttribute("opacity", "1");
+    if (mouth) mouth.innerHTML = MOUTH_BIG;
     clearTimeout(happyTimer);
-    happyTimer = setTimeout(() => { sparkle.setAttribute("opacity", "0"); mouth.innerHTML = MOUTH_SMILE; }, 900);
+    happyTimer = setTimeout(() => { mascotWrap.classList.remove("is-happy"); if (sparkle) sparkle.setAttribute("opacity", "0"); if (mouth) mouth.innerHTML = MOUTH_SMILE; }, 900);
     happy++;
     if (happy === 7) { toast("ok ok, tu m'as eu. ❤"); snd.win(); confetti(e.clientX, e.clientY); happy = 0; }
   });
