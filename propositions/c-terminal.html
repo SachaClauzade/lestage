@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposition C · Le Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0B0F14; --bg-2: #10161D; --panel: #0E141B; --fg: #E6EDF3; --fg-2: #8B98A5; --fg-3: #56616C; --line: #1E2730; --amber: #FFB000; --mint: #3DDC97; --red: #FF5C5C; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Geist", system-ui, sans-serif; font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  code, .mono { font-family: "Geist Mono", ui-monospace, monospace; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding-inline: 24px; }
+  .dim { color: var(--fg-2); }
+
+  nav { position: sticky; top: 0; z-index: 10; background: rgba(11,15,20,.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .nav-in { display: flex; align-items: center; height: 56px; gap: 24px; font-size: 14px; }
+  .brand { font-family: "Geist Mono"; font-weight: 600; }
+  .brand span { color: var(--amber); }
+  .links { display: flex; gap: 20px; color: var(--fg-2); font-family: "Geist Mono"; font-size: 13px; }
+  .cta { margin-left: auto; background: var(--amber); color: #0B0F14; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-family: "Geist Mono"; font-size: 13px; }
+
+  header.hero { padding: 80px 0 48px; }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .prompt { font-family: "Geist Mono"; color: var(--fg-2); font-size: 14px; margin-bottom: 20px; }
+  .prompt b { color: var(--mint); font-weight: 500; }
+  h1 { margin: 0; font-size: clamp(40px, 5.6vw, 68px); line-height: 1.05; letter-spacing: -.03em; font-weight: 700; }
+  h1 code { color: var(--amber); font-weight: 500; font-size: .92em; background: rgba(255,176,0,.08); padding: 0 .18em; border-radius: 6px; }
+  .lede { max-width: 520px; margin-top: 22px; font-size: 18px; color: var(--fg-2); }
+  .btns { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+  .btn { padding: 12px 18px; border-radius: 6px; font-weight: 500; font-size: 14px; border: 1px solid var(--line); font-family: "Geist Mono"; background: var(--bg-2); }
+  .btn-amber { background: var(--amber); color: #0B0F14; border-color: var(--amber); font-weight: 600; }
+
+  /* terminal window */
+  .term { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,.5); font-family: "Geist Mono"; font-size: 13px; line-height: 1.7; }
+  .term .bar { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .term .bar i { width: 10px; height: 10px; border-radius: 50%; background: #2A3440; }
+  .term .bar i:first-child { background: var(--red); opacity: .8; } .term .bar i:nth-child(2) { background: var(--amber); opacity: .8; } .term .bar i:nth-child(3) { background: var(--mint); opacity: .8; }
+  .term pre { margin: 0; padding: 16px 18px; white-space: pre-wrap; color: var(--fg-2); }
+  .term .c { color: var(--fg-3); } .term .k { color: var(--mint); } .term .a { color: var(--amber); } .term .w { color: var(--fg); }
+  .term .cursor { display: inline-block; width: 8px; height: 14px; background: var(--amber); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-row .b { height: 8px; background: var(--amber); border-radius: 2px; }
+
+  /* logs */
+  section { padding: 80px 0; }
+  h2 { margin: 0 0 14px; font-size: clamp(30px, 4vw, 44px); letter-spacing: -.025em; line-height: 1.1; }
+  h2 code { color: var(--amber); font-weight: 500; font-size: .9em; }
+  .sub { color: var(--fg-2); max-width: 580px; }
+  .log { margin-top: 36px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; font-family: "Geist Mono"; font-size: 13px; }
+  .log div { display: grid; grid-template-columns: 90px 70px 1fr; gap: 16px; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+  .log div:last-child { border-bottom: 0; }
+  .log .t { color: var(--fg-3); } .log .lv { font-weight: 600; } .log .ok { color: var(--mint); } .log .warn { color: var(--amber); } .log .err { color: var(--red); }
+  .log .m { color: var(--fg-2); } .log .m b { color: var(--fg); font-weight: 500; }
+
+  /* readme-like steps */
+  .steps { margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .step { background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 20px; }
+  .step .h { font-family: "Geist Mono"; color: var(--amber); font-size: 12px; margin-bottom: 10px; }
+  .step b { display: block; font-size: 20px; letter-spacing: -.01em; margin-bottom: 6px; }
+  .step p { margin: 0; color: var(--fg-2); font-size: 14px; }
+
+  /* pricing as a package.json */
+  .pkg { margin-top: 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; }
+  .pkg pre { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; font-family: "Geist Mono"; font-size: 13px; color: var(--fg-2); line-height: 1.7; }
+  .pkg .k { color: var(--mint); } .pkg .s { color: var(--amber); } .pkg .n { color: var(--fg); }
+  footer { border-top: 1px solid var(--line); padding: 32px 0; color: var(--fg-3); font-family: "Geist Mono"; font-size: 12px; }
+  @media (max-width: 900px) { .hero-grid, .pkg { grid-template-columns: 1fr; } .steps { grid-template-columns: 1fr; } .links { display: none; } .log div { grid-template-columns: 70px 60px 1fr; } }
+</style>
+</head>
+<body>
+<nav><div class="wrap nav-in">
+  <a class="brand" href="#">le-stage<span>/</span>tiktok-organique</a>
+  <div class="links"><a>README</a><a>logs</a><a>results.json</a><a>pricing</a></div>
+  <a class="cta" href="#">$ rejoindre --promo nov</a>
+</div></nav>
+
+<header class="hero"><div class="wrap hero-grid">
+  <div>
+    <p class="prompt"><b>sacha@bellysafe</b> ~ % cat README.md</p>
+    <h1>Fais télécharger ton app avec TikTok. <code>0 € de pub.</code></h1>
+    <p class="lede">Un stage pour les devs qui ont une app en ligne. Dix parties, deux lives par semaine où je lis tes posts comme je lis des logs, et mes chiffres RevenueCat en clair. Je n'ai rien lu dans un livre : j'ai testé, mesuré, gardé ce qui marche.</p>
+    <div class="btns"><a class="btn btn-amber" href="#">$ rejoindre --promo nov · 490 €</a><a class="btn" href="#">$ cat methode.md</a></div>
+  </div>
+  <div class="term">
+    <div class="bar"><i></i><i></i><i></i></div>
+<pre><span class="c"># revenus mensuels, export RevenueCat (EUR)</span>
+<span class="k">$</span> <span class="w">stage stats --since 2025-10</span>
+<span class="a">2025-10</span>  ▏               0 €
+<span class="a">2026-01</span>  ▏              17 €   <span class="c">← premiers posts</span>
+<span class="a">2026-02</span>  ████▏         787 €
+<span class="a">2026-03</span>  ██████████▏  2 665 €
+<span class="a">2026-06</span>  ███████████▏ 2 831 €
+<span class="a">2026-09</span>  ████████████████▏ 4 150 €
+<span class="a">2026-10</span>  ██████████████████████▏ <span class="w">5 744 €</span>
+<span class="k">$</span> <span class="w">stage stats --ads</span>
+<span class="w">0 €</span> dépensés. <span class="c">// depuis le premier jour</span>
+<span class="k">$</span> <span class="cursor"></span></pre>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <p class="mono dim">./live --date 2026-10-15</p>
+  <h2>Les lives : tes posts, lus comme des <code>logs</code>.</h2>
+  <p class="sub">Deux fois par semaine, tu partages ton écran. J'ouvre ton carrousel devant le groupe et je le lis slide par slide. Chaque remarque est un diff à appliquer avant le post suivant.</p>
+  <div class="log">
+    <div><span class="t">21:48</span><span class="lv ok">OK</span><span class="m"><b>slide 1</b> « Quand j'étais stressée au bureau » : une situation, une personne, une émotion. On ne touche pas.</span></div>
+    <div><span class="t">22:10</span><span class="lv warn">WARN</span><span class="m"><b>slide 2</b> change de sujet. Elle doit aggraver le problème annoncé, et finir par une phrase qui appelle la suite.</span></div>
+    <div><span class="t">29:42</span><span class="lv err">FAIL</span><span class="m"><b>slide 3</b> « Ton moment sur Bloom » ne dit rien à qui ne connaît pas l'app. Montre la feature, reste vague sur le nom.</span></div>
+    <div><span class="t">1:01:45</span><span class="lv ok">FIX</span><span class="m"><b>hook</b> une cible, un chiffre, une promesse : « Je suis addict au sucre et je ne dois pas dépasser 50 g par jour… »</span></div>
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <p class="mono dim">cat methode.md</p>
+  <h2>Dix parties. Trois <code>phases</code>.</h2>
+  <div class="steps">
+    <div class="step"><div class="h">01 · P1 → P4</div><b>Préparer</b><p>Compte chauffé, feature TikTokable, cible, 30 verbatims, 18 hooks, plan de tir. Aucune publication.</p></div>
+    <div class="step"><div class="h">02 · P5 → P7</div><b>Tester</b><p>12 vidéos, 4 formats, 3 hooks chacun. Tout est loggé dans le tableau de bord.</p></div>
+    <div class="step"><div class="h">03 · P8 → P10</div><b>Doubler</b><p>Les winners sur les chiffres, en série, puis Reels, Shorts, Snapchat.</p></div>
+  </div>
+  <div class="pkg">
+    <div>
+      <h2>Une place. <code>490 €</code>.</h2>
+      <p class="sub">Paiement unique, accès à vie aux parties. Petit groupe : chaque compte passe en live. Les dates de la promotion de novembre arrivent par mail.</p>
+      <div class="btns"><a class="btn btn-amber" href="#">$ rejoindre --promo nov</a></div>
+    </div>
+<pre>{
+  <span class="k">"name"</span>: <span class="s">"le-stage"</span>,
+  <span class="k">"version"</span>: <span class="s">"nov-2026"</span>,
+  <span class="k">"price"</span>: <span class="n">490</span>,
+  <span class="k">"includes"</span>: [
+    <span class="s">"10 parties vidéo"</span>,
+    <span class="s">"2 lives / semaine"</span>,
+    <span class="s">"replays écrits"</span>,
+    <span class="s">"kits PDF + tableau de bord"</span>,
+    <span class="s">"kit UGC TikTok"</span>,
+    <span class="s">"discord"</span>
+  ],
+  <span class="k">"ads"</span>: <span class="n">0</span>,
+  <span class="k">"blabla"</span>: <span class="n">false</span>
+}</pre>
+  </div>
+</div></section>
+
+<footer><div class="wrap" style="display:flex;justify-content:space-between"><span>le-stage · sacha clauzade · bellysafe</span><span>proposition C · le terminal</span></div></footer>
+</body>
+</html>

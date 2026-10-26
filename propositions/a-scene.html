@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposition A · La Scène</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0B0B0D; --bg-2: #141417; --fg: #F2EFE8; --fg-2: #A9A6A0; --line: #2A2A2F; --lime: #D7FF3C; --lime-ink: #0B0B0D; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: "Inter Tight", system-ui, sans-serif; font-size: 17px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 28px; }
+  .display { font-family: "Anton", Impact, sans-serif; text-transform: uppercase; line-height: .9; letter-spacing: .005em; }
+
+  /* spotlight that follows the cursor */
+  .spot { position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(520px 520px at var(--mx, 70%) var(--my, 30%), rgba(215,255,60,.14), transparent 65%); transition: background-position .2s; }
+
+  nav { position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line); background: rgba(11,11,13,.8); backdrop-filter: blur(10px); }
+  .nav-in { display: flex; align-items: center; height: 64px; gap: 28px; }
+  .brand { font-family: "Anton"; font-size: 22px; text-transform: uppercase; letter-spacing: .04em; }
+  .brand i { display: inline-block; width: 10px; height: 10px; background: var(--lime); margin-right: 10px; transform: rotate(45deg); }
+  .links { display: flex; gap: 22px; font-size: 14px; color: var(--fg-2); }
+  .cta { margin-left: auto; background: var(--lime); color: var(--lime-ink); padding: 10px 16px; font-weight: 600; font-size: 14px; border-radius: 2px; }
+
+  /* marquee ticker */
+  .ticker { border-bottom: 1px solid var(--line); overflow: hidden; white-space: nowrap; }
+  .ticker-in { display: inline-flex; gap: 48px; padding: 10px 0; animation: tick 28s linear infinite; }
+  .ticker span { color: var(--fg-2); }
+  .ticker b { color: var(--lime); font-weight: 600; }
+  @keyframes tick { to { transform: translateX(-50%); } }
+
+  header.hero { position: relative; padding: 96px 0 72px; z-index: 1; }
+  .hero-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 48px; align-items: end; }
+  .kicker { display: inline-flex; align-items: center; gap: 10px; color: var(--lime); margin-bottom: 28px; }
+  .kicker i { width: 8px; height: 8px; background: var(--lime); border-radius: 50%; animation: blink 1.2s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: .2; } }
+  h1 { margin: 0; font-size: clamp(64px, 11vw, 150px); }
+  h1 em { font-style: normal; color: var(--lime); }
+  .lede { max-width: 540px; margin-top: 28px; font-size: 19px; color: var(--fg-2); }
+  .lede b { color: var(--fg); font-weight: 600; }
+  .btns { display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap; }
+  .btn { padding: 16px 24px; border-radius: 2px; font-weight: 600; font-size: 15px; border: 1px solid var(--line); }
+  .btn-lime { background: var(--lime); color: var(--lime-ink); border-color: var(--lime); }
+
+  /* the ticket */
+  .ticket { position: relative; background: var(--fg); color: var(--bg); padding: 26px 26px 22px; border-radius: 6px; transform: rotate(-3deg); box-shadow: 0 40px 80px rgba(0,0,0,.6); }
+  .ticket::before, .ticket::after { content: ""; position: absolute; width: 26px; height: 26px; background: var(--bg); border-radius: 50%; left: -13px; top: 58%; }
+  .ticket::after { left: auto; right: -13px; }
+  .ticket .row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .ticket .big { font-family: "Anton"; font-size: 44px; text-transform: uppercase; line-height: 1; }
+  .ticket .tear { border-top: 2px dashed rgba(11,11,13,.3); margin: 18px 0 14px; }
+  .ticket .mono { color: rgba(11,11,13,.6); }
+  .ticket .price { font-family: "Anton"; font-size: 40px; }
+  .ticket .barcode { height: 34px; background: repeating-linear-gradient(90deg, var(--bg) 0 2px, transparent 2px 4px, var(--bg) 4px 7px, transparent 7px 9px); margin-top: 14px; opacity: .85; }
+
+  /* proof wall */
+  .wall { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, 1fr); }
+  .wall div { padding: 28px; border-right: 1px solid var(--line); }
+  .wall div:last-child { border-right: 0; }
+  .wall .n { font-family: "Anton"; font-size: 56px; line-height: 1; color: var(--lime); }
+  .wall .l { color: var(--fg-2); font-size: 14px; margin-top: 8px; }
+
+  section { padding: 96px 0; position: relative; z-index: 1; }
+  h2 { margin: 0 0 20px; font-size: clamp(40px, 6vw, 84px); }
+  .sub { color: var(--fg-2); max-width: 600px; }
+
+  /* backstage : the live */
+  .stage { margin-top: 44px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .screen { background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; padding: 22px; }
+  .screen .hd { display: flex; justify-content: space-between; color: var(--fg-2); margin-bottom: 18px; }
+  .phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .phone { aspect-ratio: 9/14; border-radius: 10px; background: #1E1E23; border: 1px solid var(--line); padding: 12px; display: flex; flex-direction: column; justify-content: space-between; font-size: 13px; }
+  .phone.on { background: var(--lime); color: var(--lime-ink); border-color: var(--lime); }
+  .phone b { font-family: "Anton"; font-size: 15px; text-transform: uppercase; line-height: 1.1; letter-spacing: .02em; }
+  .verdict { font-weight: 600; }
+  .note { font-size: 16px; color: var(--fg-2); }
+  .note b { color: var(--fg); }
+  .note .q { font-family: "Anton"; font-size: 28px; text-transform: uppercase; color: var(--fg); line-height: 1; margin: 0 0 14px; }
+
+  /* programme as a setlist */
+  .setlist { margin-top: 44px; border-top: 1px solid var(--line); }
+  .setlist li { list-style: none; display: grid; grid-template-columns: 70px 1fr auto; gap: 24px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .setlist .no { font-family: "Anton"; font-size: 28px; color: var(--lime); }
+  .setlist .t { font-size: 22px; font-weight: 600; letter-spacing: -.01em; }
+  .setlist .d { color: var(--fg-2); font-size: 14px; }
+  .setlist ul { padding: 0; margin: 0; }
+
+  footer { border-top: 1px solid var(--line); padding: 40px 0; color: var(--fg-2); font-size: 14px; display: flex; gap: 24px; }
+  @media (max-width: 900px) { .hero-grid, .stage { grid-template-columns: 1fr; } .wall { grid-template-columns: 1fr 1fr; } .wall div:nth-child(2) { border-right: 0; } .links { display: none; } }
+</style>
+</head>
+<body>
+<div class="spot" id="spot"></div>
+
+<nav><div class="wrap nav-in">
+  <a class="brand" href="#"><i></i>Le Stage</a>
+  <div class="links"><a>Programme</a><a>Backstage</a><a>Chiffres</a><a>Billet</a></div>
+  <a class="cta" href="#">Prendre mon billet</a>
+</div></nav>
+
+<div class="ticker"><div class="ticker-in">
+  <span>Barbecue chez des amis samedi <b>712 k vues</b></span><span>POV : le jus de pomme <b>570 k</b></span><span>« Maman s'il te plaît » <b>510 k</b></span><span>Pique-nique surprise <b>401 k</b></span><span>Apéro du dimanche <b>383 k</b></span><span>Octobre 2026 <b>5 744 €</b></span><span>Pub dépensée <b>0 €</b></span>
+  <span>Barbecue chez des amis samedi <b>712 k vues</b></span><span>POV : le jus de pomme <b>570 k</b></span><span>« Maman s'il te plaît » <b>510 k</b></span><span>Pique-nique surprise <b>401 k</b></span><span>Apéro du dimanche <b>383 k</b></span><span>Octobre 2026 <b>5 744 €</b></span><span>Pub dépensée <b>0 €</b></span>
+</div></div>
+
+<header class="hero"><div class="wrap hero-grid">
+  <div>
+    <p class="kicker mono"><i></i>Promotion de novembre · 12 places</p>
+    <h1 class="display">Monte<br>sur <em>scène.</em></h1>
+    <p class="lede">Le Stage, c'est quatre semaines où tu publies pour de vrai, devant un petit groupe, avec moi en régie. <b>Dix parties, deux lives par semaine, mes chiffres en clair.</b> Pas de blabla : tu montes, tu postes, on corrige.</p>
+    <div class="btns"><a class="btn btn-lime" href="#">Prendre mon billet · 490 €</a><a class="btn" href="#">Voir le programme</a></div>
+  </div>
+  <div class="ticket">
+    <div class="row"><span class="mono">Admission · 1 personne</span><span class="mono">N° 0001</span></div>
+    <div class="big">Le Stage<br>TikTok organique</div>
+    <div class="tear"></div>
+    <div class="row"><span class="mono">Novembre 2026 · en ligne</span><span class="price">490 €</span></div>
+    <div class="row"><span class="mono">Lundi &amp; jeudi 17h · Discord</span><span class="mono">Sacha Clauzade</span></div>
+    <div class="barcode"></div>
+  </div>
+</div></header>
+
+<div class="wrap"><div class="wall">
+  <div><div class="n">5 744 €</div><div class="l">en octobre avec BellySafe, 100 % organique</div></div>
+  <div><div class="n">3 M</div><div class="l">de vues sur mes sept meilleurs posts</div></div>
+  <div><div class="n">0 €</div><div class="l">de pub, depuis le premier jour</div></div>
+  <div><div class="n">1 344</div><div class="l">abonnés seulement. Les vues ne viennent pas de là.</div></div>
+</div></div>
+
+<section><div class="wrap">
+  <p class="mono" style="color:var(--lime)">Backstage</p>
+  <h2 class="display">Tes posts,<br>passés en régie.</h2>
+  <p class="sub">Deux fois par semaine, tu partages ton écran. J'ouvre ton carrousel devant tout le monde et je te dis quoi changer, slide par slide. Les autres apprennent de ton cas, tu apprends du leur.</p>
+  <div class="stage">
+    <div class="screen">
+      <div class="hd"><span class="mono">● Live · jeudi 17h</span><span class="mono">8 voix · 1 h 40</span></div>
+      <div class="phones">
+        <div class="phone on"><span class="mono">Slide 1</span><b>Quand j'étais stressée au bureau…</b><span class="verdict">✓ bon hook</span></div>
+        <div class="phone"><span class="mono">Slide 2</span><b>Comment retrouver ta concentration</b><span class="verdict">✕ change de sujet</span></div>
+        <div class="phone"><span class="mono">Slide 3</span><b>Ton moment sur [l'app]</b><span class="verdict">✕ parle de l'app</span></div>
+      </div>
+    </div>
+    <div class="screen note">
+      <p class="q">Ce que je dis en live</p>
+      <p><b>Le hook est bon.</b> Une situation, une personne, une émotion. Le problème, c'est la suite : les gens s'arrêtent à la slide 2. Elle doit aggraver le problème, pas en ouvrir un autre. Et la slide 3 montre la feature, sans le nom de l'app.</p>
+      <p style="margin-top:14px" class="mono">Vrai cas · live du 15 octobre</p>
+    </div>
+  </div>
+</div></section>
+
+<section style="padding-top:0"><div class="wrap">
+  <p class="mono" style="color:var(--lime)">Programme</p>
+  <h2 class="display">La setlist.</h2>
+  <ul class="setlist">
+    <li><span class="no">01</span><span class="t">Préparer <span class="d">· P1 → P4</span></span><span class="d">Compte chauffé, feature, cible, 18 hooks, plan de tir</span></li>
+    <li><span class="no">02</span><span class="t">Tester <span class="d">· P5 → P7</span></span><span class="d">12 vidéos, 4 formats, 3 hooks chacun</span></li>
+    <li><span class="no">03</span><span class="t">Doubler <span class="d">· P8 → P10</span></span><span class="d">Tes winners, en série, sur toutes les plateformes</span></li>
+  </ul>
+</div></section>
+
+<footer><div class="wrap" style="display:flex;gap:24px;justify-content:space-between"><span>Le Stage · par Sacha Clauzade</span><span class="mono">Proposition A · La Scène</span></div></footer>
+
+<script>
+  const spot = document.getElementById('spot');
+  addEventListener('pointermove', e => { spot.style.setProperty('--mx', e.clientX + 'px'); spot.style.setProperty('--my', e.clientY + 'px'); }, { passive: true });
+</script>
+</body>
+</html>
