@@ -443,3 +443,23 @@ body.chaos { animation: hue 4s linear infinite; }
   .intro { display: none !important; }
   .reveal { opacity: 1 !important; translate: 0 0 !important; animation: none !important; }
 }
+
+/* chart hover: cursor, dot, tooltip with the accounts */
+.rc-cursor { stroke: var(--ink); stroke-width: 1; opacity: 0; shape-rendering: crispEdges; }
+.rc-cursor-dot { fill: var(--secondary); stroke: var(--card); stroke-width: 3; opacity: 0; }
+svg.is-hover .rc-cursor { opacity: .5; } svg.is-hover .rc-cursor-dot { opacity: 1; }
+.rc-body svg { cursor: crosshair; touch-action: none; }
+.rc-tip { position: absolute; top: 28px; width: 290px; translate: -50% 0; background: var(--card); border: 1px solid var(--g2); border-radius: 8px; padding: 12px 14px; box-shadow: var(--shadow-lg); font-size: 13px; pointer-events: none; z-index: 2; animation: slidein 200ms var(--spring); }
+.rc-tip-head { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--head); font-size: 20px; }
+.rc-tip-head span { color: var(--secondary); }
+.rc-tip-total { color: var(--g4); margin: 2px 0 10px; font-weight: 500; }
+.rc-tip ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.rc-tip li { display: grid; grid-template-columns: 1fr; gap: 3px; color: var(--g4); }
+.rc-tip li.is-top { color: var(--ink); }
+.rc-tip-name { display: flex; justify-content: space-between; font-weight: 500; }
+.rc-tip-name i { font-style: normal; font-family: var(--display); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--secondary); }
+.rc-tip-bar { display: block; height: 4px; background: var(--g2); border-radius: 2px; overflow: hidden; }
+.rc-tip-bar i { display: block; height: 100%; background: var(--g3); }
+.rc-tip li.is-top .rc-tip-bar i { background: var(--secondary); }
+.rc-tip-num { font-family: var(--display); font-size: 11px; color: var(--g3); }
+.rc-tip-foot { margin-top: 10px; font-size: 11px; color: var(--g3); font-style: italic; }

@@ -346,12 +346,55 @@
     const dots = pts.map((p, i) => `<circle class="rc-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" style="animation-delay:${1.2 + i * 0.05}s; transform-origin:${p[0].toFixed(1)}px ${p[1].toFixed(1)}px"/>`).join("");
     const last = series[series.length - 1];
     const lastLabel = `<text class="rc-axis" x="${(pts[pts.length - 1][0] - 6).toFixed(1)}" y="${(pts[pts.length - 1][1] - 12).toFixed(1)}" text-anchor="end" style="fill:var(--pink);font-size:11px">${fmtNum(last.revenu)} €</text>`;
-    return `<svg viewBox="0 0 ${W} ${H}" class="${ghost ? "rc-ghost" : ""}" aria-hidden="${ghost}">${grid}${mark}<path class="rc-area" d="${area}"/><path class="rc-line" d="${path}" style="--len:${len.toFixed(0)}"/>${dots}${xl}${ghost ? "" : lastLabel}</svg>`;
+    const cursor = ghost ? "" : `<line class="rc-cursor" x1="0" x2="0" y1="${padT}" y2="${y(0)}"/><circle class="rc-cursor-dot" r="6" cx="0" cy="0"/>`;
+    const svg = `<svg viewBox="0 0 ${W} ${H}" class="${ghost ? "rc-ghost" : ""}" aria-hidden="${ghost}">${grid}${mark}<path class="rc-area" d="${area}"/><path class="rc-line" d="${path}" style="--len:${len.toFixed(0)}"/>${dots}${xl}${ghost ? "" : lastLabel}${cursor}</svg>`;
+    return ghost ? svg : { svg, pts, W, H, padL, padR };
+  }
+  // hover: reconstituted views and the account that carried the month
+  function setupRcHover(series, geo) {
+    const svg = rcBody.querySelector("svg"), cur = svg.querySelector(".rc-cursor"), dot = svg.querySelector(".rc-cursor-dot");
+    const tip = document.createElement("div"); tip.className = "rc-tip"; tip.hidden = true; rcBody.appendChild(tip);
+    const comptes = DATA.comptes || [];
+    let current = -1;
+    function render(i) {
+      const p = series[i];
+      const rows = comptes.map((c) => ({ nom: c.nom, vues: (c.vues && c.vues[p.mois]) || 0 })).filter((r) => r.vues > 0).sort((a, b) => b.vues - a.vues);
+      const total = rows.reduce((n, r) => n + r.vues, 0);
+      const top = rows[0];
+      let html = `<div class="rc-tip-head"><b>${monthLabel(p.mois)}</b><span>${fmtNum(p.revenu)} €</span></div>`;
+      if (total) {
+        html += `<div class="rc-tip-total">${fmtViews(total)} vues reconstituées</div><ul>` + rows.map((r, k) => {
+          const share = r.vues / total, est = p.revenu * share;
+          return `<li class="${k === 0 ? "is-top" : ""}"><span class="rc-tip-name">${r.nom}${k === 0 ? ' <i>a performé</i>' : ""}</span><span class="rc-tip-bar"><i style="width:${(share * 100).toFixed(0)}%"></i></span><span class="rc-tip-num">${fmtViews(r.vues)} · ≈ ${fmtNum(est)} €</span></li>`;
+        }).join("") + `</ul><div class="rc-tip-foot">revenu estimé au prorata des vues</div>`;
+      } else {
+        html += `<div class="rc-tip-foot">pas encore de vues renseignées pour ce mois</div>`;
+      }
+      tip.innerHTML = html;
+    }
+    function move(e) {
+      const b = svg.getBoundingClientRect();
+      const xs = (e.clientX - b.left) / b.width * geo.W;
+      let i = 0, best = Infinity;
+      geo.pts.forEach((pt, k) => { const d = Math.abs(pt[0] - xs); if (d < best) { best = d; i = k; } });
+      const [px, py] = geo.pts[i];
+      cur.setAttribute("x1", px); cur.setAttribute("x2", px); dot.setAttribute("cx", px); dot.setAttribute("cy", py);
+      svg.classList.add("is-hover"); tip.hidden = false;
+      const left = (px / geo.W) * b.width;
+      tip.style.left = Math.min(Math.max(left, 150), b.width - 150) + "px";
+      tip.classList.toggle("is-left", left > b.width * 0.6);
+      if (i !== current) { current = i; render(i); if (!reduced) snd.tick(); }
+    }
+    svg.addEventListener("pointermove", move);
+    svg.addEventListener("pointerenter", move);
+    svg.addEventListener("pointerleave", () => { svg.classList.remove("is-hover"); tip.hidden = true; current = -1; });
   }
   if (rc && rcBody) {
     const series = (DATA.revenue && DATA.revenue.series) || [];
     if (series.length >= 2) {
-      rcBody.innerHTML = drawRc(series);
+      const drawn = drawRc(series);
+      rcBody.innerHTML = drawn.svg;
+      setupRcHover(series, drawn);
       rcRange.textContent = monthLabel(series[0].mois) + " → " + monthLabel(series[series.length - 1].mois);
     } else {
       // placeholder: a ghost curve + a clear note, until the real export is in data.js

@@ -9,13 +9,29 @@ const SITE_DATA = {
      (assets/tt/). Un lien /video/ s'ouvre dans la page, un lien /photo/
      (carrousel) s'ouvre sur TikTok. */
   videos: [
-    { url: "https://www.tiktok.com/@bellysafe.app/photo/7619038462536174870", vues: 711500, hook: "Barbecue chez des amis samedi. Mon mari sort les merguez. Tout le monde me regarde.", format: "Carrousel", image: "assets/tt/7619038462536174870.jpg" },
-    { url: "https://www.tiktok.com/@bellysafe.app/video/7654580434969333024", vues: 570200, hook: "POV : tu vérifies si tu peux boire du jus de pomme étant enceinte", format: "POV · vidéo", image: "assets/tt/7654580434969333024.jpg" },
-    { url: "https://www.tiktok.com/@bellysafe.app/photo/7615013470680993046", vues: 509500, hook: "« Maman s'il te plaît, mange ces aliments… »", format: "Carrousel", image: "assets/tt/7615013470680993046.jpg" },
-    { url: "https://www.tiktok.com/@bellysafe.app/photo/7622718501152836867", vues: 400900, hook: "Mon copain a préparé un pique-nique surprise pour me faire plaisir. Il avait tout prévu. Sauf que.", format: "Carrousel", image: "assets/tt/7622718501152836867.jpg" },
-    { url: "https://www.tiktok.com/@bellysafe.app/photo/7619218451801885974", vues: 382500, hook: "Apéro du dimanche chez mes parents. Mon père sort le plateau de charcuterie. Et il me regarde avec ses grands yeux…", format: "Carrousel", image: "assets/tt/7619218451801885974.jpg" },
-    { url: "https://www.tiktok.com/@bellysafe.app/photo/7650557576874151200", vues: 283000, hook: "Samedi midi, barbecue. Mon mari sort les saucisses, et là tout le monde se tourne vers moi.", format: "Carrousel · variante", image: "assets/tt/7650557576874151200.jpg" },
-    { url: "https://www.tiktok.com/@bellysafe.app/photo/7623021100275993858", vues: 198700, hook: "Enceinte de 6 mois. Ce soir j'ai pleuré. Pas à cause du bébé. À cause d'un sandwich.", format: "Carrousel", image: "assets/tt/7623021100275993858.jpg" },
+    { url: "https://www.tiktok.com/@bellysafe.app/photo/7619038462536174870", date: "2026-03-19", vues: 711500, hook: "Barbecue chez des amis samedi. Mon mari sort les merguez. Tout le monde me regarde.", format: "Carrousel", image: "assets/tt/7619038462536174870.jpg" },
+    { url: "https://www.tiktok.com/@bellysafe.app/video/7654580434969333024", date: "2026-06-23", vues: 570200, hook: "POV : tu vérifies si tu peux boire du jus de pomme étant enceinte", format: "POV · vidéo", image: "assets/tt/7654580434969333024.jpg" },
+    { url: "https://www.tiktok.com/@bellysafe.app/photo/7615013470680993046", date: "2026-03-08", vues: 509500, hook: "« Maman s'il te plaît, mange ces aliments… »", format: "Carrousel", image: "assets/tt/7615013470680993046.jpg" },
+    { url: "https://www.tiktok.com/@bellysafe.app/photo/7622718501152836867", date: "2026-03-29", vues: 400900, hook: "Mon copain a préparé un pique-nique surprise pour me faire plaisir. Il avait tout prévu. Sauf que.", format: "Carrousel", image: "assets/tt/7622718501152836867.jpg" },
+    { url: "https://www.tiktok.com/@bellysafe.app/photo/7619218451801885974", date: "2026-03-20", vues: 382500, hook: "Apéro du dimanche chez mes parents. Mon père sort le plateau de charcuterie. Et il me regarde avec ses grands yeux…", format: "Carrousel", image: "assets/tt/7619218451801885974.jpg" },
+    { url: "https://www.tiktok.com/@bellysafe.app/photo/7650557576874151200", date: "2026-06-12", vues: 283000, hook: "Samedi midi, barbecue. Mon mari sort les saucisses, et là tout le monde se tourne vers moi.", format: "Carrousel · variante", image: "assets/tt/7650557576874151200.jpg" },
+    { url: "https://www.tiktok.com/@bellysafe.app/photo/7623021100275993858", date: "2026-03-30", vues: 198700, hook: "Enceinte de 6 mois. Ce soir j'ai pleuré. Pas à cause du bébé. À cause d'un sandwich.", format: "Carrousel", image: "assets/tt/7623021100275993858.jpg" },
+  ],
+
+  /* Tes comptes TikTok et leurs vues par mois, pour le survol de la courbe.
+     Un compte = un nom et un objet { "AAAA-MM": vues }. Au survol d'un mois,
+     la page reconstitue les vues totales, répartit le revenu du mois au
+     prorata des vues de chaque compte, et marque celui qui a performé.
+     @bellysafe.app est pré-rempli avec les vues des 7 posts ci-dessus,
+     rangées par mois de publication (date lue dans l'id TikTok). Les autres
+     comptes sont à nommer et à remplir depuis TikTok Analytics. */
+  comptes: [
+    { nom: "@bellysafe.app", vues: { "2026-03": 2203100, "2026-06": 853200 } },
+    { nom: "compte 2", vues: {} },
+    { nom: "compte 3", vues: {} },
+    { nom: "compte 4", vues: {} },
+    { nom: "compte 5", vues: {} },
+    { nom: "compte 6", vues: {} },
   ],
 
   /* Ta courbe RevenueCat : l'export "Revenue" en euros, un point par mois,
