@@ -309,10 +309,11 @@
         const r = portrait.getBoundingClientRect();
         const p = document.createElement("i"); p.className = "popx";
         p.style.setProperty("--x", r.left + rand(-20, r.width + 20) + "px"); p.style.setProperty("--y", r.top + rand(-10, r.height) + "px");
-        p.style.setProperty("--s", Math.round(rand(5, 13)) + "px"); p.style.setProperty("--c", cssVar(pick(["--px", "--c1", "--c2"]))); p.style.setProperty("--d", Math.round(rand(500, 900)) + "ms");
+        p.style.setProperty("--s", Math.round(rand(3, 6)) + "px"); p.style.setProperty("--c", cssVar(pick(["--px", "--c1", "--c2"]))); p.style.setProperty("--d", Math.round(rand(900, 1500)) + "ms");
+        p.style.setProperty("--dx", rand(-14, 14).toFixed(0) + "px"); p.style.setProperty("--rot", rand(-120, 120).toFixed(0) + "deg");
         p.addEventListener("animationend", () => p.remove(), { once: true }); layer.appendChild(p);
       }
-      portrait.addEventListener("mouseenter", () => { for (let k = 0; k < 6; k++) setTimeout(popPixel, k * 40); leak = setInterval(popPixel, 90); });
+      portrait.addEventListener("mouseenter", () => { for (let k = 0; k < 4; k++) setTimeout(popPixel, k * 60); leak = setInterval(popPixel, 150); });
       portrait.addEventListener("mouseleave", () => clearInterval(leak));
       // now and then, a short glitch: the rim turns blue and the face jumps a few pixels
       if (!reduced) (function glitch() { setTimeout(() => { portrait.classList.add("glitch"); setTimeout(() => portrait.classList.remove("glitch"), 120); glitch(); }, rand(4000, 9000)); })();

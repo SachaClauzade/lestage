@@ -530,8 +530,8 @@ details[open] .plus::after { transform: scaleY(0); }
 /* --- particles: pixels ------------------------------------ */
 #particles { position: fixed; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
 .pt { position: absolute; width: var(--s, 6px); height: var(--s, 6px); background: var(--c, var(--ink)); left: 0; top: 0; translate: var(--x) var(--y); animation: pt var(--d, 900ms) var(--spring-soft) forwards; will-change: transform, opacity; }
-.popx { position: absolute; left: 0; top: 0; width: var(--s); height: var(--s); background: var(--c); translate: var(--x) var(--y); animation: popx var(--d) var(--spring) forwards; will-change: transform, opacity; }
-@keyframes popx { 0% { transform: translate(-50%,-50%) scale(0); opacity: 1; } 55% { transform: translate(-50%,-50%) scale(1.15); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(1) translateY(-10px); opacity: 0; }
+.popx { position: absolute; left: 0; top: 0; width: var(--s); height: var(--s); background: var(--c); translate: var(--x) var(--y); opacity: 0; animation: popx var(--d) ease-out forwards; will-change: transform, opacity; }
+@keyframes popx { 0% { transform: translate(-50%,-50%) rotate(0) translateY(0); opacity: 0; } 15% { opacity: .7; } 100% { transform: translate(calc(-50% + var(--dx)), -50%) rotate(var(--rot)) translateY(34px); opacity: 0; } }
 @keyframes pt { 0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; } 100% { transform: translate(calc(-50% + cos(var(--a)) * var(--r)), calc(-50% + sin(var(--a)) * var(--r) + 40px)) rotate(var(--rot)); opacity: 0; } }
 
 /* --- toast ------------------------------------------------ */
