@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ton avis · Le Stage</title>
+<meta name="description" content="Tu as fait le Stage ? Dis-moi ce que tu en as pensé, et si je peux le montrer sur le site.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
+<link rel="shortcut icon" href="favicon.ico?v=3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="postuler.css">
+<style>
+  .avis-main { padding-top: 0; }
+  .avis { padding: 64px 0 96px; }
+  .avis-in { display: grid; grid-template-columns: 240px 1fr; gap: 64px; align-items: start; }
+  @media (max-width: 860px) { .avis-in { grid-template-columns: 1fr; gap: 28px; } .avis { padding: 36px 0 72px; } }
+  .avis-side { position: sticky; top: 90px; }
+  .avis-side .side-note { margin-top: 0; }
+  @media (max-width: 860px) { .avis-side { position: static; } .avis-side .side-note { display: flex; } }
+  .avis-form { max-width: 640px; }
+  .avis-form .h2 { margin-bottom: 14px; }
+  .avis-form .p { margin-bottom: 28px; }
+  .stars { border: 0; padding: 0; margin: 24px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .stars legend { font-size: 13px; font-weight: 500; color: var(--ink-2); margin-bottom: 10px; width: 100%; }
+  .stars label { position: relative; }
+  .stars input { position: absolute; opacity: 0; inset: 0; }
+  .stars i { display: block; width: 34px; height: 34px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--card); cursor: pointer; transition: background 150ms, border-color 150ms, transform 200ms var(--spring); }
+  .stars label:hover i { border-color: var(--ink); }
+  .stars.lit-1 label:nth-child(-n+2) i, .stars.lit-2 label:nth-child(-n+3) i, .stars.lit-3 label:nth-child(-n+4) i, .stars.lit-4 label:nth-child(-n+5) i, .stars.lit-5 label:nth-child(-n+6) i { background: var(--px); border-color: var(--px); }
+  .stars input:checked + i { transform: scale(1.08); }
+  .consent { margin-top: 28px; padding: 18px 20px; }
+  .consent h3 { font-size: 15px; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .consent .p { font-size: 14px; margin-bottom: 8px; }
+  .consent .check { margin-top: 12px; }
+  .consent .check:first-of-type { margin-top: 16px; }
+  .avatar-hint { font-size: 12px; color: var(--g3); margin-top: 8px; line-height: 1.5; }
+  .ok-box { display: none; }
+  .is-sent .avis-form > *:not(.ok-box) { display: none; }
+  .is-sent .ok-box { display: block; animation: stepin .6s var(--spring-soft); }
+  .count { font-size: 11px; color: var(--g3); text-align: right; margin-top: 6px; font-family: var(--display); }
+</style>
+</head>
+<body class="apply-body">
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="index.html" class="brand boop" data-boop="y:-2"><i class="px-dot" aria-hidden="true"></i>Le Stage</a>
+    <span class="mono dim apply-crumb">Ton avis sur le Stage</span>
+    <div class="nav-tools">
+      <a href="index.html" class="btn btn-sm boop" data-boop="y:-2">Le site</a>
+    </div>
+  </div>
+</header>
+
+<main class="avis avis-main">
+  <div class="wrap avis-in">
+
+    <aside class="avis-side">
+      <div class="side-note px-card">
+        <img src="assets/sacha.png" alt="" width="36" height="36">
+        <p>Merci d'avoir fait le Stage avec moi. Deux minutes ici m'aident énormément : ton avis, et ce que tu m'autorises à montrer. Tu coches ce que tu veux, rien n'est obligatoire.</p>
+      </div>
+    </aside>
+
+    <form class="avis-form" id="avisForm" novalidate>
+      <p class="eyebrow mono">Ancien du Stage</p>
+      <h1 class="h2">Ton avis, en vrai.</h1>
+      <p class="p">Ce que tu écris ici peut finir sur la page d'accueil, avec ton prénom et ta photo Discord, mais seulement si tu me le permets en bas. Sinon ça reste entre nous.</p>
+
+      <div class="row-2">
+        <label class="field"><span>Prénom</span><input type="text" id="firstName" required placeholder="Ton prénom"></label>
+        <label class="field"><span>Pseudo Discord</span><input type="text" id="discord" placeholder="pseudo"></label>
+      </div>
+      <div class="row-2">
+        <label class="field"><span>Ton app</span><input type="text" id="app" placeholder="Nom de ton app"></label>
+        <label class="field"><span>Ton compte TikTok <em class="dim">(facultatif)</em></span><input type="text" id="tiktok" placeholder="@"></label>
+      </div>
+
+      <fieldset class="stars" id="stars">
+        <legend>Le Stage, sur cinq</legend>
+        <label><input type="radio" name="note" value="1"><i></i></label>
+        <label><input type="radio" name="note" value="2"><i></i></label>
+        <label><input type="radio" name="note" value="3"><i></i></label>
+        <label><input type="radio" name="note" value="4"><i></i></label>
+        <label><input type="radio" name="note" value="5"><i></i></label>
+      </fieldset>
+
+      <label class="field"><span>Ton avis <em class="dim">(comme tu le dirais à un pote dev)</em></span><textarea id="review" rows="5" maxlength="600" placeholder="Où tu en étais avant, ce qui a changé, ce que tu retiens des lives."></textarea></label>
+      <div class="count" id="count">0 / 600</div>
+
+      <label class="field"><span>Un chiffre à partager ? <em class="dim">(facultatif : vues, téléchargements, revenus)</em></span><input type="text" id="result" placeholder="Ex. 120 000 vues en deux semaines, 40 téléchargements par jour"></label>
+
+      <div class="consent px-card">
+        <h3>Ce que je peux montrer sur le site</h3>
+        <p class="p">Coche uniquement ce qui te va. Tu pourras me demander de retirer tout ça à n'importe quel moment, un message sur Discord suffit.</p>
+        <label class="check"><input type="checkbox" id="okReview"><span>Mon avis, tel que je l'ai écrit ici <em class="dim">(ou raccourci, sans changer le sens)</em></span></label>
+        <label class="check"><input type="checkbox" id="okName"><span>Mon prénom</span></label>
+        <label class="check"><input type="checkbox" id="okAvatar"><span>Ma photo de profil Discord</span></label>
+        <label class="check"><input type="checkbox" id="okApp"><span>Le nom de mon app et mon compte TikTok</span></label>
+        <label class="check"><input type="checkbox" id="okResult"><span>Le chiffre que j'ai partagé</span></label>
+        <p class="avatar-hint">Pour la photo Discord, je la récupère moi-même depuis le serveur, tu n'as rien à envoyer.</p>
+      </div>
+
+      <div class="nav-row"><button type="button" class="btn btn-ink btn-lg" id="sendBtn" data-pixel-target>Envoyer mon avis</button></div>
+
+      <div class="ok-box">
+        <p class="eyebrow mono">C'est envoyé</p>
+        <h1 class="h2">Merci.<span class="px-dot" style="margin-left:.2em;vertical-align:baseline"></span></h1>
+        <p class="p">Ton avis est dans ma boîte. Si tu m'as autorisé à le montrer, tu le verras sur le site dans les prochains jours, et je te préviens sur Discord. Si tu changes d'avis, un message et je retire.</p>
+        <div class="nav-row"><a class="btn" href="index.html">Retour au site</a></div>
+      </div>
+    </form>
+  </div>
+</main>
+
+<div id="particles" aria-hidden="true"></div>
+<div id="toast" class="toast px" role="status" aria-live="polite" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script src="avis.js"></script>
+</body>
+</html>
