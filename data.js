@@ -3,6 +3,13 @@
    ============================================================ */
 const SITE_DATA = {
 
+  /* Envoi des candidatures. Le site est statique : il passe par Web3Forms,
+     gratuit, qui transmet le formulaire à ton adresse. Pour l'activer :
+     1. va sur https://web3forms.com, entre sacha.clauzade@gmail.com ;
+     2. tu reçois une clé d'accès par mail ;
+     3. colle-la ci-dessous. Sans clé, le bouton ouvre un mail pré-rempli. */
+  form: { web3formsKey: "", to: "sacha.clauzade@gmail.com" },
+
   /* Tes posts TikTok qui ont marché, du plus vu au moins vu.
      "vues" vient de la grille du profil @bellysafe.app le 26 octobre 2026,
      "hook" est le texte de la première image, "image" la miniature
