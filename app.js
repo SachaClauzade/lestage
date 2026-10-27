@@ -337,6 +337,26 @@
     if (bubble) bubble.addEventListener("click", (e) => { burst(e.clientX, e.clientY, { n: 16, r: 90 }); snd.pop(); });
   }
 
+  /* ---------- method track + final pixel field ----------------------- */
+  const track = $("#track");
+  if (track) {
+    const cells = $$("li", track);
+    // lights up in sequence when it comes into view, then follows the hovered part
+    new IntersectionObserver((entries, io) => entries.forEach((en) => {
+      if (!en.isIntersecting) return; io.disconnect();
+      cells.forEach((c, i) => setTimeout(() => { c.classList.add("is-on"); if (!reduced) snd.tick(); }, 120 + i * 90));
+    }), { threshold: 0.6 }).observe(track);
+    $$(".parts li[data-p]").forEach((li) => {
+      li.addEventListener("mouseenter", () => cells.forEach((c) => c.classList.toggle("is-hot", c.dataset.p === li.dataset.p)));
+      li.addEventListener("mouseleave", () => cells.forEach((c) => c.classList.remove("is-hot")));
+    });
+  }
+  const field = $("#fieldPx");
+  if (field && !reduced) {
+    const cols = ["--px", "--c1", "--c2", "--c3", "--c4", "--paper"];
+    field.innerHTML = Array.from({ length: 36 }, () => `<i style="--x:${rand(0, 100).toFixed(1)}%; --s:${Math.round(rand(4, 10))}px; --c:${cssVar(pick(cols))}; --d:${rand(7, 14).toFixed(1)}s; --delay:-${rand(0, 14).toFixed(1)}s"></i>`).join("");
+  }
+
   /* ---------- views chart ---------------------------------------- */
   const chart = $("#viewsChart"), counter = $("#chartCounter");
   function countUp(el, to, ms, format) {
@@ -505,7 +525,7 @@
     if (vids.length) {
       vgrid.innerHTML = vids.map((v, i) => `
         <button class="vcard px tilt reveal" data-url="${v.url}" style="--d:${i * 90}ms" aria-label="Voir la vidéo : ${(v.hook || "").replace(/"/g, "&quot;")}">
-          <div class="vshot">${v.image ? `<img src="${v.image}" alt="${(v.hook || "").replace(/"/g, "&quot;")}" loading="lazy">` : `<div class="vghost"></div><span class="vhook">${v.hook || ""}</span>`}<span class="vplay"></span></div>
+          <div class="vshot"><span class="rank">0${i + 1}</span>${v.image ? `<img src="${v.image}" alt="${(v.hook || "").replace(/"/g, "&quot;")}" loading="lazy">` : `<div class="vghost"></div><span class="vhook">${v.hook || ""}</span>`}<span class="vplay"></span></div>
           <div class="vmeta">${v.vues ? `<span class="vviews">${fmtViews(v.vues)}<small>vues</small></span>` : `<span class="vviews vviews-na">${v.note || "voir sur TikTok"}</span>`}<span class="vformat">${v.format || "TikTok"}</span></div>
         </button>`).join("");
       $$(".vcard", vgrid).forEach((c) => { setupTilt(c); c.addEventListener("click", () => openVideo(c.dataset.url)); });
