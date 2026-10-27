@@ -395,35 +395,6 @@
     const saved = store.get("stage.px", null); if (saved) applyPx(saved); else $$("i", swatches)[0].classList.add("is-on");
   }
 
-  /* ---------- the cube: 27 cubies, explodes and comes back ----------- */
-  const cubeWrap = $("#cubeWrap"), cube = $("#cube");
-  if (cube) {
-    const U = 30; cube.style.setProperty("--u", U + "px");
-    const cubies = [];
-    for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) {
-      const c = document.createElement("div"); c.className = "cubie";
-      c.style.setProperty("--x", x); c.style.setProperty("--y", y); c.style.setProperty("--z", z);
-      c.style.setProperty("--rx", rand(-180, 180) + "deg"); c.style.setProperty("--ry", rand(-180, 180) + "deg");
-      c.innerHTML = "<i></i><i></i><i></i><i></i><i></i><i></i>";
-      cube.appendChild(c); cubies.push(c);
-    }
-    const es = { value: 3, velocity: 0, target: 3, done: true }; // starts exploded, assembles after the intro
-    const spring = makeSpring({ tension: 140, friction: 11 });
-    let raf = 0;
-    function frame() { spring(es); cube.style.setProperty("--e", es.value.toFixed(3)); if (!es.done) raf = requestAnimationFrame(frame); else raf = 0; }
-    function setE(v) { es.target = v; if (!raf) raf = requestAnimationFrame(frame); }
-    cube.style.setProperty("--e", "3");
-    if (reduced) { es.value = 0; cube.style.setProperty("--e", "0"); }
-    else {
-      setTimeout(() => setE(0), 1400);
-      // every so often it breathes out and back
-      setInterval(() => { if (document.hidden || cubeWrap.matches(":hover")) return; setE(0.5); setTimeout(() => setE(0), 500); }, 7000);
-      cubeWrap.addEventListener("click", (e) => { setE(2.6); setTimeout(() => setE(0), 650); burst(e.clientX, e.clientY, { n: 18, r: 90, sizes: [4, 8] }); });
-      cubeWrap.addEventListener("mouseenter", () => { cubeWrap.classList.add("is-still"); setE(0.9); });
-      cubeWrap.addEventListener("mouseleave", () => { cubeWrap.classList.remove("is-still"); setE(0); });
-    }
-  }
-
   /* ---------- views chart ---------------------------------------- */
   const chart = $("#viewsChart"), counter = $("#chartCounter");
   function countUp(el, to, ms, format) {
