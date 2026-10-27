@@ -69,20 +69,21 @@
 
   const soundBtn = $("#soundToggle");
   function renderSound() {
+    if (!soundBtn) return;
     soundBtn.setAttribute("aria-pressed", String(soundOn));
     soundBtn.setAttribute("aria-label", soundOn ? "Désactiver les sons" : "Activer les sons");
   }
   renderSound();
-  soundBtn.addEventListener("click", () => { soundOn = !soundOn; store.set("stage.sound", soundOn); renderSound(); soundOn ? snd.on() : snd.off(); });
+  if (soundBtn) soundBtn.addEventListener("click", () => { soundOn = !soundOn; store.set("stage.sound", soundOn); renderSound(); soundOn ? snd.on() : snd.off(); });
 
   /* ---------- theme ---------------------------------------------- */
   const themeBtn = $("#themeToggle");
   const savedTheme = store.get("stage.theme", null);
   if (savedTheme) root.setAttribute("data-theme", savedTheme);
   function isDark() { const t = root.getAttribute("data-theme"); return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches; }
-  function renderTheme() { themeBtn.setAttribute("aria-label", isDark() ? "Activer le mode clair" : "Activer le mode sombre"); }
+  function renderTheme() { if (themeBtn) themeBtn.setAttribute("aria-label", isDark() ? "Activer le mode clair" : "Activer le mode sombre"); }
   renderTheme();
-  themeBtn.addEventListener("click", (e) => {
+  if (themeBtn) themeBtn.addEventListener("click", (e) => {
     root.setAttribute("data-theme", isDark() ? "light" : "dark"); store.set("stage.theme", root.getAttribute("data-theme")); renderTheme();
     snd.pop(); burst(e.clientX || innerWidth / 2, e.clientY || 40, { n: 12, r: 60 });
   });
@@ -259,6 +260,36 @@
     happy++;
     if (happy === 7) { toast("ok ok, tu m'as eu. ❤"); snd.win(); confetti(e.clientX, e.clientY); happy = 0; }
   });
+
+  /* ---------- the pixel: one square, alive -------------------------- */
+  const pixel = $("#pixel");
+  if (pixel && !reduced) {
+    const home = () => { const r = pixel.getBoundingClientRect(); return { x: 0, y: 0 }; };
+    const sx = { value: 0, velocity: 0, target: 0, done: true }, sy = { value: 0, velocity: 0, target: 0, done: true };
+    const jump = makeSpring({ tension: 220, friction: 12 });
+    let raf = 0, away = false, restTimer = 0;
+    function frame() {
+      jump(sx); jump(sy);
+      pixel.style.transform = `translate(${sx.value}px, ${sy.value}px)`;
+      if (!sx.done || !sy.done) raf = requestAnimationFrame(frame); else raf = 0;
+    }
+    function go(x, y) { sx.target = x; sy.target = y; if (!raf) raf = requestAnimationFrame(frame); }
+    // land: drop in from above after the intro, with a little burst
+    pixel.style.transform = "translate(0, -140px)"; sy.value = -140;
+    setTimeout(() => { go(0, 0); setTimeout(() => { const r = pixel.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, { n: 10, r: 46, sizes: [3, 6] }); snd.coin(); }, 260); }, 1250);
+    // hop onto any [data-pixel-target] on hover, come back on leave
+    $$("[data-pixel-target]").forEach((t) => {
+      t.addEventListener("mouseenter", () => {
+        const a = pixel.getBoundingClientRect(), b = t.getBoundingClientRect();
+        const base = { x: a.left - sx.value, y: a.top - sy.value };
+        go(b.right - base.x - a.width - 10, b.top - base.y + 10); away = true; snd.tick();
+      });
+      t.addEventListener("mouseleave", () => { go(0, 0); away = false; });
+    });
+    // idle: a blink every few seconds, a tiny hop when clicked
+    setInterval(() => { if (!away && Math.random() < 0.6) pixel.classList.add("blink"); setTimeout(() => pixel.classList.remove("blink"), 180); }, 2800);
+    pixel.addEventListener("click", (e) => { go(0, -26); setTimeout(() => go(0, 0), 120); burst(e.clientX, e.clientY, { n: 8, r: 36, sizes: [3, 5] }); snd.pop(); });
+  }
 
   /* ---------- views chart ---------------------------------------- */
   const chart = $("#viewsChart"), counter = $("#chartCounter");
@@ -461,9 +492,9 @@
   /* ---------- like button ------------------------------------------ */
   const likeBtn = $("#likeBtn"), likeCount = $("#likeCount");
   let likes = store.get("stage.likes", 0);
-  likeCount.textContent = likes;
-  if (likes > 0) likeBtn.classList.add("is-liked");
-  likeBtn.addEventListener("click", () => {
+  if (likeCount) likeCount.textContent = likes;
+  if (likes > 0 && likeBtn) likeBtn.classList.add("is-liked");
+  if (likeBtn) likeBtn.addEventListener("click", () => {
     likes++; store.set("stage.likes", likes); likeCount.textContent = likes; likeBtn.classList.add("is-liked");
     const r = likeBtn.getBoundingClientRect();
     burst(r.left + r.width / 2, r.top + r.height / 2, { n: 10 + Math.min(likes, 30), r: 70 + Math.min(likes * 4, 120), colors: [cssVar("--pink"), cssVar("--pink"), cssVar("--yellow")] });
@@ -535,11 +566,14 @@
   // elements rendered later (stats, videos) get observed too
   setTimeout(() => armReveal(document), 1500);
 
+  window.stageFx = { burst, confetti, snd, toast };
+
   /* ---------- scroll progress + active nav link --------------------- */
   const progress = $("#progress");
   const navLinks = $$(".links a");
   const sections = navLinks.map((a) => $(a.getAttribute("href"))).filter(Boolean);
   function onScroll() {
+    if (!progress) return;
     const max = document.documentElement.scrollHeight - innerHeight;
     progress.style.setProperty("--p", max > 0 ? (scrollY / max).toFixed(3) : 0);
   }

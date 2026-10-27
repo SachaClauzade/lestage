@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Postuler · Le Stage</title>
+<meta name="description" content="Candidature au Stage : ton app, toi, ce que tu veux. Cinq minutes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="postuler.css">
+</head>
+<body class="apply-body">
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="index.html" class="brand boop" data-boop="y:-2"><i class="px-dot" aria-hidden="true"></i>Le Stage</a>
+    <span class="mono dim apply-crumb">Candidature · 5 minutes</span>
+    <div class="nav-tools">
+      <button class="icon-btn boop" id="soundToggle" data-boop="rotate:12;scale:1.15" aria-pressed="true" aria-label="Désactiver les sons" title="Sons">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><g class="snd-waves"><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></g><g class="snd-off"><path d="m16 9 5 6"/><path d="m21 9-5 6"/></g></svg>
+      </button>
+      <a href="index.html" class="btn btn-sm boop" data-boop="y:-2">Retour</a>
+    </div>
+  </div>
+</header>
+
+<main class="apply">
+  <div class="wrap apply-in">
+
+    <aside class="apply-side">
+      <ol class="steps" id="steps">
+        <li class="is-current" data-step="1"><i></i><span>Ton app</span></li>
+        <li data-step="2"><i></i><span>Toi</span></li>
+        <li data-step="3"><i></i><span>Ce que tu veux</span></li>
+        <li data-step="4"><i></i><span>Envoi</span></li>
+      </ol>
+      <div class="side-note px-card">
+        <img src="assets/sacha.png" alt="" width="36" height="36">
+        <p>Je lis chaque candidature moi-même et je réponds sous 48 h. Si ton app n'est pas prête, je te le dis et je te dis quoi faire d'abord.</p>
+      </div>
+    </aside>
+
+    <form class="apply-form" id="applyForm" novalidate>
+
+      <!-- ÉTAPE 1 : ton app -->
+      <section class="step is-active" data-step="1">
+        <p class="eyebrow mono">Étape 1 · ton app</p>
+        <h1 class="h2">Quelle app on fait décoller ?</h1>
+        <p class="p">Cherche-la sur l'App Store, je récupère sa fiche. Si elle n'est pas encore en ligne, dis-le moi en dessous.</p>
+
+        <label class="field">
+          <span>Nom de ton app sur l'App Store</span>
+          <div class="search">
+            <input type="search" id="appQuery" placeholder="BellySafe, Toshi, …" autocomplete="off" autofocus>
+            <span class="search-state mono" id="appState"></span>
+          </div>
+        </label>
+        <ul class="results" id="appResults" hidden></ul>
+
+        <div class="app-card px-card" id="appCard" hidden>
+          <img id="appIcon" alt="" width="72" height="72">
+          <div class="app-meta">
+            <b id="appName"></b>
+            <span id="appDev" class="dim"></span>
+            <span class="mono" id="appFacts"></span>
+          </div>
+          <button type="button" class="btn btn-sm" id="appChange">Changer</button>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="appNotLive">
+          <span>Mon app n'est pas encore en ligne <em class="dim">(le stage suppose une app ou un MVP sur un store, mais dis-moi où tu en es)</em></span>
+        </label>
+        <label class="field" id="appLinkField" hidden>
+          <span>Un lien vers ton app, ton TestFlight ou ta page</span>
+          <input type="url" id="appLink" placeholder="https://">
+        </label>
+
+        <div class="nav-row"><button type="button" class="btn btn-ink btn-lg" data-next data-pixel-target>Continuer</button></div>
+      </section>
+
+      <!-- ÉTAPE 2 : toi -->
+      <section class="step" data-step="2">
+        <p class="eyebrow mono">Étape 2 · toi</p>
+        <h1 class="h2">Qui est derrière l'app ?</h1>
+        <div class="row-2">
+          <label class="field"><span>Prénom</span><input type="text" id="firstName" required placeholder="Ton prénom"></label>
+          <label class="field"><span>Email</span><input type="email" id="email" required placeholder="toi@exemple.com"></label>
+        </div>
+        <fieldset class="choices">
+          <legend>Tu es</legend>
+          <label><input type="radio" name="role" value="solo" checked><span>Dev solo</span></label>
+          <label><input type="radio" name="role" value="duo"><span>À deux</span></label>
+          <label><input type="radio" name="role" value="studio"><span>Un studio</span></label>
+          <label><input type="radio" name="role" value="nocode"><span>No-code</span></label>
+        </fieldset>
+        <fieldset class="choices">
+          <legend>TikTok, aujourd'hui</legend>
+          <label><input type="radio" name="tiktok" value="jamais" checked><span>Jamais posté</span></label>
+          <label><input type="radio" name="tiktok" value="moins1"><span>Je poste depuis moins d'un mois</span></label>
+          <label><input type="radio" name="tiktok" value="plus1"><span>Depuis plus d'un mois</span></label>
+          <label><input type="radio" name="tiktok" value="marche"><span>Ça marche déjà un peu</span></label>
+        </fieldset>
+        <label class="field"><span>Ton compte TikTok <em class="dim">(facultatif)</em></span><input type="text" id="tiktokHandle" placeholder="@"></label>
+        <div class="nav-row"><button type="button" class="btn" data-prev>Retour</button><button type="button" class="btn btn-ink btn-lg" data-next data-pixel-target>Continuer</button></div>
+      </section>
+
+      <!-- ÉTAPE 3 : ce que tu veux -->
+      <section class="step" data-step="3">
+        <p class="eyebrow mono">Étape 3 · ce que tu veux</p>
+        <h1 class="h2">Où tu veux être dans un mois ?</h1>
+        <fieldset class="choices">
+          <legend>Ton objectif</legend>
+          <label><input type="radio" name="goal" value="premiers" checked><span>Mes premiers téléchargements</span></label>
+          <label><input type="radio" name="goal" value="1000"><span>1 000 € par mois</span></label>
+          <label><input type="radio" name="goal" value="structurer"><span>Structurer ce qui marche déjà</span></label>
+        </fieldset>
+        <fieldset class="choices">
+          <legend>Temps par semaine</legend>
+          <label><input type="radio" name="time" value="2h"><span>2 h</span></label>
+          <label><input type="radio" name="time" value="5h" checked><span>5 h</span></label>
+          <label><input type="radio" name="time" value="10h"><span>10 h ou plus</span></label>
+        </fieldset>
+        <label class="field"><span>Pourquoi toi, pourquoi maintenant ? <em class="dim">(trois lignes suffisent)</em></span><textarea id="why" rows="4" placeholder="Ce que fait ton app, où tu bloques, ce que tu attends du stage."></textarea></label>
+        <div class="nav-row"><button type="button" class="btn" data-prev>Retour</button><button type="button" class="btn btn-ink btn-lg" data-next data-pixel-target>Voir le récap</button></div>
+      </section>
+
+      <!-- ÉTAPE 4 : récap + envoi -->
+      <section class="step" data-step="4">
+        <p class="eyebrow mono">Étape 4 · envoi</p>
+        <h1 class="h2">Ta candidature, en clair.</h1>
+        <div class="recap px-card" id="recap"></div>
+        <p class="p" style="margin-top:18px">En cliquant, ton mail s'ouvre avec tout ça pré-rempli. Tu envoies, je lis, je réponds sous 48 h. Tu ne paies qu'une fois accepté.</p>
+        <div class="nav-row"><button type="button" class="btn" data-prev>Retour</button><a class="btn btn-ink btn-lg" id="sendBtn" href="#" data-pixel-target>Envoyer ma candidature</a></div>
+      </section>
+
+    </form>
+  </div>
+</main>
+
+<div id="particles" aria-hidden="true"></div>
+<div id="toast" class="toast px" role="status" aria-live="polite" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script src="postuler.js"></script>
+</body>
+</html>
