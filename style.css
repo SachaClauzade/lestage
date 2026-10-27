@@ -222,16 +222,13 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 
 /* méthode: a list, each title animated after its meaning */
 .parts-list { border-top: 1px solid var(--line); }
-.pl-phase { color: var(--px); }
-.pl-phase .mono { font-size: 11px; }
-.pl { display: grid; grid-template-columns: 64px 1fr; gap: 20px; padding: 30px 0; border-bottom: 1px solid var(--line); align-items: baseline; cursor: default; opacity: .32; transition: opacity 400ms ease, transform 500ms var(--spring); transform: translateX(0); }
+.pl { display: grid; grid-template-columns: 64px 1fr; gap: 20px; padding: 40px 0; border-bottom: 1px solid var(--line); align-items: baseline; cursor: default; opacity: .32; transition: opacity 400ms ease, transform 500ms var(--spring); transform: translateX(0); }
 .pl.is-focus { opacity: 1; transform: translateX(10px); }
 .pl-no { color: var(--g3); font-size: 12px; padding-top: 8px; transition: color 300ms; }
-.pl h3 { font-size: clamp(24px, 2.8vw, 34px); letter-spacing: -0.035em; margin: 0 0 8px; position: relative; display: inline-block; }
+.pl h3 { font-size: clamp(28px, 3.4vw, 42px); letter-spacing: -0.035em; margin: 0 0 8px; position: relative; display: inline-block; }
 .pl p { margin: 0; color: var(--ink-2); font-size: 16px; max-width: 560px; }
 .pl .kw { position: relative; display: inline-block; }
 .pl.is-focus .pl-no { color: var(--px); }
-.pl-phase { padding: 40px 0 10px; }
 
 @media (max-width: 600px) { .pl { grid-template-columns: 40px 1fr; gap: 10px; } }
 
