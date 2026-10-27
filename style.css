@@ -647,11 +647,11 @@ body.chaos { animation: hue 4s linear infinite; }
   /* hero: photo + bubble side by side, buttons full width */
   .hero { padding: 28px 0 48px; }
   .hero-in { gap: 20px; }
-  .bubble-wrap { height: 230px; }
-  .portrait { width: 210px; }
-  .status { top: 0; left: 0; font-size: 10px; padding: 5px 10px; }
-  .say { left: auto; right: 0; bottom: 0; max-width: 150px; min-width: 0; font-size: 13px; padding: 10px 12px; }
-  .say::before { right: 30px; }
+  .bubble-wrap { height: 156px; }
+  .portrait { inset: 8px auto 0 0; width: 132px; }
+  .status { top: 0; left: 150px; font-size: 10px; padding: 5px 10px; }
+  .say { left: 150px; right: 0; top: 38px; bottom: auto; max-width: none; min-width: 0; font-size: 13px; padding: 10px 12px; animation: none; }
+  .say::before { top: 16px; left: -7px; right: auto; transform: rotate(-45deg); }
   .cta-row { margin-top: 28px; }
   .cta-row .btn { flex: 1 1 100%; justify-content: center; }
   .places { margin-top: 26px; }
@@ -672,7 +672,7 @@ body.chaos { animation: hue 4s linear infinite; }
   .dc-screen { padding: 12px; overflow: hidden; }
   .dc-head { padding: 10px 12px; font-size: 13px; }
   .dc-live { font-size: 11px; }
-  .dc-screen .slides { display: flex; overflow-x: auto; gap: 10px; max-width: none; margin: 0 -12px; padding: 2px 12px 6px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .dc-screen .slides { display: flex; overflow-x: auto; gap: 10px; max-width: none; margin: 0 -12px; padding: 8px 12px 10px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .dc-screen .slides::-webkit-scrollbar { display: none; }
   .dc-screen .slide { flex: 0 0 150px; scroll-snap-align: center; }
   .dc-screen-hint { font-size: 10px; }
