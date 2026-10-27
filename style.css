@@ -248,6 +248,12 @@ main { padding-top: 36px; }
 .pl h3 { font-size: clamp(28px, 3.4vw, 42px); letter-spacing: -0.035em; margin: 0 0 8px; position: relative; display: inline-block; }
 .pl p { margin: 0; color: var(--ink-2); font-size: 16px; max-width: 560px; }
 .pl .kw { position: relative; display: inline-block; }
+.learn { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; max-width: 560px; }
+.learn li { position: relative; padding-left: 18px; font-size: 14px; color: var(--ink-2); }
+.learn li::before { content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; background: var(--px); }
+.learn li.mono { padding-left: 0; color: var(--px); font-size: 11px; margin-bottom: 2px; }
+.learn li.mono::before { display: none; }
+.pl:not(.is-focus) .learn { opacity: .6; }
 .pl.is-focus .pl-no { color: var(--px); }
 
 @media (max-width: 600px) { .pl { grid-template-columns: 40px 1fr; gap: 10px; } }
