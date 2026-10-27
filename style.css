@@ -220,14 +220,18 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 
 /* méthode: a list, each title animated after its meaning */
 .parts-list { border-top: 1px solid var(--line); }
-.pl-phase { padding: 22px 0 8px; color: var(--px); }
+.pl-phase { color: var(--px); }
 .pl-phase .mono { font-size: 11px; }
-.pl { display: grid; grid-template-columns: 56px 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: baseline; cursor: default; }
-.pl-no { color: var(--g3); font-size: 12px; padding-top: 6px; }
-.pl h3 { font-size: clamp(20px, 2.3vw, 26px); letter-spacing: -0.03em; margin: 0 0 4px; position: relative; display: inline-block; }
-.pl p { margin: 0; color: var(--ink-2); font-size: 15px; }
+.pl { display: grid; grid-template-columns: 64px 1fr; gap: 20px; padding: 30px 0; border-bottom: 1px solid var(--line); align-items: baseline; cursor: default; opacity: .32; transition: opacity 400ms ease, transform 500ms var(--spring); transform: translateX(0); }
+.pl.is-focus { opacity: 1; transform: translateX(10px); }
+.pl:hover { opacity: 1; }
+.pl-no { color: var(--g3); font-size: 12px; padding-top: 8px; transition: color 300ms; }
+.pl h3 { font-size: clamp(24px, 2.8vw, 34px); letter-spacing: -0.035em; margin: 0 0 8px; position: relative; display: inline-block; }
+.pl p { margin: 0; color: var(--ink-2); font-size: 16px; max-width: 560px; }
 .pl .kw { position: relative; display: inline-block; }
-.pl:hover .pl-no { color: var(--px); }
+.pl.is-focus .pl-no, .pl:hover .pl-no { color: var(--px); }
+.pl-phase { padding: 40px 0 10px; }
+@media (hover: none) { .pl { opacity: .5; } }
 @media (max-width: 600px) { .pl { grid-template-columns: 40px 1fr; gap: 10px; } }
 
 /* P1 chauffer: pixels of heat rise from the word */

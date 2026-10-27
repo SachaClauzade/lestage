@@ -312,13 +312,19 @@
       if (li.dataset.fx === "burst") { const kw = li.querySelector(".kw"), r = kw.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, { n: 16, r: 70, sizes: [3, 6] }); }
     }
     pls.forEach((li) => li.addEventListener("mouseenter", () => play(li)));
-    const io = new IntersectionObserver((entries) => entries.forEach((en) => {
-      if (!en.isIntersecting || en.target.dataset.seen) return;
-      en.target.dataset.seen = "1";
-      setTimeout(() => play(en.target), 350);
-      io.unobserve(en.target);
-    }), { threshold: 0.8 });
-    pls.forEach((li) => io.observe(li));
+    // the row nearest the middle of the screen is the one in focus; it plays once when it takes focus
+    let focused = null;
+    function focusRow() {
+      const mid = innerHeight * 0.46; let best = null, bd = Infinity;
+      pls.forEach((li) => { const r = li.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; const d = Math.abs((r.top + r.height / 2) - mid); if (d < bd) { bd = d; best = li; } });
+      if (best === focused) return;
+      pls.forEach((li) => li.classList.toggle("is-focus", li === best));
+      focused = best;
+      if (best) play(best);
+    }
+    window.addEventListener("scroll", focusRow, { passive: true });
+    window.addEventListener("resize", focusRow);
+    focusRow();
   }
   const field = $("#fieldPx");
   if (field && !reduced) {
