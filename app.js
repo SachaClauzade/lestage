@@ -47,7 +47,7 @@
   const themeBtn = $("#themeToggle");
   const savedTheme = store.get("stage.theme", null);
   if (savedTheme) root.setAttribute("data-theme", savedTheme);
-  function isDark() { const t = root.getAttribute("data-theme"); return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches; }
+  function isDark() { return root.getAttribute("data-theme") !== "light"; }
   function renderTheme() { if (themeBtn) themeBtn.setAttribute("aria-label", isDark() ? "Activer le mode clair" : "Activer le mode sombre"); }
   renderTheme();
   if (themeBtn) themeBtn.addEventListener("click", (e) => {
