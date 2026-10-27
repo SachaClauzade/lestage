@@ -304,48 +304,71 @@
     if (bubble) bubble.addEventListener("click", (e) => { burst(e.clientX, e.clientY, { n: 16, r: 90 }); snd.pop(); });
   }
 
-  /* ---------- method player: the ten parts, one at a time ------------- */
-  const player = $("#player");
-  if (player) {
+  /* ---------- method deck: ten cards, ten pixel illustrations ---------- */
+  const deck = $("#deck");
+  if (deck) {
+    // 12x12 pixel maps: . empty, k ink, o orange, y yellow, b blue, g green, p pink, w paper, l light grey
+    const ART = {
+      compte: ["....kkkk....","...k....k...","...k.oo.k...","...k.oo.k...","...k....k...","...k.yy.k...","...kyooyk...","...kyooyk...","...k.yy.k...","...k....k...","...k.kk.k...","....kkkk...."],
+      cible:  ["....kkkk....","..kk....kk..",".k........k.",".k..kkkk..k.","k..k....k..k","k..k.oo.k..k","k..k.oo.k..k","k..k....k..k",".k..kkkk..k.",".k........k.","..kk....kk..","....kkkk...."],
+      etude:  ["..kkkkk.....",".k.....k....","k..b.b..k...","k.......k...","k..b.b..k...","k.......k...",".k.....k....","..kkkkk.k...","........kk..",".........kk.","..........kk","...........k"],
+      hook:   ["......kk....","......kk....","......k.....","......k.....","......k.....","......k.....","..k...k.....","..k...k.....","..kk.kk.....","...kkk......","....o.......","...oo......."],
+      pov:    ["............","....kkkk....","..kk....kk..",".k..kkkk..k.","k..k.oo.k..k","k..k.oo.k..k",".k..kkkk..k.","..kk....kk..","....kkkk....","............","....y..y....","....y..y...."],
+      script: ["..kkkkkkk...","..k.....kk..","..k.....k.k.","..k.....kkkk","..k.ooo....k","..k........k","..k.kkkk...k","..k........k","..k.kkkkkk.k","..k........k","..k.kkk....k","..kkkkkkkkkk"],
+      dl:     ["......kk....","......kk....","......kk....","......kk....","..kk..kk..kk","...kk.kk.kk.","....kkkkkk..",".....kkkk...","......kk....","............","kkkkkkkkkkkk","k..........k"],
+      analyse:["............","..........o.","..........o.","......k...o.","......k...o.","......k.k.o.","..k...k.k.o.","..k.k.k.k.o.","..k.k.k.k.o.","..k.k.k.k.o.","kkkkkkkkkkkk","............"],
+      doubler:["............","..kkkkkk....","..k....k....","..k....k.ooo","..k....k.o.o","..k....k.ooo","..kkkkkk....","............","......kkkkkk","......k....k","......k....k","......kkkkkk"],
+      demult: ["......oo....","......oo....","....oooooo..","....oooooo..","..b......g..","..b.b..g.g..","..bbb..ggg..","............","y..........p","yy........pp","yyy......ppp","............"],
+    };
+    const COL = { k: "var(--ink)", o: "var(--px)", y: "var(--c1)", b: "var(--c2)", g: "var(--c3)", p: "var(--c4)", w: "var(--paper)", l: "var(--line-2)" };
+    function pixelArt(name) {
+      const rows = ART[name]; let n = 0;
+      const rects = rows.map((r, y) => r.split("").map((c, x) => c === "." ? "" : `<rect x="${x}" y="${y}" width="1" height="1" fill="${COL[c]}" style="--i:${n++}"/>`).join("")).join("");
+      return `<svg viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
+    }
     const PARTS = [
-      ["Préparer", "Créer ton compte et le chauffer", "Un compte neuf, tes mots-clés, trois sessions de warm-up."],
-      ["Préparer", "Choisir ta feature et ta cible", "Une feature TikTokable, un avatar précis, trente verbatims."],
-      ["Préparer", "Étudier ce qui marche déjà", "Ta Viral Bank, trois modèles par format, quatre recettes."],
-      ["Préparer", "Écrire tes hooks et ton plan de tir", "Dix-huit hooks, une banque d'images, douze vidéos planifiées."],
-      ["Tester", "Créer tes premières vidéos · POV", "Trente secondes, texte dès la première image, l'app en payoff."],
-      ["Tester", "Écrire tes scripts · Problème → Solution", "Trois frameworks, dix scripts de réserve avec l'IA."],
-      ["Tester", "Faire télécharger · Avant/Après et Démo live", "Les commentaires, l'audit friction, ta backstory."],
-      ["Doubler", "Analyser tes résultats", "La rétention, le ratio, tes deux ou trois winners."],
-      ["Doubler", "Doubler sur tes winners", "Un template par format, six vidéos par session, deux variantes et un test."],
-      ["Doubler", "Démultiplier et préparer la suite", "Reels, Shorts, Snapchat, et ton plan à trente jours."],
+      ["Préparer", "compte", "Créer ton compte et le chauffer", "Un compte neuf, tes mots-clés, trois sessions de warm-up."],
+      ["Préparer", "cible", "Choisir ta feature et ta cible", "Une feature TikTokable, un avatar précis, trente verbatims."],
+      ["Préparer", "etude", "Étudier ce qui marche déjà", "Ta Viral Bank, trois modèles par format, quatre recettes."],
+      ["Préparer", "hook", "Écrire tes hooks et ton plan de tir", "Dix-huit hooks, une banque d'images, douze vidéos planifiées."],
+      ["Tester", "pov", "Créer tes premières vidéos · POV", "Trente secondes, texte dès la première image, l'app en payoff."],
+      ["Tester", "script", "Écrire tes scripts · Problème → Solution", "Trois frameworks, dix scripts de réserve avec l'IA."],
+      ["Tester", "dl", "Faire télécharger · Avant/Après et Démo live", "Les commentaires, l'audit friction, ta backstory."],
+      ["Doubler", "analyse", "Analyser tes résultats", "La rétention, le ratio, tes deux ou trois winners."],
+      ["Doubler", "doubler", "Doubler sur tes winners", "Un template par format, six vidéos par session."],
+      ["Doubler", "demult", "Démultiplier et préparer la suite", "Reels, Shorts, Snapchat, ton plan à trente jours."],
     ];
-    const track = $("#track");
-    track.innerHTML = PARTS.map((p, i) => `<li data-i="${i}" title="P${i + 1} · ${p[1]}"></li>`).join("");
-    const cells = $$("li", track);
-    const plPhase = $("#plPhase"), plNo = $("#plNo"), plTitle = $("#plTitle"), plOut = $("#plOut"), plCount = $("#plCount");
-    const STEP = 3200; let cur = -1, t0 = 0, paused = false, started = false, raf = 0;
-    function showPart(i) {
-      cur = i; t0 = performance.now();
-      const p = PARTS[i];
-      plPhase.textContent = `${p[0]} · P${i + 1}`; plNo.textContent = `P${i + 1}`; plTitle.textContent = p[1]; plOut.textContent = p[2]; plCount.textContent = `${i + 1} / ${PARTS.length}`;
-      cells.forEach((c, k) => { c.classList.toggle("is-done", k < i); c.classList.toggle("is-on", k === i); c.style.setProperty("--k", 0); });
-      player.classList.remove("is-switch"); void player.offsetWidth; player.classList.add("is-switch");
+    const cards = $("#cards"), track = $("#track");
+    cards.innerHTML = PARTS.map((p, i) => `<li class="card" data-i="${i}"><div class="ill">${pixelArt(p[1])}</div><div><span class="card-phase">${p[0]} · P${i + 1}</span><b>${p[2]}</b><p>${p[3]}</p><span class="card-no">${i + 1} / ${PARTS.length}</span></div></li>`).join("");
+    track.innerHTML = PARTS.map((p, i) => `<li data-i="${i}" title="P${i + 1} · ${p[2]}"></li>`).join("");
+    const items = $$(".card", cards), cells = $$("li", track);
+    let cur = 0;
+    function mark(i) {
+      if (i === cur && items[i].classList.contains("is-on")) return;
+      cur = i;
+      items.forEach((c, k) => c.classList.toggle("is-on", k === i));
+      cells.forEach((c, k) => { c.classList.toggle("is-done", k < i); c.classList.toggle("is-on", k === i); });
     }
-    function tick(now) {
-      if (!paused) {
-        const k = Math.min(1, (now - t0) / STEP);
-        cells[cur].style.setProperty("--k", k.toFixed(3));
-        if (k >= 1) showPart((cur + 1) % PARTS.length);
-      } else t0 = now - (parseFloat(cells[cur].style.getPropertyValue("--k")) || 0) * STEP;
-      raf = requestAnimationFrame(tick);
-    }
-    cells.forEach((c) => c.addEventListener("click", () => { showPart(+c.dataset.i); }));
-    player.addEventListener("mouseenter", () => { paused = true; });
-    player.addEventListener("mouseleave", () => { paused = false; });
-    showPart(0);
-    if (reduced) { cells[0].style.setProperty("--k", 1); }
-    else new IntersectionObserver((entries, io) => entries.forEach((en) => { if (en.isIntersecting && !started) { started = true; io.disconnect(); t0 = performance.now(); raf = requestAnimationFrame(tick); } }), { threshold: 0.5 }).observe(player);
-    document.addEventListener("visibilitychange", () => { if (document.hidden) paused = true; else if (!player.matches(":hover")) paused = false; });
+    function goTo(i) { i = Math.max(0, Math.min(PARTS.length - 1, i)); items[i].scrollIntoView({ behavior: reduced ? "instant" : "smooth", inline: "start", block: "nearest" }); mark(i); }
+    // which card is in front: the one closest to the left edge
+    cards.addEventListener("scroll", () => {
+      const left = cards.getBoundingClientRect().left; let best = 0, bd = Infinity;
+      items.forEach((c, k) => { const d = Math.abs(c.getBoundingClientRect().left - left); if (d < bd) { bd = d; best = k; } });
+      mark(best);
+    }, { passive: true });
+    $("#deckPrev").addEventListener("click", () => goTo(cur - 1));
+    $("#deckNext").addEventListener("click", () => goTo(cur + 1));
+    cells.forEach((c) => c.addEventListener("click", () => goTo(+c.dataset.i)));
+    items.forEach((c) => c.addEventListener("click", () => { if (!dragged) goTo(+c.dataset.i); }));
+    cards.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") { e.preventDefault(); goTo(cur + 1); } if (e.key === "ArrowLeft") { e.preventDefault(); goTo(cur - 1); } });
+    // drag to scroll with the mouse
+    let down = false, dragged = false, sx = 0, sl = 0;
+    cards.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse") return; down = true; dragged = false; sx = e.clientX; sl = cards.scrollLeft; cards.classList.add("is-drag"); });
+    window.addEventListener("pointermove", (e) => { if (!down) return; const dx = e.clientX - sx; if (Math.abs(dx) > 4) dragged = true; cards.scrollLeft = sl - dx; });
+    window.addEventListener("pointerup", () => { if (!down) return; down = false; cards.classList.remove("is-drag"); setTimeout(() => goTo(cur), 10); });
+    // wheel: vertical wheel moves the deck sideways while hovering it
+    cards.addEventListener("wheel", (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { e.preventDefault(); cards.scrollLeft += e.deltaY; } }, { passive: false });
+    mark(0);
   }
   const field = $("#fieldPx");
   if (field && !reduced) {
