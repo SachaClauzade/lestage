@@ -648,7 +648,7 @@
       <figure class="avis-card px boop" data-boop="rotate:${i % 2 ? 1 : -1}">
         <div class="avis-head">
           <span class="avatar">${r.image ? `<img src="${r.image}" alt="">` : esc(r.prenom[0])}</span>
-          <div><b>${esc(r.prenom)}</b><span class="mono">bêta d'octobre</span></div>
+          <div><b>${esc(r.prenom)}</b><span class="mono">promo d'octobre</span></div>
           <span class="note5" aria-label="${r.note} sur 5">${Array.from({ length: 5 }, (_, k) => `<i class="${k < r.note ? "on" : ""}" style="--i:${k}"></i>`).join("")}</span>
         </div>
         <blockquote><p>${esc(r.texte)}</p></blockquote>
