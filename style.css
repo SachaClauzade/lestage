@@ -78,7 +78,7 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 /* --- type ------------------------------------------------- */
 .eyebrow { font-family: var(--display); font-size: 12px; letter-spacing: 0.02em; color: var(--g4); margin-bottom: 22px; display: flex; align-items: center; gap: 10px; }
 .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--px); flex: none; }
-.snack { position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 36px; background: var(--c2); color: #fff; font-size: 13px; }
+.snack { position: fixed; top: 64px; left: 0; right: 0; z-index: 39; height: 36px; background: var(--c2); color: #fff; font-size: 13px; }
 .snack-in { display: flex; align-items: center; gap: 12px; height: 100%; }
 .snack-tag { font-size: 10px; background: #fff; color: var(--c2); padding: 3px 7px; border-radius: 3px; }
 .snack b { font-weight: 600; letter-spacing: -0.01em; }
@@ -87,8 +87,8 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 .snack-places { font-size: 11px; color: rgba(255,255,255,.85); }
 .snack-cta { margin-left: auto; font-size: 11px; color: #fff; text-decoration: none; padding: 5px 10px; border: 1px solid rgba(255,255,255,.5); border-radius: 4px; transition: background 150ms, color 150ms; }
 .snack-cta:hover { background: #fff; color: var(--c2); }
-body { padding-top: 36px; }
-.nav { top: 36px; }
+main { padding-top: 36px; }
+.nav { top: 0; }
 .intro { z-index: 100; }
 @media (max-width: 700px) { .snack-places, .snack-sep { display: none; } .snack { font-size: 12px; } }
 .h1 { font-size: clamp(64px, 11vw, 152px); line-height: 0.92; letter-spacing: -0.05em; font-weight: 600; position: relative; }
@@ -175,15 +175,11 @@ body { padding-top: 36px; }
 /* the bubble: photo, orbiting pixels, status, a speech bubble that types */
 .hero-art { display: flex; justify-content: center; }
 .bubble-wrap { position: relative; width: 360px; height: 380px; }
-.portrait { position: absolute; inset: 0; cursor: pointer; }
-.cutout { width: 100%; height: 100%; overflow: visible; }
-.halo { transition: transform 250ms ease-out; }
-.halo-1 { fill: var(--px); animation: halo 4.5s steps(1) infinite; transform: translate(var(--hx, 0), var(--hy, 0)); }
-.halo-2 { fill: var(--c2); opacity: .9; animation: halo2 4.5s steps(1) infinite; transform: translate(calc(var(--hx, 0) * 2.2), calc(var(--hy, 0) * 2.2)); }
-@keyframes halo { 0% { fill: var(--px); } 33% { fill: var(--c1); } 66% { fill: var(--c2); } 100% { fill: var(--px); } }
-@keyframes halo2 { 0% { fill: var(--c2); } 33% { fill: var(--px); } 66% { fill: var(--c1); } 100% { fill: var(--c2); } }
-.face { transform: translate(var(--fx, 0), var(--fy, 0)); transition: transform 250ms ease-out; filter: grayscale(1) contrast(1.05); }
-.patch { fill: var(--paper); }
+.portrait { position: absolute; inset: 0; cursor: pointer; --ox: 10px; --oy: 10px; }
+.face { width: 100%; height: 100%; object-fit: contain; display: block; filter: grayscale(1) contrast(1.05) drop-shadow(var(--ox) var(--oy) 0 var(--s1, var(--px))) drop-shadow(var(--ox) var(--oy) 0 var(--s2, var(--c2))); transition: filter 400ms cubic-bezier(.2, 1.4, .4, 1), transform 400ms cubic-bezier(.2, 1.4, .4, 1); transform: translate(var(--fx, 0), var(--fy, 0)); }
+.portrait.glitch .face { --s1: var(--c1); --s2: var(--px); transition: none; transform: translate(calc(var(--fx, 0) - 6px), var(--fy, 0)); }
+.portrait:hover .face { --ox: 16px; --oy: 14px; }
+.patch { position: absolute; left: 61.5%; top: 79%; width: 12.5%; height: 5%; background: var(--paper); pointer-events: none; }
 .status { position: absolute; top: 14px; left: -10px; display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 11px; color: var(--ink-2); box-shadow: var(--shadow-sm); }
 .status i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(0,208,132,.5); animation: ping 1.8s ease-out infinite; }
 @keyframes ping { to { box-shadow: 0 0 0 8px rgba(0,208,132,0); } }

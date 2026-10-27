@@ -304,12 +304,15 @@
     if (portrait) {
       portrait.addEventListener("click", (e) => { burst(e.clientX, e.clientY, { n: 18, r: 100 }); snd.pop(); });
       // the halos shift away from the cursor, the face leans toward it
+      // the offset silhouettes slide away from the cursor, the face leans toward it
       window.addEventListener("pointermove", (e) => {
         const r = portrait.getBoundingClientRect();
         const dx = (e.clientX - (r.left + r.width / 2)) / innerWidth, dy = (e.clientY - (r.top + r.height / 2)) / innerHeight;
-        portrait.style.setProperty("--hx", (-dx * 26).toFixed(1) + "px"); portrait.style.setProperty("--hy", (-dy * 26).toFixed(1) + "px");
-        portrait.style.setProperty("--fx", (dx * 8).toFixed(1) + "px"); portrait.style.setProperty("--fy", (dy * 8).toFixed(1) + "px");
+        portrait.style.setProperty("--ox", (10 - dx * 22).toFixed(1) + "px"); portrait.style.setProperty("--oy", (10 - dy * 22).toFixed(1) + "px");
+        portrait.style.setProperty("--fx", (dx * 6).toFixed(1) + "px"); portrait.style.setProperty("--fy", (dy * 6).toFixed(1) + "px");
       }, { passive: true });
+      // now and then, a short pixel glitch: the colours swap and the face jumps a few pixels
+      if (!reduced) (function glitch() { setTimeout(() => { portrait.classList.add("glitch"); setTimeout(() => portrait.classList.remove("glitch"), 140); if (Math.random() < 0.5) setTimeout(() => { portrait.classList.add("glitch"); setTimeout(() => portrait.classList.remove("glitch"), 90); }, 260); glitch(); }, rand(3500, 8000)); })();
     }
   }
 
