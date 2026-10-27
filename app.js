@@ -311,7 +311,6 @@
       li.classList.remove("play"); void li.offsetWidth; li.classList.add("play");
       if (li.dataset.fx === "burst") { const kw = li.querySelector(".kw"), r = kw.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, { n: 16, r: 70, sizes: [3, 6] }); }
     }
-    pls.forEach((li) => li.addEventListener("mouseenter", () => play(li)));
     // the row nearest the middle of the screen is the one in focus; it plays once when it takes focus
     let focused = null;
     function focusRow() {
