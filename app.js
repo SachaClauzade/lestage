@@ -324,6 +324,40 @@
     field.innerHTML = Array.from({ length: 36 }, () => `<i style="--x:${rand(0, 100).toFixed(1)}%; --s:${Math.round(rand(4, 10))}px; --c:${cssVar(pick(cols))}; --d:${rand(7, 14).toFixed(1)}s; --delay:-${rand(0, 14).toFixed(1)}s"></i>`).join("");
   }
 
+  /* ---------- manifeste: words light up as you scroll ------------------ */
+  const wordsBox = $("#words");
+  if (wordsBox) {
+    $$("p", wordsBox).forEach((p) => {
+      const walk = (node) => Array.from(node.childNodes).forEach((n) => {
+        if (n.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          n.textContent.split(/(\s+)/).forEach((part) => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(" "));
+            else { const w = document.createElement("span"); w.className = "wd"; w.textContent = part; frag.appendChild(w); }
+          });
+          n.replaceWith(frag);
+        } else if (n.nodeType === 1) walk(n);
+      });
+      walk(p);
+    });
+    const all = $$(".wd", wordsBox);
+    let lit = -1;
+    function update() {
+      const r = wordsBox.getBoundingClientRect();
+      // 0 when the block's top is 80% down the screen, 1 when its bottom reaches 35%
+      const start = innerHeight * 0.8, end = innerHeight * 0.35;
+      const p = Math.min(1, Math.max(0, (start - r.top) / (r.height + start - end)));
+      const n = reduced ? all.length : Math.floor(p * (all.length + 6));
+      if (n === lit) return;
+      all.forEach((w, i) => { w.classList.toggle("on", i < n); w.classList.toggle("hot", i === n - 1 && n < all.length); });
+      lit = n;
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  }
+
   /* ---------- views chart ---------------------------------------- */
   const chart = $("#viewsChart"), counter = $("#chartCounter");
   function countUp(el, to, ms, format) {
@@ -561,6 +595,7 @@
   // tag: direct children of each section's wrap arrive one by one; grids stagger their children
   $$(".section > .wrap, .hero > .wrap").forEach((wrap) => {
     $$(":scope > *", wrap).forEach((el) => {
+      if (el.matches(".words")) return;
       if (el.matches(GROUPS)) $$(":scope > *", el).forEach((c, i) => { c.classList.add("reveal"); c.style.setProperty("--d", i * 90 + "ms"); });
       else el.classList.add("reveal");
     });
