@@ -55,7 +55,7 @@ const SITE_DATA = {
     ],
     stats: [
       { valeur: 28244, suffixe: " €", label: "encaissés depuis janvier 2026", sub: "export RevenueCat, 12 mois" },
-      { valeur: 5744, suffixe: " €", label: "en octobre 2026", sub: "le meilleur mois, et il n'est pas fini" },
+      { valeur: 6200, suffixe: " €", label: "par mois avec BellySafe", sub: "100 % organique" },
       { valeur: 0, suffixe: " €", label: "dépensés en pub", sub: "depuis le premier jour" },
       { valeur: 2, suffixe: " mois", label: "à 200 vues avant que ça marche", sub: "sur ma première app" },
     ],

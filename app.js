@@ -291,7 +291,7 @@
   });
   const sayText = $("#sayText");
   if (sayText) {
-    const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 5 744 € en octobre, zéro pub.", "Je lis chaque candidature moi-même.", "Si ton app n'est pas prête, je te le dis."];
+    const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 6 200 € par mois, zéro pub.", "Je lis chaque candidature moi-même.", "Si ton app n'est pas prête, je te le dis."];
     let li = 0;
     function type(text, done) {
       let k = 0; sayText.textContent = "";
