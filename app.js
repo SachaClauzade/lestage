@@ -307,7 +307,7 @@
       let leak = 0;
       function popPixel() {
         const r = portrait.getBoundingClientRect();
-        const p = document.createElement("i"); p.className = "pop";
+        const p = document.createElement("i"); p.className = "popx";
         p.style.setProperty("--x", r.left + rand(-20, r.width + 20) + "px"); p.style.setProperty("--y", r.top + rand(-10, r.height) + "px");
         p.style.setProperty("--s", Math.round(rand(5, 13)) + "px"); p.style.setProperty("--c", cssVar(pick(["--px", "--c1", "--c2"]))); p.style.setProperty("--d", Math.round(rand(500, 900)) + "ms");
         p.addEventListener("animationend", () => p.remove(), { once: true }); layer.appendChild(p);
