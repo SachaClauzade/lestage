@@ -137,7 +137,13 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 .hero { padding: 104px 0 80px; position: relative; }
 .hero-in { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 40px; align-items: center; }
 .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 38px; }
-.proof { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 12px 32px; margin-top: 52px; border-top: 1px solid var(--line); padding-top: 18px; }
+.places { display: flex; align-items: center; gap: 14px; margin-top: 34px; font-size: 12px; color: var(--ink-2); flex-wrap: wrap; }
+.places b { color: var(--ink); }
+.places-grid { display: grid; grid-template-columns: repeat(10, 10px); gap: 4px; }
+.places-grid i { width: 10px; height: 10px; background: var(--line-2); transform: scale(.4); opacity: .4; }
+.places-grid.is-in i { animation: placein .5s var(--spring) forwards; animation-delay: calc(var(--i) * 45ms); }
+@keyframes placein { to { transform: scale(1); opacity: 1; background: var(--px); } }
+.proof { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 12px 32px; margin-top: 28px; border-top: 1px solid var(--line); padding-top: 18px; }
 .proof li { display: flex; flex-direction: column; }
 @media (max-width: 560px) { .proof { grid-template-columns: 1fr 1fr; } }
 .proof b { font-size: 15px; font-weight: 500; color: var(--ink); }

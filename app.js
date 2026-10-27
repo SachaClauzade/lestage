@@ -291,7 +291,7 @@
   });
   const sayText = $("#sayText");
   if (sayText) {
-    const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 6 200 € par mois, zéro pub.", "Je lis chaque candidature moi-même.", "Si ton app n'est pas prête, je te le dis."];
+    const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 6 200 € par mois, zéro pub.", "Prochain batch le 15 novembre. 20 places.", "Je lis chaque candidature moi-même.", "Si ton app n'est pas prête, je te le dis."];
     let li = 0;
     function type(text, done) {
       let k = 0; sayText.textContent = "";
@@ -358,6 +358,13 @@
     window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", update);
     update();
+  }
+
+  /* ---------- 20 places: twenty pixels that light up ----------------- */
+  const placesGrid = $("#placesGrid");
+  if (placesGrid) {
+    placesGrid.innerHTML = Array.from({ length: 20 }, (_, i) => `<i style="--i:${i}"></i>`).join("");
+    new IntersectionObserver((entries, io) => entries.forEach((en) => { if (en.isIntersecting) { placesGrid.classList.add("is-in"); io.disconnect(); } }), { threshold: 0.5 }).observe(placesGrid);
   }
 
   /* ---------- views chart ---------------------------------------- */
