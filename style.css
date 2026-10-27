@@ -162,8 +162,8 @@ main { padding-top: 36px; }
 .proof { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 12px 32px; margin-top: 28px; border-top: 1px solid var(--line); padding-top: 18px; }
 .proof li { display: flex; flex-direction: column; }
 @media (max-width: 560px) { .proof { grid-template-columns: 1fr 1fr; } }
-.proof b { font-size: 15px; font-weight: 500; color: var(--ink); }
-.proof span { font-size: 12px; color: var(--g3); margin-top: 2px; }
+.proof b { font-size: 15px; font-weight: 500; color: var(--px); }
+.proof span { font-size: 12px; color: var(--g3); margin-top: 2px; line-height: 1.5; }
 
 /* the mascot pixel, as the full stop of the title */
 .px-mascot { display: inline-block; width: .14em; height: .14em; background: var(--px); margin-left: .06em; vertical-align: baseline; cursor: pointer; will-change: transform; transition: scale 180ms var(--spring); }
@@ -589,8 +589,6 @@ body.chaos { animation: hue 4s linear infinite; }
 /* --- the three colours, spread across the page ------------------- */
 .batch-tag { background: var(--c2); }
 .batch-in { color: var(--c2); }
-.proof li:nth-child(2) b { color: var(--c2); }
-.proof li:nth-child(3) b { color: var(--c1); }
 .methode, .chiffres, .about, .faq { --px: var(--c2); --px-soft: rgba(45, 124, 255, .16); }
 .lives, .videos, .pourqui { --px: var(--c1); --px-soft: rgba(255, 214, 10, .16); }
 .methode .pl[data-fx="heat"] .kw::after { background: var(--c1); }
