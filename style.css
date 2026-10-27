@@ -216,34 +216,76 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 .manifeste .sig { margin-top: 36px; font-family: var(--display); font-size: 12px; color: var(--g3); display: flex; align-items: center; gap: 12px; font-weight: 400; letter-spacing: 0; }
 .manifeste .sig img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
 
-/* méthode: a deck of ten cards, driven by the reader */
-.deck { position: relative; }
-.track { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; margin-bottom: 18px; }
-.track li { height: 8px; background: var(--line-2); cursor: pointer; transition: background 200ms, transform 300ms var(--spring); }
-.track li.is-done { background: var(--ink); }
-.track li.is-on { background: var(--px); transform: scaleY(1.5); }
-.track li:hover { background: var(--g3); }
-.deck-row { display: grid; grid-template-columns: 40px 1fr 40px; gap: 12px; align-items: center; }
-.deck-btn { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--card); font-size: 16px; transition: transform 200ms var(--spring), border-color 150ms; }
-.deck-btn:hover { border-color: var(--ink); transform: scale(1.08); }
-.cards { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 6px 2px 14px; cursor: grab; outline: none; }
-.cards::-webkit-scrollbar { display: none; }
-.cards.is-drag { cursor: grabbing; scroll-snap-type: none; }
-.card { flex: 0 0 min(100%, 420px); scroll-snap-align: start; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; display: grid; grid-template-columns: 120px 1fr; gap: 20px; align-items: center; transition: border-color 200ms, transform 300ms var(--spring); user-select: none; }
-.card.is-on { border-color: var(--ink); }
-.card .ill { width: 120px; height: 120px; }
-.card .ill svg { width: 100%; height: 100%; }
-.card .ill rect { transition: opacity 300ms; }
-.card:not(.is-on) .ill rect { opacity: .45; }
-.card.is-on .ill rect { animation: illin .5s steps(4) both; animation-delay: calc(var(--i) * 6ms); }
-@keyframes illin { from { opacity: 0; } to { opacity: 1; } }
-.card-phase { font-family: var(--display); font-size: 11px; color: var(--px); }
-.card b { display: block; font-size: 20px; letter-spacing: -0.025em; margin: 6px 0 8px; line-height: 1.15; }
-.card p { font-size: 14px; color: var(--ink-2); margin: 0; }
-.card .card-no { font-family: var(--display); font-size: 11px; color: var(--g3); margin-top: 10px; display: block; }
-.deck-hint { margin-top: 4px; font-size: 11px; color: var(--g3); text-align: center; }
-@media (max-width: 700px) { .deck-row { grid-template-columns: 1fr; } .deck-btn { display: none; } .card { grid-template-columns: 90px 1fr; } .card .ill { width: 90px; height: 90px; } }
+/* méthode: a list, each title animated after its meaning */
+.parts-list { border-top: 1px solid var(--line); }
+.pl-phase { padding: 22px 0 8px; color: var(--px); }
+.pl-phase .mono { font-size: 11px; }
+.pl { display: grid; grid-template-columns: 56px 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: baseline; cursor: default; }
+.pl-no { color: var(--g3); font-size: 12px; padding-top: 6px; }
+.pl h3 { font-size: clamp(20px, 2.3vw, 26px); letter-spacing: -0.03em; margin: 0 0 4px; position: relative; display: inline-block; }
+.pl p { margin: 0; color: var(--ink-2); font-size: 15px; }
+.pl .kw { position: relative; display: inline-block; }
+.pl:hover .pl-no { color: var(--px); }
+@media (max-width: 600px) { .pl { grid-template-columns: 40px 1fr; gap: 10px; } }
 
+/* P1 chauffer: pixels of heat rise from the word */
+.pl[data-fx="heat"].play .kw { color: var(--px); transition: color 200ms; }
+.pl[data-fx="heat"] .kw::before, .pl[data-fx="heat"] .kw::after { content: ""; position: absolute; bottom: 100%; width: 6px; height: 6px; background: var(--px); opacity: 0; }
+.pl[data-fx="heat"] .kw::before { left: 20%; }
+.pl[data-fx="heat"] .kw::after { left: 65%; background: var(--c1); }
+.pl[data-fx="heat"].play .kw::before { animation: heat .9s ease-out; }
+.pl[data-fx="heat"].play .kw::after { animation: heat .9s ease-out .25s; }
+@keyframes heat { 0% { opacity: 0; transform: translateY(6px) scale(.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-22px) scale(1.2); } }
+
+/* P2 cible: a crosshair box locks onto the word */
+.pl[data-fx="target"] .kw::after { content: ""; position: absolute; inset: -4px -6px; border: 1.5px solid var(--px); opacity: 0; pointer-events: none; }
+.pl[data-fx="target"].play .kw::after { animation: lock .7s var(--spring) forwards; }
+@keyframes lock { 0% { opacity: 0; transform: scale(2.6); } 40% { opacity: 1; } 100% { opacity: 1; transform: scale(1); } }
+.pl[data-fx="target"].play .kw { color: var(--px); transition: color 300ms 400ms; }
+
+/* P3 étudier: a scanner bar sweeps the title */
+.pl[data-fx="scan"] h3::after { content: ""; position: absolute; top: -4px; bottom: -4px; left: 0; width: 24px; background: linear-gradient(90deg, transparent, var(--px-soft), var(--px), var(--px-soft), transparent); opacity: 0; pointer-events: none; }
+.pl[data-fx="scan"].play h3::after { animation: scan 1s ease-in-out forwards; }
+@keyframes scan { 0% { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - 24px); opacity: 0; } }
+
+/* P4 hooks: a hook comes down and pulls the word up */
+.pl[data-fx="hook"] .kw::before { content: ""; position: absolute; left: 50%; top: -34px; width: 2px; height: 26px; background: var(--ink); opacity: 0; }
+.pl[data-fx="hook"] .kw::after { content: ""; position: absolute; left: calc(50% - 6px); top: -12px; width: 8px; height: 8px; border: 2px solid var(--px); border-top: 0; border-right: 0; opacity: 0; }
+.pl[data-fx="hook"].play .kw::before, .pl[data-fx="hook"].play .kw::after { animation: hookdown .5s var(--spring) forwards; }
+.pl[data-fx="hook"].play .kw { animation: hooked .6s var(--spring) .35s; }
+@keyframes hookdown { 0% { opacity: 0; transform: translateY(-20px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes hooked { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); color: var(--px); } 100% { transform: translateY(0); } }
+
+/* P5 POV: the word blinks like an eye */
+.pl[data-fx="eye"].play .kw { animation: blinkeye .9s ease-in-out; transform-origin: center; color: var(--px); }
+@keyframes blinkeye { 0%, 100% { transform: scaleY(1); } 40% { transform: scaleY(.08); } 60% { transform: scaleY(1); } 70% { transform: scaleY(.08); } 85% { transform: scaleY(1); } }
+
+/* P6 scripts: typed out, with a caret */
+.pl[data-fx="type"].play .kw { animation: typed 1s steps(18) forwards; }
+.pl[data-fx="type"] .kw::after { content: ""; position: absolute; right: -8px; top: 10%; width: 3px; height: 80%; background: var(--px); opacity: 0; }
+.pl[data-fx="type"].play .kw::after { animation: caret 1.4s steps(2) forwards; }
+@keyframes typed { 0% { clip-path: inset(0 100% 0 0); } 100% { clip-path: inset(0 0 0 0); } }
+@keyframes caret { 0%, 90% { opacity: 1; } 100% { opacity: 0; } }
+
+/* P7 télécharger: an arrow drops into the word, which catches it */
+.pl[data-fx="drop"] .kw::before { content: ""; position: absolute; left: 50%; top: -30px; width: 8px; height: 8px; background: var(--px); opacity: 0; translate: -50% 0; }
+.pl[data-fx="drop"].play .kw::before { animation: dropin .55s cubic-bezier(.4, 0, 1, 1) forwards; }
+.pl[data-fx="drop"].play .kw { animation: catchit .5s var(--spring) .5s; }
+@keyframes dropin { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(36px); } }
+@keyframes catchit { 0% { transform: translateY(0); } 40% { transform: translateY(5px); color: var(--px); } 100% { transform: translateY(0); } }
+
+/* P8 analyser: bars grow next to the word */
+.pl[data-fx="bars"] .kw::after { content: ""; position: absolute; left: calc(100% + 10px); bottom: 2px; width: 6px; height: 22px; background: var(--ink); box-shadow: 9px 0 0 var(--g3), 18px 0 0 var(--px), 27px 0 0 var(--c1); transform: scaleY(0); transform-origin: bottom; }
+.pl[data-fx="bars"].play .kw::after { animation: bars .8s var(--spring) forwards; }
+@keyframes bars { to { transform: scaleY(1); } }
+
+/* P9 doubler: the word casts a second self */
+.pl[data-fx="double"].play .kw { animation: doubled .8s var(--spring) forwards; }
+@keyframes doubled { 0% { text-shadow: 0 0 0 transparent; } 100% { text-shadow: 6px 6px 0 var(--px); } }
+
+/* P10 démultiplier: the word bursts into pixels (JS) and flashes */
+.pl[data-fx="burst"].play .kw { animation: flash .6s steps(3); }
+@keyframes flash { 0% { color: var(--px); } 100% { color: var(--ink); } }
 /* lives: a Discord window */
 .dc { display: grid; grid-template-columns: 220px 1fr; border-radius: 12px; overflow: hidden; background: #313338; color: #DBDEE1; font-size: 14px; box-shadow: var(--shadow-lg); }
 .dc .mono { color: #949BA4; }
