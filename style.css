@@ -285,8 +285,9 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 @keyframes catchit { 0% { transform: translateY(0); } 40% { transform: translateY(5px); color: var(--px); } 100% { transform: translateY(0); } }
 
 /* P8 analyser: bars grow next to the word */
-.pl[data-fx="bars"] .kw::after { content: ""; position: absolute; left: calc(100% + 10px); bottom: 2px; width: 6px; height: 22px; background: var(--ink); box-shadow: 9px 0 0 var(--g3), 18px 0 0 var(--px), 27px 0 0 var(--c1); transform: scaleY(0); transform-origin: bottom; }
-.pl[data-fx="bars"].play .kw::after { animation: bars .8s var(--spring) forwards; }
+.pl[data-fx="bars"] h3::after { content: ""; position: absolute; left: calc(100% + 16px); bottom: 4px; width: 6px; height: 22px; background: var(--ink); box-shadow: 9px 0 0 var(--g3), 18px 0 0 var(--px), 27px 0 0 var(--c1); transform: scaleY(0); transform-origin: bottom; }
+.pl[data-fx="bars"].play h3::after { animation: bars .8s var(--spring) forwards; }
+.pl[data-fx="bars"].play .kw { color: var(--px); transition: color 300ms; }
 @keyframes bars { to { transform: scaleY(1); } }
 
 /* P9 doubler: the word casts a second self */
