@@ -15,10 +15,9 @@
   --line-2: #333333;
   --px: #FF5A2E;
   --px-soft: rgba(255, 90, 46, 0.16);
-  --c1: #FFD60A;   /* the small colours: only in motion */
+  --c1: #FFD60A;   /* the trio: orange (--px), yellow, blue. Nothing else. */
   --c2: #2D7CFF;
-  --c3: #00D084;
-  --c4: #FF3DAE;
+  --ok: #23A559;   /* Discord green, only inside the Discord window */
   --pink: var(--px);           /* app.js reads --pink for particles and the chart */
   --violet: var(--px);
   --green: #4FD08A;
@@ -172,13 +171,21 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 .bubble { width: 250px; height: 250px; border-radius: 50%; overflow: hidden; border: 1px solid var(--line-2); box-shadow: var(--shadow-lg); background: var(--card); margin: 30px auto 0; cursor: pointer; }
 .bubble img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--spring); }
 .bubble:hover img { transform: scale(1.06); }
-.orbit { position: absolute; left: 50%; top: 155px; width: 300px; height: 300px; translate: -50% -50%; animation: orbit 14s linear infinite; pointer-events: none; }
-.orbit i { position: absolute; width: 10px; height: 10px; background: var(--px); left: 50%; top: 0; translate: -50% -50%; }
-.orbit i:nth-child(2) { background: var(--c1); top: auto; bottom: 0; left: 50%; translate: -50% 50%; width: 7px; height: 7px; }
-.orbit i:nth-child(3) { background: var(--c2); top: 50%; left: 0; translate: -50% -50%; width: 6px; height: 6px; }
-@keyframes orbit { to { rotate: 360deg; } }
+/* the cube: 27 pixel cubies in three colours, floating by the photo */
+.cube-wrap { position: absolute; right: -36px; top: -10px; width: 120px; height: 120px; perspective: 700px; cursor: pointer; z-index: 2; }
+.cube { position: absolute; inset: 0; transform-style: preserve-3d; animation: spin 16s linear infinite; }
+.cube-wrap.is-still .cube { animation-play-state: paused; }
+@keyframes spin { from { transform: rotateX(-24deg) rotateY(0deg); } to { transform: rotateX(-24deg) rotateY(360deg); } }
+.cubie { position: absolute; left: 50%; top: 50%; width: var(--u); height: var(--u); margin: calc(var(--u) / -2) 0 0 calc(var(--u) / -2); transform-style: preserve-3d; transform: translate3d(calc(var(--x) * var(--u) * (1 + var(--e, 0))), calc(var(--y) * var(--u) * (1 + var(--e, 0))), calc(var(--z) * var(--u) * (1 + var(--e, 0)))) rotateX(calc(var(--e, 0) * var(--rx))) rotateY(calc(var(--e, 0) * var(--ry))); }
+.cubie i { position: absolute; inset: 1px; background: var(--ink); backface-visibility: hidden; }
+.cubie i:nth-child(1) { transform: translateZ(calc(var(--u) / 2)); background: var(--px); }
+.cubie i:nth-child(2) { transform: rotateY(90deg) translateZ(calc(var(--u) / 2)); background: var(--c2); }
+.cubie i:nth-child(3) { transform: rotateX(90deg) translateZ(calc(var(--u) / 2)); background: var(--c1); }
+.cubie i:nth-child(4) { transform: rotateY(180deg) translateZ(calc(var(--u) / 2)); background: var(--px); filter: brightness(.7); }
+.cubie i:nth-child(5) { transform: rotateY(-90deg) translateZ(calc(var(--u) / 2)); background: var(--c2); filter: brightness(.7); }
+.cubie i:nth-child(6) { transform: rotateX(-90deg) translateZ(calc(var(--u) / 2)); background: var(--c1); filter: brightness(.7); }
 .status { position: absolute; top: 18px; left: 10px; display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 11px; color: var(--ink-2); box-shadow: var(--shadow-sm); }
-.status i { width: 8px; height: 8px; border-radius: 50%; background: var(--c3); box-shadow: 0 0 0 0 rgba(0,208,132,.5); animation: ping 1.8s ease-out infinite; }
+.status i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(0,208,132,.5); animation: ping 1.8s ease-out infinite; }
 @keyframes ping { to { box-shadow: 0 0 0 8px rgba(0,208,132,0); } }
 .say { position: absolute; left: -40px; bottom: -4px; min-width: 240px; max-width: 290px; padding: 12px 16px; font-size: 15px; color: var(--ink); animation: float 5s ease-in-out infinite; }
 .say p { margin: 0; min-height: 1.5em; }
@@ -192,7 +199,7 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
   .hero-art { order: -1; justify-content: flex-start; }
   .bubble-wrap { width: 100%; height: 250px; }
   .bubble { width: 160px; height: 160px; margin: 20px 0 0; }
-  .orbit { left: 100px; top: 100px; width: 200px; height: 200px; }
+  .cube-wrap { right: auto; left: 150px; top: -20px; width: 90px; height: 90px; }
   .status { left: 0; top: 0; }
   .say { left: 150px; bottom: 10px; min-width: 0; max-width: 220px; }
 }
