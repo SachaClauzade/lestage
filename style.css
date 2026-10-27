@@ -373,6 +373,10 @@ main { padding-top: 36px; }
 @media (max-width: 900px) { .quotes { grid-template-columns: 1fr; } }
 .quote { margin: 0; padding: 24px; font-size: 18px; font-weight: 500; line-height: 1.35; letter-spacing: -0.015em; }
 .quote footer { margin-top: 14px; color: var(--g3); }
+.live-keys { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 36px; }
+.live-keys li { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--line-2); border-radius: 999px; font-size: 12px; color: var(--ink-2); background: var(--card); }
+.live-keys li::before { content: ""; width: 6px; height: 6px; background: var(--px); }
+.live-keys b { color: var(--ink); font-weight: 600; }
 .live-facts { display: flex; flex-wrap: wrap; gap: 40px; margin-top: 44px; }
 .live-facts li { display: flex; flex-direction: column; }
 .live-facts b { font-size: 36px; line-height: 1; letter-spacing: -0.03em; }
