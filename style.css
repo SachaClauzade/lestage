@@ -440,7 +440,7 @@ svg.is-hover .rc-cursor { opacity: .4; } svg.is-hover .rc-cursor-dot { opacity: 
 .vhook { position: absolute; left: 12px; right: 12px; top: 12px; font-weight: 500; font-size: 15px; line-height: 1.25; color: var(--ink); }
 .vghost { position: absolute; inset: 0; background: repeating-linear-gradient(45deg, var(--line) 0 2px, transparent 2px 10px); opacity: .5; }
 .vmeta { padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
-.rank { position: absolute; left: 10px; top: 10px; font-family: var(--display); font-size: 11px; background: var(--card); border: 1px solid var(--line); padding: 4px 7px; border-radius: 6px; color: var(--ink-2); z-index: 1; }
+.rank { position: absolute; left: 10px; top: 10px; font-family: "Geist", system-ui, sans-serif; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: .02em; font-size: 11px; background: var(--card); border: 1px solid var(--line); padding: 4px 7px; border-radius: 6px; color: var(--ink-2); z-index: 1; }
 .vcard:first-child .rank { background: var(--px); color: #fff; border-color: var(--px); }
 .vviews { font-size: 24px; line-height: 1; font-weight: 600; letter-spacing: -0.03em; }
 .vviews small { font-weight: 500; font-size: 12px; color: var(--g4); margin-left: 4px; letter-spacing: 0; }
@@ -596,7 +596,7 @@ body.chaos { animation: hue 4s linear infinite; }
 .methode .pl[data-fx="heat"] .kw::after { background: var(--c1); }
 .methode .pl[data-fx="bars"] h3::after { box-shadow: 9px 0 0 var(--g3), 18px 0 0 var(--px), 27px 0 0 #FF4A1C; }
 .lives .btn-ink, .videos .btn-ink, .pourqui .btn-ink { color: #0A0A0A; }
-.videos .rank { color: #0A0A0A; }
+.videos .vcard:first-child .rank { color: #0A0A0A; }
 .stat:nth-child(2) b { color: var(--c1); }
 .stat:nth-child(3) b { color: #FF4A1C; }
 .kit .kcard:nth-child(3n+1) { --k: #FF4A1C; }
