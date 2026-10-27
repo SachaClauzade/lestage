@@ -303,16 +303,11 @@
     const portrait = $("#portrait");
     if (portrait) {
       portrait.addEventListener("click", (e) => { burst(e.clientX, e.clientY, { n: 18, r: 100 }); snd.pop(); });
-      // the pixelated twin: the photo drawn at 36×36, shown blown up on hover
-      const cv = $("#pixelated"), face = $(".face", portrait);
-      function drawPix() {
-        if (!cv || !face.naturalWidth) return;
-        const c = cv.getContext("2d"); c.imageSmoothingEnabled = false; c.clearRect(0, 0, cv.width, cv.height);
-        const s = Math.min(cv.width / face.naturalWidth, cv.height / face.naturalHeight), w = face.naturalWidth * s, hh = face.naturalHeight * s;
-        c.filter = "grayscale(1) contrast(1.05)"; c.drawImage(face, (cv.width - w) / 2, (cv.height - hh) / 2, w, hh);
-      }
-      if (face.complete) drawPix(); else face.addEventListener("load", drawPix);
-      // now and then, a short glitch: rim turns blue, the pixel twin flashes
+      // on hover, pixels leak from the rim
+      let leak = 0;
+      portrait.addEventListener("mouseenter", () => { leak = setInterval(() => { const r = portrait.getBoundingClientRect(); burst(r.left + rand(r.width * 0.25, r.width * 0.9), r.top + rand(r.height * 0.1, r.height * 0.95), { n: 2, r: 30, sizes: [3, 5], dur: [400, 700] }); }, 160); });
+      portrait.addEventListener("mouseleave", () => clearInterval(leak));
+      // now and then, a short glitch: the rim turns blue and the face jumps a few pixels
       if (!reduced) (function glitch() { setTimeout(() => { portrait.classList.add("glitch"); setTimeout(() => portrait.classList.remove("glitch"), 120); glitch(); }, rand(4000, 9000)); })();
     }
   }

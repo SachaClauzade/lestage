@@ -175,19 +175,26 @@ main { padding-top: 36px; }
 /* the bubble: photo, orbiting pixels, status, a speech bubble that types */
 .hero-art { display: flex; justify-content: center; }
 .bubble-wrap { position: relative; width: 360px; height: 380px; }
-.portrait { position: absolute; inset: 0; cursor: pointer; --rim: var(--px); }
-.face { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; filter: grayscale(1) contrast(1.05); z-index: 2; transition: opacity 250ms steps(3); }
-/* a 2px rim around the silhouette: the photo's own mask, offset in eight directions */
-.rim { position: absolute; inset: 0; background: var(--rim); transition: background 200ms; z-index: 1;
+.portrait { position: absolute; inset: 0; cursor: pointer; --rim: var(--px); --rw: 1.022; }
+.portrait:hover { --rw: 1.04; }
+.face { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; filter: grayscale(1) contrast(1.05); z-index: 2; transition: transform 300ms var(--spring); }
+.portrait:hover .face { transform: scale(1.01); }
+/* a thick rim around the silhouette: the photo's own mask, scaled up, hollowed out */
+.rim { position: absolute; inset: 0; background: var(--rim); transition: background 150ms steps(1), transform 350ms var(--spring); z-index: 1;
   -webkit-mask: url("assets/sacha-cutout.png") center / contain no-repeat; mask: url("assets/sacha-cutout.png") center / contain no-repeat;
-  transform: scale(1.012); transform-origin: 50% 60%; }
-.rim::after { content: ""; position: absolute; inset: 0; background: var(--paper); -webkit-mask: inherit; mask: inherit; transform: scale(.994); transform-origin: 50% 60%; }
+  transform: scale(var(--rw)); transform-origin: 50% 62%; }
+.rim::after { content: ""; position: absolute; inset: 0; background: var(--paper); -webkit-mask: inherit; mask: inherit; transform: scale(calc(1 / var(--rw) * .996)); transform-origin: 50% 62%; }
+.portrait:hover .rim { animation: rimcycle 1.2s steps(1) infinite; }
+@keyframes rimcycle { 0% { background: var(--px); } 33% { background: var(--c1); } 66% { background: var(--c2); } 100% { background: var(--px); } }
 .portrait.glitch { --rim: var(--c2); }
-.portrait.glitch .face { transform: translate(4px, -2px); }
-/* on hover the photo turns into big pixels, then back */
-.pixelated { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; z-index: 3; opacity: 0; pointer-events: none; transition: opacity 180ms steps(2); }
-.portrait:hover .pixelated, .portrait.glitch .pixelated { opacity: 1; }
-.portrait:hover .face { opacity: 0; }
+.portrait.glitch .face { transform: translate(4px, -2px); transition: none; }
+/* a pixel scanline sweeps the photo on hover, clipped to the silhouette */
+.scan { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0;
+  -webkit-mask: url("assets/sacha-cutout.png") center / contain no-repeat; mask: url("assets/sacha-cutout.png") center / contain no-repeat;
+  background: linear-gradient(to bottom, transparent 0, transparent calc(var(--sy, 0%) - 4px), var(--rim) calc(var(--sy, 0%) - 4px), var(--rim) calc(var(--sy, 0%) + 4px), transparent calc(var(--sy, 0%) + 4px)); }
+.portrait:hover .scan { opacity: .85; animation: scanline 1.1s linear infinite; }
+@keyframes scanline { from { --sy: -5%; } to { --sy: 105%; } }
+@property --sy { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
 .status, .say { z-index: 5; }
 .patch { position: absolute; left: 61.5%; top: 79%; width: 12.5%; height: 5%; background: var(--paper); pointer-events: none; z-index: 3; }
 .status { position: absolute; top: 14px; left: -10px; display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 11px; color: var(--ink-2); box-shadow: var(--shadow-sm); }
