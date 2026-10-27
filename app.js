@@ -303,15 +303,17 @@
     const portrait = $("#portrait");
     if (portrait) {
       portrait.addEventListener("click", (e) => { burst(e.clientX, e.clientY, { n: 18, r: 100 }); snd.pop(); });
-      // the halos shift away from the cursor, the face leans toward it
-      // the offset silhouettes slide away from the cursor, the face leans toward it
-      window.addEventListener("pointermove", (e) => {
-        const r = portrait.getBoundingClientRect();
-        const dx = (e.clientX - (r.left + r.width / 2)) / innerWidth, dy = (e.clientY - (r.top + r.height / 2)) / innerHeight;
-        portrait.style.setProperty("--mx", (-dx * 30).toFixed(1) + "px"); portrait.style.setProperty("--my", (-dy * 30).toFixed(1) + "px");
-      }, { passive: true });
-      // now and then, a short pixel glitch: the colours swap and the face jumps a few pixels
-      if (!reduced) (function glitch() { setTimeout(() => { portrait.classList.add("glitch"); setTimeout(() => portrait.classList.remove("glitch"), 140); if (Math.random() < 0.5) setTimeout(() => { portrait.classList.add("glitch"); setTimeout(() => portrait.classList.remove("glitch"), 90); }, 260); glitch(); }, rand(3500, 8000)); })();
+      // the pixelated twin: the photo drawn at 36×36, shown blown up on hover
+      const cv = $("#pixelated"), face = $(".face", portrait);
+      function drawPix() {
+        if (!cv || !face.naturalWidth) return;
+        const c = cv.getContext("2d"); c.imageSmoothingEnabled = false; c.clearRect(0, 0, cv.width, cv.height);
+        const s = Math.min(cv.width / face.naturalWidth, cv.height / face.naturalHeight), w = face.naturalWidth * s, hh = face.naturalHeight * s;
+        c.filter = "grayscale(1) contrast(1.05)"; c.drawImage(face, (cv.width - w) / 2, (cv.height - hh) / 2, w, hh);
+      }
+      if (face.complete) drawPix(); else face.addEventListener("load", drawPix);
+      // now and then, a short glitch: rim turns blue, the pixel twin flashes
+      if (!reduced) (function glitch() { setTimeout(() => { portrait.classList.add("glitch"); setTimeout(() => portrait.classList.remove("glitch"), 120); glitch(); }, rand(4000, 9000)); })();
     }
   }
 
