@@ -37,10 +37,10 @@ const SITE_DATA = {
        ces vues sont INVENTÉES pour remplir la courbe en attendant les vraies
        (TikTok Analytics, vues par mois et par compte). À remplacer. */
     { nom: "@bellysafe.app", vues: { "2026-02": 180000, "2026-03": 2203100, "2026-04": 1240000, "2026-05": 760000, "2026-06": 853200, "2026-07": 910000, "2026-08": 1050000, "2026-09": 1320000, "2026-10": 1680000 } },
-    { nom: "compte 2",       vues: { "2026-04": 95000, "2026-05": 210000, "2026-06": 340000, "2026-07": 420000, "2026-08": 380000, "2026-09": 610000, "2026-10": 740000 } },
-    { nom: "compte 3",       vues: { "2026-05": 60000, "2026-06": 150000, "2026-07": 290000, "2026-08": 520000, "2026-09": 450000, "2026-10": 560000 } },
-    { nom: "compte 4",       vues: { "2026-07": 40000, "2026-08": 120000, "2026-09": 260000, "2026-10": 390000 } },
-    { nom: "compte 5",       vues: { "2026-08": 30000, "2026-09": 140000, "2026-10": 310000 } },
+    { nom: "compte 2",       vues: { "2026-08": 380000, "2026-09": 610000, "2026-10": 740000 } },
+    { nom: "compte 3",       vues: { "2026-09": 450000, "2026-10": 560000 } },
+    { nom: "compte 4",       vues: { "2026-09": 260000, "2026-10": 390000 } },
+    { nom: "compte 5",       vues: { "2026-10": 310000 } },
     { nom: "compte 6",       vues: { "2026-09": 25000, "2026-10": 180000 } },
   ],
 
@@ -64,10 +64,10 @@ const SITE_DATA = {
       { mois: "2026-10", revenu: 6200 },
     ],
     stats: [
-      { valeur: 28700, suffixe: " €", label: "encaissés depuis janvier 2026", sub: "RevenueCat, 12 mois" },
+      { valeur: 28700, suffixe: " €", label: "encaissés depuis février 2026", sub: "RevenueCat, 9 mois" },
       { valeur: 6200, suffixe: " €", label: "par mois avec BellySafe", sub: "100 % organique" },
       { valeur: 0, suffixe: " €", label: "dépensés en pub", sub: "depuis le premier jour" },
-      { valeur: 2, suffixe: " mois", label: "à 200 vues avant que ça marche", sub: "sur ma première app" },
+      { valeur: 1, suffixe: " compte", label: "jusqu'à 3 000 € par mois", sub: "les cinq autres sont venus après" },
     ],
   },
   /* Avis de la bêta d'octobre 2026 (formulaire Tally, 23-25 oct.). Textes = leur avis public,
