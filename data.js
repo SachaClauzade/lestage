@@ -14,7 +14,7 @@ const SITE_DATA = {
      bandeau). Crée un compte sur cloud.umami.is, ajoute le site
      stage.sachaclauzade.me, et colle ici l'identifiant "Website ID".
      Tant que c'est vide, rien n'est chargé ni envoyé. */
-  analytics: { umamiWebsiteId: "", umamiHost: "https://cloud.umami.is", domaines: "stage.sachaclauzade.me" },
+  analytics: { umamiWebsiteId: "8bb79345-8dd1-4b33-908c-92bfdd97d866", umamiHost: "https://cloud.umami.is", domaines: "stage.sachaclauzade.me" },
 
   /* Tes posts TikTok qui ont marché, du plus vu au moins vu.
      "vues" vient de la grille du profil @bellysafe.app le 26 octobre 2026,
