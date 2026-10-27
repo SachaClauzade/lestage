@@ -308,8 +308,7 @@
       window.addEventListener("pointermove", (e) => {
         const r = portrait.getBoundingClientRect();
         const dx = (e.clientX - (r.left + r.width / 2)) / innerWidth, dy = (e.clientY - (r.top + r.height / 2)) / innerHeight;
-        portrait.style.setProperty("--ox", (10 - dx * 22).toFixed(1) + "px"); portrait.style.setProperty("--oy", (10 - dy * 22).toFixed(1) + "px");
-        portrait.style.setProperty("--fx", (dx * 6).toFixed(1) + "px"); portrait.style.setProperty("--fy", (dy * 6).toFixed(1) + "px");
+        portrait.style.setProperty("--mx", (-dx * 30).toFixed(1) + "px"); portrait.style.setProperty("--my", (-dy * 30).toFixed(1) + "px");
       }, { passive: true });
       // now and then, a short pixel glitch: the colours swap and the face jumps a few pixels
       if (!reduced) (function glitch() { setTimeout(() => { portrait.classList.add("glitch"); setTimeout(() => portrait.classList.remove("glitch"), 140); if (Math.random() < 0.5) setTimeout(() => { portrait.classList.add("glitch"); setTimeout(() => portrait.classList.remove("glitch"), 90); }, 260); glitch(); }, rand(3500, 8000)); })();
