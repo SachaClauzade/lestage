@@ -710,3 +710,8 @@ body.chaos { animation: hue 4s linear infinite; }
   .final-in { gap: 20px; }
   .foot-in { gap: 16px; }
 }
+
+/* méthode → avis : pas de double filet ni de double marge */
+.parts-list .pl:last-child { border-bottom: 0; padding-bottom: 12px; }
+.methode { padding-bottom: 48px; }
+.avis { padding-top: 64px; }
