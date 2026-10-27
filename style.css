@@ -149,9 +149,13 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 .places { display: flex; align-items: center; gap: 14px; margin-top: 34px; font-size: 12px; color: var(--ink-2); flex-wrap: wrap; }
 .places b { color: var(--ink); }
 .places-grid { display: grid; grid-template-columns: repeat(10, 10px); gap: 4px; }
-.places-grid i { width: 10px; height: 10px; background: var(--line-2); transform: scale(.4); opacity: .4; }
-.places-grid.is-in i { animation: placein .5s var(--spring) forwards; animation-delay: calc(var(--i) * 45ms); }
-@keyframes placein { to { transform: scale(1); opacity: 1; background: var(--px); } }
+.places-grid { grid-template-columns: repeat(10, 12px); gap: 5px; }
+.places-grid i { width: 12px; height: 12px; background: var(--line-2); transform: scale(.4); opacity: .4; cursor: pointer; transition: transform 250ms var(--spring); }
+.places-grid i:hover { transform: scale(1.5) rotate(45deg) !important; }
+.places-grid.is-in i { animation: placein .5s var(--spring) forwards, placewave 3.6s steps(1) calc(var(--i) * -180ms) infinite; animation-delay: calc(var(--i) * 45ms), calc(.5s + var(--i) * 45ms + var(--i) * -180ms); }
+@keyframes placein { to { transform: scale(1); opacity: 1; } }
+@keyframes placewave { 0% { background: #FF4A1C; } 33% { background: var(--c1); } 66% { background: var(--c2); } 100% { background: #FF4A1C; } }
+.places b { color: var(--ink); }
 .proof { display: grid; grid-template-columns: repeat(4, auto); justify-content: start; gap: 12px 32px; margin-top: 28px; border-top: 1px solid var(--line); padding-top: 18px; }
 .proof li { display: flex; flex-direction: column; }
 @media (max-width: 560px) { .proof { grid-template-columns: 1fr 1fr; } }
@@ -565,8 +569,6 @@ body.chaos { animation: hue 4s linear infinite; }
 /* --- the three colours, spread across the page ------------------- */
 .batch-tag { background: var(--c2); }
 .batch-in { color: var(--c2); }
-.places-grid.is-in i { animation-name: placein-y; }
-@keyframes placein-y { to { transform: scale(1); opacity: 1; background: var(--c1); } }
 .proof li:nth-child(2) b { color: var(--c2); }
 .proof li:nth-child(3) b { color: var(--c1); }
 .methode, .chiffres, .about, .faq { --px: var(--c2); --px-soft: rgba(45, 124, 255, .16); }

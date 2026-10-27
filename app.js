@@ -369,6 +369,7 @@
   const placesGrid = $("#placesGrid");
   if (placesGrid) {
     placesGrid.innerHTML = Array.from({ length: 20 }, (_, i) => `<i style="--i:${i}"></i>`).join("");
+    $$("i", placesGrid).forEach((p) => p.addEventListener("mouseenter", () => { const r = p.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, { n: 6, r: 28, sizes: [3, 5], dur: [300, 500] }); }));
     new IntersectionObserver((entries, io) => entries.forEach((en) => { if (en.isIntersecting) { placesGrid.classList.add("is-in"); io.disconnect(); } }), { threshold: 0.5 }).observe(placesGrid);
   }
 
