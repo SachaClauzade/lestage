@@ -15,6 +15,10 @@
   --line-2: #C9C9C4;
   --px: #FF4A1C;
   --px-soft: rgba(255, 74, 28, 0.12);
+  --c1: #FFD60A;   /* the small colours: only in motion */
+  --c2: #2D7CFF;
+  --c3: #00D084;
+  --c4: #FF3DAE;
   --pink: var(--px);           /* app.js reads --pink for particles and the chart */
   --violet: var(--px);
   --green: #1E9E5A;
@@ -78,6 +82,8 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--px); flex: none; }
 .h1 { font-size: clamp(64px, 11vw, 152px); line-height: 0.92; letter-spacing: -0.05em; font-weight: 600; position: relative; }
 .h1 .w { display: inline-block; }
+.h1 .l { display: inline-block; transition: color 300ms; will-change: transform; }
+.h1 .l.is-hit { color: var(--hit, var(--px)); }
 .h2 { font-size: clamp(32px, 4.4vw, 54px); line-height: 1.02; letter-spacing: -0.035em; margin-bottom: 20px; }
 .h3 { font-size: 22px; letter-spacing: -0.02em; margin-bottom: 14px; }
 .lede { font-size: 19px; line-height: 1.55; max-width: 560px; margin-top: 30px; color: var(--ink-2); }
@@ -94,7 +100,8 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 .btn:hover { border-color: var(--ink); }
 .btn:active { transform: scale(0.98); }
 .btn-ink { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.btn-ink:hover { background: var(--px); border-color: var(--px); color: #fff; }
+.btn-ink:hover { background: var(--px); border-color: var(--px); color: #fff; box-shadow: 0 10px 30px var(--px-soft), 0 0 0 4px var(--px-soft); }
+.magnet { transition: transform 200ms var(--spring-soft); }
 .btn-ink .dim { color: rgba(255,255,255,.55); }
 .btn-paper { background: var(--paper); color: var(--ink); border-color: var(--paper); }
 .btn-paper:hover { background: var(--px); color: #fff; border-color: var(--px); }
@@ -141,27 +148,39 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 /* the mascot pixel, as the full stop of the title */
 .px-mascot { display: inline-block; width: .14em; height: .14em; background: var(--px); margin-left: .06em; vertical-align: baseline; cursor: pointer; will-change: transform; transition: scale 180ms var(--spring); }
 .px-mascot.blink { scale: 1 .25; }
+.px-ghost { position: fixed; left: 0; top: 0; width: 14px; height: 14px; background: var(--px); pointer-events: none; z-index: 54; opacity: .5; animation: ghost 500ms ease-out forwards; }
+@keyframes ghost { to { opacity: 0; transform: scale(.4); } }
 .px-mascot:hover { scale: 1.25; }
 
-/* the bubble */
+/* the bubble: photo, orbiting pixels, status, a speech bubble that types */
 .hero-art { display: flex; justify-content: center; }
-.bubble-wrap { position: relative; width: 300px; height: 300px; }
-.bubble { width: 260px; height: 260px; border-radius: 50%; overflow: hidden; border: 1px solid var(--line-2); box-shadow: var(--shadow-lg); background: var(--card); margin: 20px auto 0; }
-.bubble img { width: 100%; height: 100%; object-fit: cover; }
-.say { position: absolute; left: -60px; bottom: -8px; width: 270px; padding: 14px 16px; font-size: 14px; color: var(--ink-2); animation: float 5s ease-in-out infinite; }
-.say .mono { display: block; color: var(--g3); margin-bottom: 6px; }
-.say p { margin: 0; }
-.say::before { content: ""; position: absolute; right: -1px; top: -10px; width: 10px; height: 10px; background: var(--card); border-left: 1px solid var(--line); border-top: 1px solid var(--line); transform: rotate(45deg); right: 40px; }
-.px-dot-a { position: absolute; top: 24px; right: 20px; width: 12px; height: 12px; animation: float 4s ease-in-out infinite; }
-.px-dot-b { position: absolute; top: 60px; right: 0; width: 6px; height: 6px; opacity: .6; animation: float 4s ease-in-out -1.5s infinite; }
+.bubble-wrap { position: relative; width: 320px; height: 340px; }
+.bubble { width: 250px; height: 250px; border-radius: 50%; overflow: hidden; border: 1px solid var(--line-2); box-shadow: var(--shadow-lg); background: var(--card); margin: 30px auto 0; cursor: pointer; }
+.bubble img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--spring); }
+.bubble:hover img { transform: scale(1.06); }
+.orbit { position: absolute; left: 50%; top: 155px; width: 300px; height: 300px; translate: -50% -50%; animation: orbit 14s linear infinite; pointer-events: none; }
+.orbit i { position: absolute; width: 10px; height: 10px; background: var(--px); left: 50%; top: 0; translate: -50% -50%; }
+.orbit i:nth-child(2) { background: var(--c1); top: auto; bottom: 0; left: 50%; translate: -50% 50%; width: 7px; height: 7px; }
+.orbit i:nth-child(3) { background: var(--c2); top: 50%; left: 0; translate: -50% -50%; width: 6px; height: 6px; }
+@keyframes orbit { to { rotate: 360deg; } }
+.status { position: absolute; top: 18px; left: 10px; display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 11px; color: var(--ink-2); box-shadow: var(--shadow-sm); }
+.status i { width: 8px; height: 8px; border-radius: 50%; background: var(--c3); box-shadow: 0 0 0 0 rgba(0,208,132,.5); animation: ping 1.8s ease-out infinite; }
+@keyframes ping { to { box-shadow: 0 0 0 8px rgba(0,208,132,0); } }
+.say { position: absolute; left: -40px; bottom: -4px; min-width: 240px; max-width: 290px; padding: 12px 16px; font-size: 15px; color: var(--ink); animation: float 5s ease-in-out infinite; }
+.say p { margin: 0; min-height: 1.5em; }
+.say::before { content: ""; position: absolute; top: -7px; right: 44px; width: 12px; height: 12px; background: var(--card); border-left: 1px solid var(--line); border-top: 1px solid var(--line); transform: rotate(45deg); }
+.caret { display: inline-block; width: 8px; height: 1em; background: var(--px); vertical-align: -0.15em; margin-left: 2px; animation: blink 0.9s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
 @keyframes float { 0%,100% { translate: 0 0; } 50% { translate: 0 -8px; } }
 @media (max-width: 900px) {
   .hero { padding: 56px 0 56px; }
   .hero-in { grid-template-columns: 1fr; gap: 28px; }
   .hero-art { order: -1; justify-content: flex-start; }
-  .bubble-wrap { width: 220px; height: 240px; }
-  .bubble { width: 180px; height: 180px; margin: 0; }
-  .say { left: 120px; bottom: 0; width: 230px; }
+  .bubble-wrap { width: 100%; height: 250px; }
+  .bubble { width: 160px; height: 160px; margin: 20px 0 0; }
+  .orbit { left: 100px; top: 100px; width: 200px; height: 200px; }
+  .status { left: 0; top: 0; }
+  .say { left: 150px; bottom: 10px; min-width: 0; max-width: 220px; }
 }
 
 /* cursor sparkles in the hero: tiny pixels */
@@ -444,7 +463,13 @@ details[open] .plus::after { transform: scaleY(0); }
 
 /* --- intro: one pixel, then the page ---------------------- */
 .intro { position: fixed; inset: 0; z-index: 100; background: var(--paper); display: grid; place-items: center; }
-.intro-px { width: 14px; height: 14px; background: var(--px); animation: pxbeat .8s var(--spring) infinite alternate; }
+.intro-px { width: 14px; height: 14px; background: var(--px); animation: pxbeat .8s var(--spring) infinite alternate; position: relative; }
+.intro-px::before, .intro-px::after { content: ""; position: absolute; inset: 0; background: var(--c1); opacity: 0; }
+.intro-px::after { background: var(--c2); }
+.intro.is-done .intro-px::before { animation: split 0.5s var(--spring) forwards; }
+.intro.is-done .intro-px::after { animation: split2 0.5s var(--spring) forwards; }
+@keyframes split { 0% { opacity: 1; } 100% { opacity: 0; translate: -90px -40px; } }
+@keyframes split2 { 0% { opacity: 1; } 100% { opacity: 0; translate: 90px -40px; } }
 @keyframes pxbeat { from { transform: scale(1); } to { transform: scale(1.8); } }
 .intro.is-done { animation: wipe 0.6s cubic-bezier(.7, 0, .2, 1) forwards; }
 .intro.is-done .intro-px { animation: pxgo .4s var(--spring) forwards; }

@@ -19,7 +19,7 @@
   };
   const root = document.documentElement;
   const cssVar = (name) => getComputedStyle(root).getPropertyValue(name).trim();
-  const COLORS = () => [cssVar("--pink"), cssVar("--pink"), cssVar("--ink"), cssVar("--g3")];
+  const COLORS = () => [cssVar("--px"), cssVar("--px"), cssVar("--c1"), cssVar("--c2"), cssVar("--c3"), cssVar("--c4"), cssVar("--ink")];
   const fmtNum = (n) => new Intl.NumberFormat("fr-FR").format(Math.round(n));
 
   /* ---------- spring: a tiny physics integrator ------------------- */
@@ -289,6 +289,52 @@
     // idle: a blink every few seconds, a tiny hop when clicked
     setInterval(() => { if (!away && Math.random() < 0.6) pixel.classList.add("blink"); setTimeout(() => pixel.classList.remove("blink"), 180); }, 2800);
     pixel.addEventListener("click", (e) => { go(0, -26); setTimeout(() => go(0, 0), 120); burst(e.clientX, e.clientY, { n: 8, r: 36, sizes: [3, 5] }); snd.pop(); });
+  }
+
+  /* ---------- hype layer: letters, trail, magnets, the talking bubble --- */
+  if (heroTitle && !reduced) setTimeout(() => {
+    $$(".w", heroTitle).forEach((w) => {
+      if (w.querySelector(".l")) return;
+      w.innerHTML = w.textContent.split("").map((ch) => `<span class="l">${ch}</span>`).join("");
+    });
+    const cols = ["--px", "--c1", "--c2", "--c3", "--c4"];
+    $$(".l", heroTitle).forEach((l) => l.addEventListener("mouseenter", () => {
+      l.style.setProperty("--hit", cssVar(pick(cols))); l.classList.add("is-hit");
+      l.animate([{ transform: "translateY(0) rotate(0)" }, { transform: `translateY(-14px) rotate(${rand(-8, 8)}deg)` }, { transform: "translateY(0) rotate(0)" }], { duration: 480, easing: "cubic-bezier(.3,1.6,.5,1)" });
+      snd.tick(); setTimeout(() => l.classList.remove("is-hit"), 500);
+    }));
+  }, 2200);
+  if (pixel && !reduced) {
+    let last = { x: 0, y: 0 };
+    setInterval(() => {
+      const r = pixel.getBoundingClientRect();
+      if (Math.hypot(r.left - last.x, r.top - last.y) > 10 && last.x) {
+        const g = document.createElement("i"); g.className = "px-ghost";
+        g.style.left = r.left + "px"; g.style.top = r.top + "px"; g.style.width = r.width + "px"; g.style.height = r.height + "px";
+        g.style.background = cssVar(pick(["--px", "--c1", "--c2"]));
+        g.addEventListener("animationend", () => g.remove(), { once: true });
+        layer.appendChild(g);
+      }
+      last = { x: r.left, y: r.top };
+    }, 40);
+  }
+  if (!reduced && window.matchMedia("(hover: hover)").matches) $$(".magnet").forEach((b) => {
+    b.addEventListener("pointermove", (e) => { const r = b.getBoundingClientRect(); const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2); b.style.transform = `translate(${dx * 0.18}px, ${dy * 0.28}px)`; });
+    b.addEventListener("pointerleave", () => { b.style.transform = ""; });
+  });
+  const sayText = $("#sayText");
+  if (sayText) {
+    const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 5 744 € en octobre, zéro pub.", "Je lis chaque candidature moi-même.", "Si ton app n'est pas prête, je te le dis."];
+    let li = 0;
+    function type(text, done) {
+      let k = 0; sayText.textContent = "";
+      (function step() { if (k <= text.length) { sayText.textContent = text.slice(0, k++); if (k % 3 === 0) snd.tick(); setTimeout(step, 28 + rand(0, 30)); } else setTimeout(done, 2200); })();
+    }
+    function erase(done) { (function step() { const t = sayText.textContent; if (t.length) { sayText.textContent = t.slice(0, -2); setTimeout(step, 14); } else done(); })(); }
+    function loop() { type(lines[li], () => erase(() => { li = (li + 1) % lines.length; loop(); })); }
+    if (reduced) sayText.textContent = lines[0]; else setTimeout(loop, 1600);
+    const bubble = $("#bubble");
+    if (bubble) bubble.addEventListener("click", (e) => { burst(e.clientX, e.clientY, { n: 16, r: 90 }); snd.pop(); });
   }
 
   /* ---------- views chart ---------------------------------------- */
