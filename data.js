@@ -26,12 +26,15 @@ const SITE_DATA = {
      rangées par mois de publication (date lue dans l'id TikTok). Les autres
      comptes sont à nommer et à remplir depuis TikTok Analytics. */
   comptes: [
-    { nom: "@bellysafe.app", vues: { "2026-03": 2203100, "2026-06": 853200 } },
-    { nom: "compte 2", vues: {} },
-    { nom: "compte 3", vues: {} },
-    { nom: "compte 4", vues: {} },
-    { nom: "compte 5", vues: {} },
-    { nom: "compte 6", vues: {} },
+    /* ATTENTION : à part mars et juin de @bellysafe.app (déduits des 7 posts),
+       ces vues sont INVENTÉES pour remplir la courbe en attendant les vraies
+       (TikTok Analytics, vues par mois et par compte). À remplacer. */
+    { nom: "@bellysafe.app", vues: { "2026-02": 180000, "2026-03": 2203100, "2026-04": 1240000, "2026-05": 760000, "2026-06": 853200, "2026-07": 910000, "2026-08": 1050000, "2026-09": 1320000, "2026-10": 1680000 } },
+    { nom: "compte 2",       vues: { "2026-04": 95000, "2026-05": 210000, "2026-06": 340000, "2026-07": 420000, "2026-08": 380000, "2026-09": 610000, "2026-10": 740000 } },
+    { nom: "compte 3",       vues: { "2026-05": 60000, "2026-06": 150000, "2026-07": 290000, "2026-08": 520000, "2026-09": 450000, "2026-10": 560000 } },
+    { nom: "compte 4",       vues: { "2026-07": 40000, "2026-08": 120000, "2026-09": 260000, "2026-10": 390000 } },
+    { nom: "compte 5",       vues: { "2026-08": 30000, "2026-09": 140000, "2026-10": 310000 } },
+    { nom: "compte 6",       vues: { "2026-09": 25000, "2026-10": 180000 } },
   ],
 
   /* Ta courbe RevenueCat : l'export "Revenue" en euros, un point par mois,
