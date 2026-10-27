@@ -75,3 +75,17 @@
 .field.is-error input { border-color: var(--px); }
 
 [hidden] { display: none !important; }
+
+/* mobile: no crumb in the nav, keep the back button */
+@media (max-width: 560px) {
+  .apply-crumb { display: none; }
+  .apply-body .nav-tools .btn { display: inline-flex; }
+  .steps { gap: 14px; }
+  .side-note { display: flex; margin-top: 0; }
+  .step .h2 { font-size: 30px; }
+  .choices span { padding: 8px 12px; font-size: 13px; }
+  .nav-row { flex-wrap: wrap; }
+  .nav-row .btn-lg { flex: 1 1 auto; justify-content: center; }
+  .recap div { grid-template-columns: 1fr; gap: 4px; }
+}
+

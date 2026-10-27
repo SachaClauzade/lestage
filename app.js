@@ -476,7 +476,8 @@
     return ["janv", "févr", "mars", "avr", "mai", "juin", "juil", "août", "sept", "oct", "nov", "déc"][mo - 1] + " " + String(y).slice(2);
   }
   function drawRc(series, ghost = false) {
-    const W = 800, H = 260, padL = 54, padR = 20, padT = 20, padB = 34;
+    const narrow = window.innerWidth < 560;
+    const W = narrow ? 420 : 800, H = narrow ? 300 : 260, padL = narrow ? 46 : 54, padR = narrow ? 14 : 20, padT = 20, padB = 34;
     const max = Math.max(...series.map((p) => p.revenu)) * 1.15 || 1;
     const x = (i) => padL + (i / Math.max(1, series.length - 1)) * (W - padL - padR);
     const y = (v) => padT + (1 - v / max) * (H - padT - padB);
@@ -486,7 +487,7 @@
     let len = 0; for (let i = 1; i < pts.length; i++) len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
     const ticks = [0, 0.25, 0.5, 0.75, 1].map((k) => Math.round(max * k));
     const grid = ticks.map((t) => `<line class="rc-grid" x1="${padL}" x2="${W - padR}" y1="${y(t).toFixed(1)}" y2="${y(t).toFixed(1)}"/><text class="rc-axis" x="${padL - 8}" y="${(y(t) + 3).toFixed(1)}" text-anchor="end">${fmtNum(t)}</text>`).join("");
-    const step = Math.ceil(series.length / 8);
+    const step = Math.ceil(series.length / (narrow ? 5 : 8));
     const xl = series.map((p, i) => (i % step === 0 || i === series.length - 1) ? `<text class="rc-axis" x="${x(i).toFixed(1)}" y="${H - 10}" text-anchor="middle">${monthLabel(p.mois)}</text>` : "").join("");
     const ti = series.findIndex((p) => p.tiktok);
     const mark = ti >= 0 ? `<line class="rc-mark" x1="${x(ti).toFixed(1)}" x2="${x(ti).toFixed(1)}" y1="${padT}" y2="${y(0)}"/><text class="rc-mark-label" x="${(x(ti) + 6).toFixed(1)}" y="${padT + 10}">SORTIE DE L'APP · PREMIERS POSTS</text>` : "";
@@ -539,9 +540,10 @@
   if (rc && rcBody) {
     const series = (DATA.revenue && DATA.revenue.series) || [];
     if (series.length >= 2) {
-      const drawn = drawRc(series);
-      rcBody.innerHTML = drawn.svg;
-      setupRcHover(series, drawn);
+      const mount = () => { const drawn = drawRc(series); rcBody.innerHTML = drawn.svg; setupRcHover(series, drawn); };
+      mount();
+      let narrowNow = window.innerWidth < 560, rt = 0;
+      window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { const n = window.innerWidth < 560; if (n !== narrowNow) { narrowNow = n; mount(); } }, 150); });
       rcRange.textContent = monthLabel(series[0].mois) + " → " + monthLabel(series[series.length - 1].mois);
     } else {
       // placeholder: a ghost curve + a clear note, until the real export is in data.js
