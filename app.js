@@ -463,7 +463,7 @@
     const step = Math.ceil(series.length / 8);
     const xl = series.map((p, i) => (i % step === 0 || i === series.length - 1) ? `<text class="rc-axis" x="${x(i).toFixed(1)}" y="${H - 10}" text-anchor="middle">${monthLabel(p.mois)}</text>` : "").join("");
     const ti = series.findIndex((p) => p.tiktok);
-    const mark = ti >= 0 ? `<line class="rc-mark" x1="${x(ti).toFixed(1)}" x2="${x(ti).toFixed(1)}" y1="${padT}" y2="${y(0)}"/><text class="rc-mark-label" x="${(x(ti) + 6).toFixed(1)}" y="${padT + 10}">PREMIERS POSTS TIKTOK</text>` : "";
+    const mark = ti >= 0 ? `<line class="rc-mark" x1="${x(ti).toFixed(1)}" x2="${x(ti).toFixed(1)}" y1="${padT}" y2="${y(0)}"/><text class="rc-mark-label" x="${(x(ti) + 6).toFixed(1)}" y="${padT + 10}">SORTIE DE L'APP · PREMIERS POSTS</text>` : "";
     const dots = pts.map((p, i) => `<circle class="rc-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" style="animation-delay:${1.2 + i * 0.05}s; transform-origin:${p[0].toFixed(1)}px ${p[1].toFixed(1)}px"/>`).join("");
     const last = series[series.length - 1];
     const lastLabel = `<text class="rc-axis" x="${(pts[pts.length - 1][0] - 6).toFixed(1)}" y="${(pts[pts.length - 1][1] - 12).toFixed(1)}" text-anchor="end" style="fill:var(--pink);font-size:11px">${fmtNum(last.revenu)} €</text>`;

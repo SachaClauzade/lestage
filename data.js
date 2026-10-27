@@ -35,15 +35,15 @@ const SITE_DATA = {
   ],
 
   /* Ta courbe RevenueCat : l'export "Revenue" en euros, un point par mois,
-     dans l'ordre. "tiktok: true" marque le mois des premiers posts TikTok,
-     affiché sur la courbe. Les "stats" sont les 4 tuiles au-dessus. */
+     dans l'ordre. "tiktok: true" marque le mois de sortie de l'app et des premiers
+     posts TikTok (février 2026), affiché sur la courbe. Les "stats" sont les 4 tuiles au-dessus. */
   revenue: {
     series: [
       { mois: "2025-10", revenu: 0 },
       { mois: "2025-11", revenu: 0 },
       { mois: "2025-12", revenu: 0 },
-      { mois: "2026-01", revenu: 17.15, tiktok: true },
-      { mois: "2026-02", revenu: 787.11 },
+      { mois: "2026-01", revenu: 17.15 },
+      { mois: "2026-02", revenu: 787.11, tiktok: true },
       { mois: "2026-03", revenu: 2664.86 },
       { mois: "2026-04", revenu: 3188.97 },
       { mois: "2026-05", revenu: 2332.23 },
