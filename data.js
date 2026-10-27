@@ -78,5 +78,7 @@ const SITE_DATA = {
     { prenom: "Pauline", note: 5, image: "", texte: "J'ai beaucoup appris : mieux travailler mes hooks, créer des posts plus accrocheurs, mieux mettre en avant mon app. Depuis que j'applique les conseils, le trafic vers mon app a augmenté. Les lives sont un vrai plus : Sacha analyse nos comptes et nos contenus, et il est très disponible dès qu'on a une question." },
     { prenom: "Aubin", note: 5, image: "", texte: "Si tu viens de démarrer et que tu as peu de budget, le contenu organique sur TikTok est probablement le meilleur levier pour toi. Tous les tips nécessaires à ton démarrage sont dans cette formation." },
     { prenom: "Georges", note: 5, image: "", texte: "Une formation parfaite, courte, avec des fondamentaux solides pour quelqu'un qui n'a jamais fait de marketing. Je recommande fortement." },
+    /* Reçu via avis.html le 27 oct. 2026 : autorise avis, prénom, photo Discord, app. */
+    { prenom: "Patrick", app: "Evoly", note: 5, image: "", texte: "Excellente formation, que je recommande à tous ceux qui veulent promouvoir leur app mobile sur TikTok. Le Stage permet de comprendre les rouages de TikTok, de la préparation du compte jusqu'à la création de contenus efficaces, en passant par les hooks. J'ai particulièrement apprécié le côté concret et progressif, avec des actions chaque jour et de nombreuses ressources : prompts, guides, outils. Complète, structurée et surtout très pratique." },
   ],
 };
