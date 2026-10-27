@@ -128,11 +128,6 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 .links a { font-size: 14px; font-weight: 500; text-decoration: none; color: var(--g4); transition: color 150ms; }
 .links a:hover, .links a.is-active { color: var(--ink); }
 .nav-tools { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-.swatches { display: flex; gap: 4px; margin-right: 6px; padding: 5px; border: 1px dashed var(--line-2); border-radius: 8px; }
-.swatches i { width: 12px; height: 12px; border-radius: 2px; cursor: pointer; opacity: .8; transition: transform 200ms var(--spring), opacity 150ms; }
-.swatches i:hover { transform: scale(1.3); opacity: 1; }
-.swatches i.is-on { outline: 2px solid var(--ink); outline-offset: 1px; opacity: 1; }
-@media (max-width: 960px) { .swatches { display: none; } }
 #soundToggle .snd-off { display: none; }
 #soundToggle[aria-pressed="false"] .snd-waves { display: none; }
 #soundToggle[aria-pressed="false"] .snd-off { display: block; }

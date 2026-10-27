@@ -381,21 +381,6 @@
     batchIn.textContent = days > 1 ? `dans ${days} jours` : days === 1 ? "demain" : days === 0 ? "aujourd'hui" : "en cours";
   }
 
-  /* ---------- debug: accent colour swatches in the nav ---------------- */
-  const swatches = $("#swatches");
-  if (swatches) {
-    const SW = [["orange", "#FF4A1C"], ["rouge", "#FF2D2D"], ["jaune", "#FFD60A"], ["lime", "#C8FF00"], ["vert", "#00D084"], ["cyan", "#00E5FF"], ["bleu", "#2D7CFF"], ["violet", "#7C5CFF"], ["rose", "#FF3DAE"], ["blanc", "#F2F2F0"]];
-    const hexToRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-    function applyPx(hex) {
-      const [r, g, b] = hexToRgb(hex);
-      root.style.setProperty("--px", hex); root.style.setProperty("--px-soft", `rgba(${r},${g},${b},.14)`);
-      $$("i", swatches).forEach((i) => i.classList.toggle("is-on", i.dataset.hex === hex));
-    }
-    swatches.innerHTML = SW.map(([n, hex]) => `<i data-hex="${hex}" title="${n}" style="background:${hex}"></i>`).join("");
-    $$("i", swatches).forEach((i) => i.addEventListener("click", () => { applyPx(i.dataset.hex); store.set("stage.px", i.dataset.hex); burst(innerWidth / 2, 40, { n: 10, r: 50 }); }));
-    const saved = store.get("stage.px", null); if (saved) applyPx(saved); else $$("i", swatches)[0].classList.add("is-on");
-  }
-
   /* ---------- views chart ---------------------------------------- */
   const chart = $("#viewsChart"), counter = $("#chartCounter");
   function countUp(el, to, ms, format) {
