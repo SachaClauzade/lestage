@@ -300,8 +300,17 @@
     function erase(done) { (function step() { const t = sayText.textContent; if (t.length) { sayText.textContent = t.slice(0, -2); setTimeout(step, 14); } else done(); })(); }
     function loop() { type(lines[li], () => erase(() => { li = (li + 1) % lines.length; loop(); })); }
     if (reduced) sayText.textContent = lines[0]; else setTimeout(loop, 1600);
-    const bubble = $("#bubble");
-    if (bubble) bubble.addEventListener("click", (e) => { burst(e.clientX, e.clientY, { n: 16, r: 90 }); snd.pop(); });
+    const portrait = $("#portrait");
+    if (portrait) {
+      portrait.addEventListener("click", (e) => { burst(e.clientX, e.clientY, { n: 18, r: 100 }); snd.pop(); });
+      // the halos shift away from the cursor, the face leans toward it
+      window.addEventListener("pointermove", (e) => {
+        const r = portrait.getBoundingClientRect();
+        const dx = (e.clientX - (r.left + r.width / 2)) / innerWidth, dy = (e.clientY - (r.top + r.height / 2)) / innerHeight;
+        portrait.style.setProperty("--hx", (-dx * 26).toFixed(1) + "px"); portrait.style.setProperty("--hy", (-dy * 26).toFixed(1) + "px");
+        portrait.style.setProperty("--fx", (dx * 8).toFixed(1) + "px"); portrait.style.setProperty("--fy", (dy * 8).toFixed(1) + "px");
+      }, { passive: true });
+    }
   }
 
   /* ---------- method list: each title plays its own animation ---------- */
@@ -371,6 +380,16 @@
     placesGrid.innerHTML = Array.from({ length: 20 }, (_, i) => `<i style="--i:${i}"></i>`).join("");
     $$("i", placesGrid).forEach((p) => p.addEventListener("mouseenter", () => { const r = p.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, { n: 6, r: 28, sizes: [3, 5], dur: [300, 500] }); }));
     new IntersectionObserver((entries, io) => entries.forEach((en) => { if (en.isIntersecting) { placesGrid.classList.add("is-in"); io.disconnect(); } }), { threshold: 0.5 }).observe(placesGrid);
+    // all white; now and then one of them flashes a colour, never the same place twice in a row
+    if (!reduced) {
+      const px = $$("i", placesGrid); let last = -1;
+      (function flash() {
+        let k; do { k = Math.floor(rand(0, px.length)); } while (k === last); last = k;
+        const el = px[k]; el.style.setProperty("--lit", cssVar(pick(["--px", "--c1", "--c2"]))); el.classList.add("lit");
+        setTimeout(() => el.classList.remove("lit"), 420);
+        setTimeout(flash, rand(500, 1300));
+      })();
+    }
   }
 
   /* ---------- batch countdown ----------------------------------- */
