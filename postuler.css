@@ -1,7 +1,7 @@
 /* ============================================================
    Le Stage · candidature
    ============================================================ */
-.apply { padding: 64px 0 96px; }
+.apply { padding: 64px 0 96px; overflow-x: clip; }
 .apply-in { display: grid; grid-template-columns: 240px 1fr; gap: 64px; align-items: start; }
 .apply-crumb { margin-left: 8px; }
 @media (max-width: 860px) { .apply-in { grid-template-columns: 1fr; gap: 28px; } .apply { padding: 36px 0 72px; } }
