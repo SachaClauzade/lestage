@@ -740,3 +740,5 @@ body.chaos { animation: hue 4s linear infinite; }
 a.fit-cta:hover span { translate: 4px 0; }
 .fit-yes::after { content: "20 places"; position: absolute; top: 18px; right: -34px; rotate: 45deg; font-family: var(--display); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 4px 40px; }
 @media (max-width: 900px) { .fit { grid-template-columns: 1fr; gap: 18px; } }
+.videos { padding-bottom: 56px; }
+.pourqui { padding-top: 64px; }
