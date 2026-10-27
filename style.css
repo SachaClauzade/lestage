@@ -79,6 +79,11 @@ code { font-family: var(--display); font-size: 0.85em; background: var(--paper-2
 /* --- type ------------------------------------------------- */
 .eyebrow { font-family: var(--display); font-size: 12px; letter-spacing: 0.02em; color: var(--g4); margin-bottom: 22px; display: flex; align-items: center; gap: 10px; }
 .eyebrow::before { content: ""; width: 8px; height: 8px; background: var(--px); flex: none; }
+.batch { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 26px; padding: 8px 14px 8px 8px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--card); font-size: 15px; flex-wrap: wrap; }
+.batch-tag { background: var(--px); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+.batch b { font-size: 17px; letter-spacing: -0.01em; }
+.batch-in { color: var(--px); font-size: 11px; }
+.batch-sel { color: var(--g3); font-size: 11px; padding-left: 12px; border-left: 1px solid var(--line); }
 .h1 { font-size: clamp(64px, 11vw, 152px); line-height: 0.92; letter-spacing: -0.05em; font-weight: 600; position: relative; }
 .h1 .w { display: inline-block; }
 .h1 .l { display: inline-block; transition: color 300ms; will-change: transform; }

@@ -106,7 +106,7 @@
     const body = [`Candidature au Stage`, ``, `App : ${a.app}`, `Prénom : ${a.prenom}`, `Email : ${a.email}`, `Profil : ${a.role}`, `TikTok : ${a.tiktok}${a.handle ? " · " + a.handle : ""}`, `Objectif : ${a.objectif}`, `Temps : ${a.temps}`, ``, `Pourquoi moi, pourquoi maintenant :`, a.pourquoi || "—"].join("\n");
     $("#sendBtn").href = `mailto:${TO}?subject=${encodeURIComponent("Candidature au Stage · " + (state.app ? state.app.name : a.prenom))}&body=${encodeURIComponent(body)}`;
   }
-  $("#sendBtn").addEventListener("click", (e) => { if (window.stageFx) { window.stageFx.confetti(e.clientX, e.clientY); window.stageFx.snd.win(); } toast("Ton mail s'ouvre. Je te réponds sous 48 h."); });
+  $("#sendBtn").addEventListener("click", (e) => { if (window.stageFx) { window.stageFx.confetti(e.clientX, e.clientY); window.stageFx.snd.win(); } toast("Ton mail s'ouvre. Tu sais dans les 24 h si tu es sélectionné."); });
 
   const toastEl = $("#toast"); let tt = 0;
   function toast(msg) { toastEl.textContent = msg; toastEl.hidden = false; clearTimeout(tt); tt = setTimeout(() => (toastEl.hidden = true), 2800); }

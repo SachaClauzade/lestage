@@ -291,7 +291,7 @@
   });
   const sayText = $("#sayText");
   if (sayText) {
-    const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 6 200 € par mois, zéro pub.", "Prochain batch le 15 novembre. 20 places.", "Je lis chaque candidature moi-même.", "Si ton app n'est pas prête, je te le dis."];
+    const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 6 200 € par mois, zéro pub.", "Prochain batch le 15 novembre. 20 places.", "Je lis chaque candidature moi-même, réponse en 24 h.", "Si ton app n'est pas prête, je te le dis."];
     let li = 0;
     function type(text, done) {
       let k = 0; sayText.textContent = "";
@@ -371,6 +371,14 @@
   if (placesGrid) {
     placesGrid.innerHTML = Array.from({ length: 20 }, (_, i) => `<i style="--i:${i}"></i>`).join("");
     new IntersectionObserver((entries, io) => entries.forEach((en) => { if (en.isIntersecting) { placesGrid.classList.add("is-in"); io.disconnect(); } }), { threshold: 0.5 }).observe(placesGrid);
+  }
+
+  /* ---------- batch countdown ----------------------------------- */
+  const batchIn = $("#batchIn");
+  if (batchIn) {
+    const start = new Date(2026, 10, 15), today = new Date(); today.setHours(0, 0, 0, 0);
+    const days = Math.round((start - today) / 86400000);
+    batchIn.textContent = days > 1 ? `dans ${days} jours` : days === 1 ? "demain" : days === 0 ? "aujourd'hui" : "en cours";
   }
 
   /* ---------- views chart ---------------------------------------- */
