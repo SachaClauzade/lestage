@@ -108,7 +108,7 @@
 
   /* ---------- particles ------------------------------------------ */
   const layer = $("#particles");
-  function burst(x, y, { n = 14, r = 80, colors, sizes = [4, 8], dur = [700, 1100] } = {}) {
+  function burst(x, y, { n = 14, r = 80, colors, sizes = [4, 8], dur = [700, 1100], scatter = false } = {}) {
     if (reduced) return;
     const palette = colors || COLORS();
     const frag = document.createDocumentFragment();
@@ -116,7 +116,7 @@
       const p = document.createElement("i");
       p.className = "pt";
       p.style.setProperty("--x", x + "px"); p.style.setProperty("--y", y + "px");
-      p.style.setProperty("--a", (i / n) * 360 + rand(-14, 14) + "deg");
+      p.style.setProperty("--a", (scatter ? rand(0, 360) : (i / n) * 360 + rand(-14, 14)) + "deg");
       p.style.setProperty("--r", rand(r * 0.5, r * 1.3) + "px");
       p.style.setProperty("--rot", rand(-180, 180) + "deg");
       p.style.setProperty("--s", Math.round(rand(sizes[0], sizes[1])) + "px");
@@ -246,6 +246,7 @@
     setTimeout(() => { go(0, 0); setTimeout(() => { const r = pixel.getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, { n: 10, r: 46, sizes: [3, 6] }); snd.coin(); }, 260); }, 1250);
     // hop onto any [data-pixel-target] on hover, come back on leave
     $$("[data-pixel-target]").forEach((t) => {
+      if (!t.closest(".hero")) return; // far buttons get the sprinkle below, not a straight flight
       t.addEventListener("mouseenter", () => {
         const a = pixel.getBoundingClientRect(), b = t.getBoundingClientRect();
         const base = { x: a.left - sx.value, y: a.top - sy.value };
@@ -289,6 +290,20 @@
     b.addEventListener("pointermove", (e) => { const r = b.getBoundingClientRect(); const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2); b.style.transform = `translate(${dx * 0.18}px, ${dy * 0.28}px)`; });
     b.addEventListener("pointerleave", () => { b.style.transform = ""; });
   });
+  /* ---------- sprinkle: pixels drift off the whole edge of the big buttons --- */
+  if (!reduced && window.matchMedia("(hover: hover)").matches) $$("#buyBtn, #finalBtn, #heroCta").forEach((b) => {
+    let drip = 0;
+    const edgePoint = () => {
+      const r = b.getBoundingClientRect(), side = Math.random();
+      if (side < 0.35) return [r.left + rand(0, r.width), r.top];
+      if (side < 0.7) return [r.left + rand(0, r.width), r.bottom];
+      return [side < 0.85 ? r.left : r.right, r.top + rand(0, r.height)];
+    };
+    const puff = (n, rad) => { for (let k = 0; k < n; k++) { const [x, y] = edgePoint(); burst(x, y, { n: 1, r: rad, sizes: [3, 6], dur: [600, 1000], scatter: true }); } };
+    b.addEventListener("mouseenter", () => { puff(16, 70); clearInterval(drip); drip = setInterval(() => puff(2, 48), 110); });
+    b.addEventListener("mouseleave", () => { clearInterval(drip); drip = 0; });
+  });
+
   const sayText = $("#sayText");
   if (sayText) {
     const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 6 200 € par mois, zéro pub.", "Prochaine promo le 15 novembre. 20 places.", "Je lis chaque candidature moi-même, réponse en 24 h.", "Si ton app n'est pas prête, je te le dis."];
