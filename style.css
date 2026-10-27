@@ -475,12 +475,8 @@ svg.is-hover .rc-cursor { opacity: .4; } svg.is-hover .rc-cursor-dot { opacity: 
 .about-facts li { font-family: var(--display); font-size: 11px; padding: 8px 12px; }
 
 /* pour qui */
-.col { padding: 26px; }
-.col-yes { border-color: var(--ink); }
-.col-dim { opacity: .85; }
 .plain li { position: relative; padding: 9px 0 9px 20px; font-size: 15px; color: var(--ink-2); border-bottom: 1px solid var(--line); }
 .plain li::before { content: ""; position: absolute; left: 0; top: 18px; width: 6px; height: 6px; background: var(--px); }
-.col-dim .plain li::before { background: var(--g3); }
 .plain li:last-child { border-bottom: 0; }
 
 /* tarif */
@@ -606,7 +602,7 @@ body.chaos { animation: hue 4s linear infinite; }
 .kit .kcard:nth-child(3n+2) { --k: var(--c2); }
 .kit .kcard:nth-child(3n+3) { --k: var(--c1); }
 .kit .kcard svg { color: var(--ink); }
-.price-badge { color: var(--c1); border-color: var(--c1); }
+.price-badge { color: #0A0A0A; background: var(--c1); border-color: var(--c1); font-weight: 500; }
 .cur { color: var(--c2); }
 .foot .like.is-liked .heart-body { fill: var(--c2); }
 
@@ -702,7 +698,7 @@ body.chaos { animation: hue 4s linear infinite; }
 
   /* à propos, pour qui, tarif */
   .about-photo { width: min(100%, 240px); }
-  .col { padding: 22px; }
+  .fit-card { padding: 22px 20px; }
   .price { padding: 26px 22px; }
   .acc-body { padding: 0 16px 16px; }
 
@@ -715,3 +711,32 @@ body.chaos { animation: hue 4s linear infinite; }
 .parts-list .pl:last-child { border-bottom: 0; padding-bottom: 12px; }
 .methode { padding-bottom: 48px; }
 .avis { padding-top: 64px; }
+
+/* ---------- pour qui : les deux cartes ---------------------------- */
+.pourqui .p { max-width: 560px; margin-bottom: 34px; }
+.fit { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
+.fit-card { position: relative; display: flex; flex-direction: column; padding: 28px; box-shadow: var(--shadow); overflow: hidden; }
+.fit-yes { border-color: var(--ink); box-shadow: var(--shadow-lg); }
+.fit-no { border-style: dashed; border-color: var(--line-2); background: color-mix(in srgb, var(--card) 70%, var(--paper)); }
+.fit-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px; }
+.fit-head .h3 { flex-basis: 100%; margin: 6px 0 0; font-size: 24px; }
+.fit-mark { display: grid; grid-template-columns: 8px 8px; gap: 2px; width: 18px; height: 18px; }
+.fit-mark i { display: block; background: var(--c1); }
+.fit-no .fit-mark i { background: var(--line-2); }
+.fit-no .fit-mark i:nth-child(2), .fit-no .fit-mark i:nth-child(3) { background: transparent; }
+.fit-tag { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #0A0A0A; background: var(--c1); padding: 3px 8px; border-radius: 4px; }
+.fit-no .fit-tag { background: transparent; color: var(--g3); border: 1px solid var(--line-2); }
+.fit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.fit-list li { position: relative; padding: 13px 0 13px 30px; font-size: 15px; line-height: 1.5; color: var(--ink-2); border-top: 1px solid var(--line); }
+.fit-list b { color: var(--ink); font-weight: 600; }
+.fit-list li::before { content: ""; position: absolute; left: 0; top: 18px; width: 14px; height: 14px; border-radius: 3px; background: var(--c1); }
+.fit-list li::after { content: ""; position: absolute; left: 5px; top: 20px; width: 4px; height: 7px; border: solid #0A0A0A; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.fit-no .fit-list li { color: var(--g4); }
+.fit-no .fit-list b { color: var(--ink-2); }
+.fit-no .fit-list li::before { background: linear-gradient(45deg, transparent 44%, var(--g3) 44%, var(--g3) 56%, transparent 56%), linear-gradient(-45deg, transparent 44%, var(--g3) 44%, var(--g3) 56%, transparent 56%); background-color: transparent; border: 1px solid var(--line-2); background-origin: border-box; }
+.fit-no .fit-list li::after { content: none; }
+.fit-cta { margin-top: auto; padding-top: 22px; font-size: 12px; text-decoration: none; color: var(--ink); display: inline-flex; gap: 8px; align-items: center; }
+.fit-cta span { transition: translate 200ms var(--spring); }
+a.fit-cta:hover span { translate: 4px 0; }
+.fit-yes::after { content: "20 places"; position: absolute; top: 18px; right: -34px; rotate: 45deg; font-family: var(--display); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 4px 40px; }
+@media (max-width: 900px) { .fit { grid-template-columns: 1fr; gap: 18px; } }
