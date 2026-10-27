@@ -304,19 +304,48 @@
     if (bubble) bubble.addEventListener("click", (e) => { burst(e.clientX, e.clientY, { n: 16, r: 90 }); snd.pop(); });
   }
 
-  /* ---------- method track + final pixel field ----------------------- */
-  const track = $("#track");
-  if (track) {
+  /* ---------- method player: the ten parts, one at a time ------------- */
+  const player = $("#player");
+  if (player) {
+    const PARTS = [
+      ["Préparer", "Créer ton compte et le chauffer", "Un compte neuf, tes mots-clés, trois sessions de warm-up."],
+      ["Préparer", "Choisir ta feature et ta cible", "Une feature TikTokable, un avatar précis, trente verbatims."],
+      ["Préparer", "Étudier ce qui marche déjà", "Ta Viral Bank, trois modèles par format, quatre recettes."],
+      ["Préparer", "Écrire tes hooks et ton plan de tir", "Dix-huit hooks, une banque d'images, douze vidéos planifiées."],
+      ["Tester", "Créer tes premières vidéos · POV", "Trente secondes, texte dès la première image, l'app en payoff."],
+      ["Tester", "Écrire tes scripts · Problème → Solution", "Trois frameworks, dix scripts de réserve avec l'IA."],
+      ["Tester", "Faire télécharger · Avant/Après et Démo live", "Les commentaires, l'audit friction, ta backstory."],
+      ["Doubler", "Analyser tes résultats", "La rétention, le ratio, tes deux ou trois winners."],
+      ["Doubler", "Doubler sur tes winners", "Un template par format, six vidéos par session, deux variantes et un test."],
+      ["Doubler", "Démultiplier et préparer la suite", "Reels, Shorts, Snapchat, et ton plan à trente jours."],
+    ];
+    const track = $("#track");
+    track.innerHTML = PARTS.map((p, i) => `<li data-i="${i}" title="P${i + 1} · ${p[1]}"></li>`).join("");
     const cells = $$("li", track);
-    // lights up in sequence when it comes into view, then follows the hovered part
-    new IntersectionObserver((entries, io) => entries.forEach((en) => {
-      if (!en.isIntersecting) return; io.disconnect();
-      cells.forEach((c, i) => setTimeout(() => { c.classList.add("is-on"); if (!reduced) snd.tick(); }, 120 + i * 90));
-    }), { threshold: 0.6 }).observe(track);
-    $$(".parts li[data-p]").forEach((li) => {
-      li.addEventListener("mouseenter", () => cells.forEach((c) => c.classList.toggle("is-hot", c.dataset.p === li.dataset.p)));
-      li.addEventListener("mouseleave", () => cells.forEach((c) => c.classList.remove("is-hot")));
-    });
+    const plPhase = $("#plPhase"), plNo = $("#plNo"), plTitle = $("#plTitle"), plOut = $("#plOut"), plCount = $("#plCount");
+    const STEP = 3200; let cur = -1, t0 = 0, paused = false, started = false, raf = 0;
+    function showPart(i) {
+      cur = i; t0 = performance.now();
+      const p = PARTS[i];
+      plPhase.textContent = `${p[0]} · P${i + 1}`; plNo.textContent = `P${i + 1}`; plTitle.textContent = p[1]; plOut.textContent = p[2]; plCount.textContent = `${i + 1} / ${PARTS.length}`;
+      cells.forEach((c, k) => { c.classList.toggle("is-done", k < i); c.classList.toggle("is-on", k === i); c.style.setProperty("--k", 0); });
+      player.classList.remove("is-switch"); void player.offsetWidth; player.classList.add("is-switch");
+    }
+    function tick(now) {
+      if (!paused) {
+        const k = Math.min(1, (now - t0) / STEP);
+        cells[cur].style.setProperty("--k", k.toFixed(3));
+        if (k >= 1) showPart((cur + 1) % PARTS.length);
+      } else t0 = now - (parseFloat(cells[cur].style.getPropertyValue("--k")) || 0) * STEP;
+      raf = requestAnimationFrame(tick);
+    }
+    cells.forEach((c) => c.addEventListener("click", () => { showPart(+c.dataset.i); }));
+    player.addEventListener("mouseenter", () => { paused = true; });
+    player.addEventListener("mouseleave", () => { paused = false; });
+    showPart(0);
+    if (reduced) { cells[0].style.setProperty("--k", 1); }
+    else new IntersectionObserver((entries, io) => entries.forEach((en) => { if (en.isIntersecting && !started) { started = true; io.disconnect(); t0 = performance.now(); raf = requestAnimationFrame(tick); } }), { threshold: 0.5 }).observe(player);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) paused = true; else if (!player.matches(":hover")) paused = false; });
   }
   const field = $("#fieldPx");
   if (field && !reduced) {
