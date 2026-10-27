@@ -58,6 +58,7 @@
     cur = n;
     steps.forEach((s) => s.classList.toggle("is-active", +s.dataset.step === n));
     dots.forEach((d) => { const k = +d.dataset.step; d.classList.toggle("is-current", k === n); d.classList.toggle("is-done", k < n); });
+    if (n === 5) dots.forEach((d) => { d.classList.add("is-done"); d.classList.remove("is-current"); });
     window.scrollTo({ top: 0, behavior: "smooth" });
     if (n === 4) recap();
     if (window.stageFx) window.stageFx.snd.click();
@@ -106,7 +107,29 @@
     const body = [`Candidature au Stage`, ``, `App : ${a.app}`, `Prénom : ${a.prenom}`, `Email : ${a.email}`, `Profil : ${a.role}`, `TikTok : ${a.tiktok}${a.handle ? " · " + a.handle : ""}`, `Objectif : ${a.objectif}`, `Temps : ${a.temps}`, ``, `Pourquoi moi, pourquoi maintenant :`, a.pourquoi || "—"].join("\n");
     $("#sendBtn").href = `mailto:${TO}?subject=${encodeURIComponent("Candidature au Stage · " + (state.app ? state.app.name : a.prenom))}&body=${encodeURIComponent(body)}`;
   }
-  $("#sendBtn").addEventListener("click", (e) => { if (window.stageFx) { window.stageFx.confetti(e.clientX, e.clientY); window.stageFx.snd.win(); } toast("Ton mail s'ouvre. Tu sais dans les 24 h si tu es sélectionné."); });
+  const FORM = (typeof SITE_DATA !== "undefined" && SITE_DATA.form) || {};
+  const sendBtn = $("#sendBtn");
+  sendBtn.addEventListener("click", async (e) => {
+    if (!FORM.web3formsKey) { if (window.stageFx) window.stageFx.confetti(e.clientX, e.clientY); toast("Ton mail s'ouvre avec ta candidature."); return; }
+    e.preventDefault();
+    if (sendBtn.dataset.busy) return;
+    sendBtn.dataset.busy = "1"; sendBtn.textContent = "Envoi…";
+    const a = answers();
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({
+        access_key: FORM.web3formsKey, subject: "Candidature au Stage · " + (state.app ? state.app.name : a.prenom), from_name: a.prenom || "Candidature", replyto: a.email,
+        app: a.app, prenom: a.prenom, email: a.email, profil: a.role, tiktok: a.tiktok + (a.handle ? " · " + a.handle : ""), objectif: a.objectif, temps: a.temps, pourquoi: a.pourquoi || "—", botcheck: "",
+      }) });
+      const out = await res.json();
+      if (!res.ok || !out.success) throw new Error(out.message || "envoi refusé");
+      if (window.stageFx) window.stageFx.confetti(e.clientX, e.clientY);
+      show(5);
+    } catch (err) {
+      sendBtn.textContent = "Envoyer ma candidature"; delete sendBtn.dataset.busy;
+      toast("L'envoi direct a échoué, j'ouvre ton mail à la place.");
+      setTimeout(() => { window.location.href = sendBtn.href; }, 900);
+    }
+  });
 
   const toastEl = $("#toast"); let tt = 0;
   function toast(msg) { toastEl.textContent = msg; toastEl.hidden = false; clearTimeout(tt); tt = setTimeout(() => (toastEl.hidden = true), 2800); }
