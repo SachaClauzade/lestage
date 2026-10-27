@@ -63,6 +63,7 @@
       if (!res.ok || !out.success) throw new Error(out.message || "envoi refusé");
       if (window.stageFx) window.stageFx.confetti(e.clientX, e.clientY);
       document.body.classList.add("is-sent");
+      if (window.stageTrack) window.stageTrack("avis_envoye", { note: a.note });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       btn.textContent = "Envoyer mon avis"; delete btn.dataset.busy;

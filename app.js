@@ -13,6 +13,48 @@
   const rand = (a, b) => a + Math.random() * (b - a);
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   const DATA = (typeof SITE_DATA !== "undefined" && SITE_DATA) || { videos: [], revenue: { series: [], stats: [] } };
+  /* ---------- tracking : Umami, chargé seulement si l'identifiant est renseigné ---
+     track(nom, données) envoie un événement nommé. En local (ou avec ?debug_track),
+     tout est aussi écrit dans window.__trackLog pour vérifier. */
+  const AN = DATA.analytics || {};
+  const trackDebug = location.hostname === "localhost" || location.hostname === "127.0.0.1" || /debug_track/.test(location.search);
+  window.__trackLog = window.__trackLog || [];
+  if (AN.umamiWebsiteId) {
+    const sc = document.createElement("script");
+    sc.defer = true; sc.src = (AN.umamiHost || "https://cloud.umami.is").replace(/\/$/, "") + "/script.js";
+    sc.setAttribute("data-website-id", AN.umamiWebsiteId);
+    if (AN.domaines) sc.setAttribute("data-domains", AN.domaines);
+    document.head.appendChild(sc);
+  }
+  function track(name, data) {
+    if (trackDebug) { window.__trackLog.push([name, data || {}]); console.debug("[track]", name, data || ""); }
+    try { if (window.umami && typeof window.umami.track === "function") window.umami.track(name, data || {}); } catch {}
+  }
+  window.stageTrack = track;
+  const whereFrom = (el) => el.closest(".nav") ? "nav" : el.closest(".snack") ? "barre promo" : el.closest(".hero") ? "hero" : el.closest(".fit") ? "pour qui" : el.closest(".tarif") ? "tarif" : el.closest(".final") ? "final" : el.closest(".faq") ? "faq" : "autre";
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("a, button"); if (!a) return;
+    const href = a.getAttribute("href") || "";
+    if (href === "#tarif") track("voir_offre", { depuis: whereFrom(a) });
+    else if (/postuler\.html/.test(href)) track("postuler_clic", { depuis: whereFrom(a) });
+    else if (/^https?:/.test(href) && !href.includes(location.hostname)) track("lien_externe", { url: href.replace(/^https?:\/\//, "").slice(0, 80), depuis: whereFrom(a) });
+  }, true);
+  {
+    // une section compte comme vue quand au moins un quart (ou 200 px) est à l'écran
+    const seen = new Set(); let tick = 0;
+    const check = () => {
+      tick = 0;
+      $$("section[id]").forEach((sec) => {
+        if (seen.has(sec.id)) return;
+        const r = sec.getBoundingClientRect(), vis = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
+        if (vis >= Math.min(r.height * 0.25, 200)) { seen.add(sec.id); track("section_vue", { section: sec.id }); }
+      });
+    };
+    const onScroll = () => { if (!tick) tick = setTimeout(check, 120); };
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("load", () => setTimeout(check, 1500));
+  }
+
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
@@ -51,7 +93,7 @@
   function renderTheme() { if (themeBtn) themeBtn.setAttribute("aria-label", isDark() ? "Activer le mode clair" : "Activer le mode sombre"); }
   renderTheme();
   if (themeBtn) themeBtn.addEventListener("click", (e) => {
-    root.setAttribute("data-theme", isDark() ? "light" : "dark"); store.set("stage.theme", root.getAttribute("data-theme")); renderTheme();
+    root.setAttribute("data-theme", isDark() ? "light" : "dark"); store.set("stage.theme", root.getAttribute("data-theme")); renderTheme(); track("theme", { vers: root.getAttribute("data-theme") });
     snd.pop(); burst(e.clientX || innerWidth / 2, e.clientY || 40, { n: 12, r: 60 });
   });
 
@@ -461,7 +503,7 @@
   $$(".kcard").forEach((k) => k.addEventListener("mouseenter", snd.tick));
 
   /* ---------- accordion + click sounds ------------------------------ */
-  $$("details").forEach((d) => d.addEventListener("toggle", () => (d.open ? snd.click() : snd.tick())));
+  $$("details").forEach((d) => d.addEventListener("toggle", () => { if (d.open) { snd.click(); track("faq_ouverte", { question: (d.querySelector("summary")?.textContent || "").trim().slice(0, 80) }); } else snd.tick(); }));
   $$(".btn, .icon-btn").forEach((b) => b.addEventListener("pointerdown", () => snd.click()));
 
   /* ---------- stats tiles (RevenueCat) ---------------------------- */
@@ -595,7 +637,7 @@
           <div class="vshot"><span class="rank">0${i + 1}</span>${v.image ? `<img src="${v.image}" alt="${(v.hook || "").replace(/"/g, "&quot;")}" loading="lazy">` : `<div class="vghost"></div><span class="vhook">${v.hook || ""}</span>`}<span class="vplay"></span></div>
           <div class="vmeta">${v.vues ? `<span class="vviews">${fmtViews(v.vues)}<small>vues</small></span>` : `<span class="vviews vviews-na">${v.note || "voir sur TikTok"}</span>`}<span class="vformat">${v.format || "TikTok"}</span></div>
         </button>`).join("");
-      $$(".vcard", vgrid).forEach((c) => { setupTilt(c); c.addEventListener("click", () => openVideo(c.dataset.url)); });
+      $$(".vcard", vgrid).forEach((c, i) => { setupTilt(c); c.addEventListener("click", () => { track("post_ouvert", { rang: i + 1 }); openVideo(c.dataset.url); }); });
     } else {
       // ghost cards until the links are in data.js
       const ghosts = [["POV", "+ 10 000 vues"], ["Problème → Solution", "le breakout"], ["Avant/Après", "ta feature à l'écran"], ["Démo live", "l'app en payoff"]];

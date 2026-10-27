@@ -10,6 +10,12 @@ const SITE_DATA = {
      3. colle-la ci-dessous. Sans clé, le bouton ouvre un mail pré-rempli. */
   form: { web3formsKey: "1a8596dc-2c8e-447f-b7f0-077d3bece9b8", to: "sacha.clauzade@gmail.com" },
 
+  /* Statistiques de visite : Umami Cloud (gratuit, sans cookie, donc sans
+     bandeau). Crée un compte sur cloud.umami.is, ajoute le site
+     stage.sachaclauzade.me, et colle ici l'identifiant "Website ID".
+     Tant que c'est vide, rien n'est chargé ni envoyé. */
+  analytics: { umamiWebsiteId: "", umamiHost: "https://cloud.umami.is", domaines: "stage.sachaclauzade.me" },
+
   /* Tes posts TikTok qui ont marché, du plus vu au moins vu.
      "vues" vient de la grille du profil @bellysafe.app le 26 octobre 2026,
      "hook" est le texte de la première image, "image" la miniature

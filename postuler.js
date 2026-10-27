@@ -54,7 +54,9 @@
   /* ---------- steps ---------------------------------------------- */
   const steps = $$(".step"), dots = $$("#steps li");
   let cur = 1;
+  const track = (n, d) => { if (window.stageTrack) window.stageTrack(n, d); };
   function show(n) {
+    if (n > cur) track(n === 5 ? "candidature_envoyee" : "candidature_etape", n === 5 ? { app: state.app ? state.app.name : "sans fiche" } : { etape: n });
     cur = n;
     steps.forEach((s) => s.classList.toggle("is-active", +s.dataset.step === n));
     dots.forEach((d) => { const k = +d.dataset.step; d.classList.toggle("is-current", k === n); d.classList.toggle("is-done", k < n); });
@@ -110,7 +112,7 @@
   const FORM = (typeof SITE_DATA !== "undefined" && SITE_DATA.form) || {};
   const sendBtn = $("#sendBtn");
   sendBtn.addEventListener("click", async (e) => {
-    if (!FORM.web3formsKey) { if (window.stageFx) window.stageFx.confetti(e.clientX, e.clientY); toast("Ton mail s'ouvre avec ta candidature."); return; }
+    if (!FORM.web3formsKey) { track("candidature_mailto", {}); if (window.stageFx) window.stageFx.confetti(e.clientX, e.clientY); toast("Ton mail s'ouvre avec ta candidature."); return; }
     e.preventDefault();
     if (sendBtn.dataset.busy) return;
     sendBtn.dataset.busy = "1"; sendBtn.textContent = "Envoi…";
