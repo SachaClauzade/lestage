@@ -605,7 +605,7 @@
       else { priceNum.textContent = "490"; snd.coin(); }
     })(t0);
   }), { threshold: 0.5 }).observe(priceCard);
-  [buyBtn, $("#finalBtn"), $("#heroCta")].forEach((b) => b && b.addEventListener("click", (e) => { confetti(e.clientX, e.clientY); snd.win(); }));
+  [buyBtn, $("#finalBtn")].forEach((b) => b && b.addEventListener("click", (e) => { confetti(e.clientX, e.clientY); snd.win(); }));
 
   /* ---------- like button ------------------------------------------ */
   const likeBtn = $("#likeBtn"), likeCount = $("#likeCount");
