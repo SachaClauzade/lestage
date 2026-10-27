@@ -54,10 +54,10 @@ const SITE_DATA = {
       { mois: "2026-07", revenu: 3114.38 },
       { mois: "2026-08", revenu: 3414.21 },
       { mois: "2026-09", revenu: 4149.6 },
-      { mois: "2026-10", revenu: 5744.25 },
+      { mois: "2026-10", revenu: 6200 },
     ],
     stats: [
-      { valeur: 28244, suffixe: " €", label: "encaissés depuis janvier 2026", sub: "export RevenueCat, 12 mois" },
+      { valeur: 28700, suffixe: " €", label: "encaissés depuis janvier 2026", sub: "RevenueCat, 12 mois" },
       { valeur: 6200, suffixe: " €", label: "par mois avec BellySafe", sub: "100 % organique" },
       { valeur: 0, suffixe: " €", label: "dépensés en pub", sub: "depuis le premier jour" },
       { valeur: 2, suffixe: " mois", label: "à 200 vues avant que ça marche", sub: "sur ma première app" },
