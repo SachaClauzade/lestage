@@ -70,4 +70,13 @@ const SITE_DATA = {
       { valeur: 2, suffixe: " mois", label: "à 200 vues avant que ça marche", sub: "sur ma première app" },
     ],
   },
+  /* Avis de la bêta d'octobre 2026 (formulaire Tally, 23-25 oct.). Textes = leur avis public,
+     parfois raccourci sans changer le sens. image: chemin vers l'avatar Discord quand ils l'autorisent. */
+  avis: [
+    { prenom: "Jimmy", note: 5, image: "", texte: "Exactement ce pour quoi j'étais venu : une explication de A à Z sur comment faire du contenu organique sur TikTok pour son app. En plus, un accompagnement personnalisé pour chaque compte, avec des retours constructifs. Je recommande." },
+    { prenom: "Thomas", note: 5, image: "", texte: "Ton app arrive et tu ne connais pas la prochaine étape. Le meilleur moyen, c'est d'apprendre le marketing organique pour démarrer, et ici tu es au bon endroit." },
+    { prenom: "Pauline", note: 5, image: "", texte: "J'ai beaucoup appris : mieux travailler mes hooks, créer des posts plus accrocheurs, mieux mettre en avant mon app. Depuis que j'applique les conseils, le trafic vers mon app a augmenté. Les lives sont un vrai plus : Sacha analyse nos comptes et nos contenus, et il est très disponible dès qu'on a une question." },
+    { prenom: "Aubin", note: 5, image: "", texte: "Si tu viens de démarrer et que tu as peu de budget, le contenu organique sur TikTok est probablement le meilleur levier pour toi. Tous les tips nécessaires à ton démarrage sont dans cette formation." },
+    { prenom: "Georges", note: 5, image: "", texte: "Une formation parfaite, courte, avec des fondamentaux solides pour quelqu'un qui n'a jamais fait de marketing. Je recommande fortement." },
+  ],
 };

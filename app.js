@@ -640,7 +640,22 @@
 
   /* ---------- intro + reveal on scroll ---------------------------- */
   const intro = $("#intro");
-  const GROUPS = ".hero-copy, .phases, .kit-grid, .quotes, .stats, .vgrid, .acc, .live-facts, .grid-2, .about-in, .price-wrap, .final-in, .about-facts, .list-x, .cta-row";
+  /* ---------- avis de la bêta ---------------------------------- */
+  (() => {
+    const grid = $("#avisGrid"); if (!grid || typeof SITE_DATA === "undefined" || !SITE_DATA.avis) return;
+    const esc = (s) => String(s).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+    grid.innerHTML = SITE_DATA.avis.map((r, i) => `
+      <figure class="avis-card px boop" data-boop="rotate:${i % 2 ? 1 : -1}">
+        <div class="avis-head">
+          <span class="avatar">${r.image ? `<img src="${r.image}" alt="">` : esc(r.prenom[0])}</span>
+          <div><b>${esc(r.prenom)}</b><span class="mono">bêta d'octobre</span></div>
+          <span class="note5" aria-label="${r.note} sur 5">${Array.from({ length: 5 }, (_, k) => `<i class="${k < r.note ? "on" : ""}" style="--i:${k}"></i>`).join("")}</span>
+        </div>
+        <blockquote><p>${esc(r.texte)}</p></blockquote>
+      </figure>`).join("");
+  })();
+
+  const GROUPS = ".hero-copy, .phases, .kit-grid, .quotes, .stats, .vgrid, .acc, .live-facts, .grid-2, .about-in, .price-wrap, .final-in, .about-facts, .list-x, .cta-row, .avis-grid";
   // tag: direct children of each section's wrap arrive one by one; grids stagger their children
   $$(".section > .wrap, .hero > .wrap").forEach((wrap) => {
     $$(":scope > *", wrap).forEach((el) => {
