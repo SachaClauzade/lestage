@@ -36,45 +36,12 @@
     };
   }
 
-  /* ---------- sound: synthesized, no files ------------------------ */
-  let audioCtx = null;
-  let soundOn = store.get("stage.sound", true);
-  function ctx() {
-    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; } }
-    if (audioCtx.state === "suspended") audioCtx.resume();
-    return audioCtx;
-  }
-  function blip(freq = 880, dur = 0.045, type = "square", vol = 0.05, slide = 0) {
-    if (!soundOn) return;
-    const c = ctx(); if (!c) return;
-    const o = c.createOscillator(), g = c.createGain();
-    o.type = type; o.frequency.setValueAtTime(freq, c.currentTime);
-    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), c.currentTime + dur);
-    g.gain.setValueAtTime(vol, c.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
-    o.connect(g).connect(c.destination);
-    o.start(); o.stop(c.currentTime + dur + 0.02);
-  }
-  const snd = {
-    click: () => blip(rand(820, 900), 0.04, "square", 0.045),
-    tick: () => blip(rand(1400, 1600), 0.02, "square", 0.02),
-    pop: () => blip(300, 0.09, "triangle", 0.07, 500),
-    on: () => { blip(520, 0.06, "square", 0.05); setTimeout(() => blip(780, 0.07, "square", 0.05), 70); },
-    off: () => { blip(780, 0.06, "square", 0.05); setTimeout(() => blip(520, 0.08, "square", 0.05), 70); },
-    win: () => [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => blip(f, 0.12, "square", 0.05), i * 70)),
-    boom: () => blip(120, 0.25, "sawtooth", 0.06, -80),
-    whoosh: () => blip(200, 0.18, "triangle", 0.04, 900),
-    coin: () => { blip(988, 0.06, "square", 0.05); setTimeout(() => blip(1319, 0.14, "square", 0.05), 60); },
-  };
-
+  /* ---------- sound: off. The snd.* calls stay as no-ops so the
+     interactions keep their hooks if the sounds ever come back. ----- */
+  const noop = () => {};
+  const snd = { click: noop, tick: noop, pop: noop, on: noop, off: noop, win: noop, boom: noop, whoosh: noop, coin: noop };
   const soundBtn = $("#soundToggle");
-  function renderSound() {
-    if (!soundBtn) return;
-    soundBtn.setAttribute("aria-pressed", String(soundOn));
-    soundBtn.setAttribute("aria-label", soundOn ? "Désactiver les sons" : "Activer les sons");
-  }
-  renderSound();
-  if (soundBtn) soundBtn.addEventListener("click", () => { soundOn = !soundOn; store.set("stage.sound", soundOn); renderSound(); soundOn ? snd.on() : snd.off(); });
+  if (soundBtn) soundBtn.remove();
 
   /* ---------- theme ---------------------------------------------- */
   const themeBtn = $("#themeToggle");
