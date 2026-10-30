@@ -43,7 +43,7 @@
     <form id="genForm" novalidate>
       <p class="eyebrow mono">Candidat accepté</p>
       <h1 class="h2">Son lien, son mail.</h1>
-      <p class="p">Remplis, et le lien se construit à droite. Rien n'est envoyé nulle part : les infos sont encodées dans l'adresse elle-même.</p>
+      <p class="p">Remplis, et le lien se construit à droite. Rien n'est envoyé nulle part : les infos sont écrites dans l'adresse elle-même, après le dièse, donc jamais transmises au serveur.</p>
       <div class="row-2">
         <label class="field"><span>Prénom</span><input type="text" id="p" placeholder="Jimmy" autocomplete="off"></label>
         <label class="field"><span>Email</span><input type="email" id="e" placeholder="jimmy@exemple.com" autocomplete="off"></label>
@@ -87,11 +87,6 @@
   const BASE = location.hostname === "localhost" || location.hostname === "127.0.0.1" ? location.origin + "/bienvenue.html" : "https://stage.sachaclauzade.me/bienvenue.html";
   $("#h").value = CFG.delaiHeures || 48;
 
-  const encode = (obj) => {
-    const bytes = new TextEncoder().encode(JSON.stringify(obj));
-    let bin = ""; bytes.forEach((b) => (bin += String.fromCharCode(b)));
-    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  };
   const fmt = (dt) => dt.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 
   function build() {
@@ -100,7 +95,11 @@
     const d = new Date(Date.now() + h * 3600e3);
     $("#dl").value = fmt(d);
     if (!p) { $("#url").textContent = "Remplis au moins le prénom."; $("#mail").value = ""; $("#preview").href = "#"; return; }
-    const url = BASE + "#" + encode({ p, e, a, m, d: d.toISOString() });
+    const q = new URLSearchParams();
+    q.set("prenom", p); if (e) q.set("email", e); if (a) q.set("app", a); if (m) q.set("mot", m);
+    const z = (n) => String(n).padStart(2, "0");
+    q.set("jusqu", `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`); // heure locale, lue telle quelle par la page
+    const url = BASE + "#" + q.toString().replace(/%40/g, "@").replace(/%3A/g, ":");
     $("#url").textContent = url; $("#preview").href = url;
     $("#subject").textContent = `Le Stage · c'est oui${a ? " pour " + a : ""}`;
     $("#mail").value = [

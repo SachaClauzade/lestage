@@ -1,6 +1,6 @@
 /* ============================================================
    Page d'acceptation : lit le candidat dans le fragment de l'URL
-   (#<base64url de { p, e, a, m, d }>), remplit la page, et envoie vers
+   (#prenom=…&email=…&app=…&mot=…&jusqu=…), remplit la page, et envoie vers
    le Payment Link Stripe avec le mail pré-rempli et une référence.
    Le fragment n'est jamais envoyé au serveur ni aux statistiques.
    ============================================================ */
@@ -19,7 +19,15 @@
       return JSON.parse(new TextDecoder().decode(bytes));
     } catch { return null; }
   }
-  const data = decode(location.hash.slice(1));
+  function readHash(h) {
+    if (!h) return null;
+    if (h.includes("=")) {
+      const q = new URLSearchParams(h);
+      return { p: q.get("prenom") || "", e: q.get("email") || "", a: q.get("app") || "", m: q.get("mot") || "", d: q.get("jusqu") || "" };
+    }
+    return decode(h); // anciens liens, encodés
+  }
+  const data = readHash(location.hash.slice(1));
   if (!data || !data.p) { document.body.classList.add("is-generic"); track("acceptation_vue", { etat: "lien incomplet" }); return; }
 
   /* ---------- remplissage ------------------------------------------ */
