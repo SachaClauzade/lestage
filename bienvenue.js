@@ -39,7 +39,7 @@
   if (data.m) $("#sideMsg").textContent = data.m;
   if (prenom) document.title = `${prenom}, ta place · Le Stage`;
 
-  const deadline = data.d ? new Date(data.d) : CFG.dateLimite ? new Date(CFG.dateLimite) : null;
+  const deadline = data.d ? new Date(data.d) : null;
   const fmt = (dt) => dt.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
   const expired = deadline && !isNaN(deadline) && Date.now() > deadline.getTime();
   $("#rDeadline").textContent = deadline && !isNaN(deadline) ? (expired ? "délai passé" : "jusqu'au " + fmt(deadline)) : "quelques jours";

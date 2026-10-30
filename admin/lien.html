@@ -48,7 +48,7 @@
         <label class="field"><span>Email du candidat</span><input type="email" id="e" placeholder="jimmy@exemple.com" autocomplete="off"></label>
         <label class="field"><span>Prénom <em class="dim">(pour le « Bienvenue, … » et le mail)</em></span><input type="text" id="p" placeholder="Jimmy" autocomplete="off"></label>
       </div>
-      <p class="hint">Les places sont gardées jusqu'au <b id="dl"></b>. Ça se change dans data.js, ligne <code>stripe.dateLimite</code>.</p>
+      <p class="hint">La place est gardée <b id="hrs"></b> à partir de maintenant, soit jusqu'au <b id="dl"></b>. L'échéance part dans le lien. Ça se change dans data.js, ligne <code>stripe.delaiHeures</code>.</p>
     </form>
 
     <div class="out">
@@ -80,14 +80,17 @@
   if (!CFG.paymentLink) document.body.classList.add("is-nolink");
   const BASE = location.hostname === "localhost" || location.hostname === "127.0.0.1" ? location.origin + "/bienvenue.html" : "https://stage.sachaclauzade.me/bienvenue.html";
   const fmt = (dt) => dt.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-  const limite = CFG.dateLimite ? new Date(CFG.dateLimite) : null;
-  const limiteTxt = limite && !isNaN(limite) ? fmt(limite) : null;
-  $("#dl").textContent = limiteTxt || "(pas de date dans data.js)";
+  const HRS = +CFG.delaiHeures || 48;
+  const z = (n) => String(n).padStart(2, "0");
+  $("#hrs").textContent = HRS + " h";
 
   function build() {
     const e = $("#e").value.trim(), p = $("#p").value.trim();
+    const d = new Date(Date.now() + HRS * 3600e3), limiteTxt = fmt(d);
+    $("#dl").textContent = limiteTxt;
     if (!e) { $("#url").textContent = "Remplis l'email."; $("#mail").value = ""; $("#preview").href = "#"; return; }
-    const url = BASE + "#email=" + e + (p ? "&prenom=" + encodeURIComponent(p).replace(/%20/g, "+") : "");
+    const jusqu = `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`; // heure locale
+    const url = BASE + "#email=" + e + (p ? "&prenom=" + encodeURIComponent(p).replace(/%20/g, "+") : "") + "&jusqu=" + jusqu;
     $("#url").textContent = url; $("#preview").href = url;
     $("#mail").value = [
       `Salut${p ? " " + p : ""},`,
@@ -97,7 +100,7 @@
       `Tout est là, avec le récap et le paiement pour réserver ta place :`,
       url,
       ``,
-      limiteTxt ? `Je la garde jusqu'au ${limiteTxt}. Après, je la propose au suivant sur la liste.` : `Je la garde quelques jours. Après, je la propose au suivant sur la liste.`,
+      `Je la garde ${HRS} h, jusqu'au ${limiteTxt}. Après, je la propose au suivant sur la liste.`,
       ``,
       `Une question avant ? Réponds à ce mail.`,
       ``,
