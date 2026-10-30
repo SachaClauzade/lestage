@@ -21,7 +21,7 @@ const SITE_DATA = {
      La page bienvenue.html y ajoute l'email du candidat et son prénom + app
      en référence, pour que tu saches qui a payé.
      "delaiHeures" : combien de temps la place est gardée après l'envoi du lien. */
-  stripe: { paymentLink: "", delaiHeures: 48 },
+  stripe: { paymentLink: "https://buy.stripe.com/14A8wO2Oo1tM2VxeXIg3600", delaiHeures: 48 },
 
   analytics: { umamiWebsiteId: "8bb79345-8dd1-4b33-908c-92bfdd97d866", umamiHost: "https://cloud.umami.is", domaines: "stage.sachaclauzade.me" },
 
