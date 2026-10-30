@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F3F3F1">
+<title>Générer un lien · Le Stage</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="64x64" href="../favicon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<link rel="stylesheet" href="../postuler.css">
+<style>
+  .gen { padding: 56px 0 96px; }
+  .gen-in { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; max-width: 1100px; }
+  @media (max-width: 900px) { .gen-in { grid-template-columns: 1fr; gap: 32px; } .gen { padding: 32px 0 64px; } }
+  .gen .h2 { margin-bottom: 10px; }
+  .out { position: sticky; top: 90px; display: grid; gap: 18px; }
+  .out-box { padding: 18px 20px; }
+  .out-box .mono.lbl { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--g3); margin-bottom: 8px; }
+  .out-box .url { font-family: var(--display); font-size: 12px; line-height: 1.5; word-break: break-all; color: var(--ink); margin: 0; }
+  .out-box textarea { width: 100%; min-height: 260px; font: inherit; font-size: 14px; line-height: 1.5; color: var(--ink); background: var(--card); border: 1px solid var(--line-2); border-radius: 8px; padding: 12px 14px; resize: vertical; }
+  .copy { font-size: 11px; padding: 4px 10px; }
+  .hint { font-size: 13px; color: var(--g3); margin-top: 14px; line-height: 1.5; }
+  .warn { display: none; padding: 12px 14px; font-size: 13px; border-left: 3px solid var(--c1); background: color-mix(in srgb, var(--c1) 12%, var(--card)); }
+  .is-nolink .warn { display: block; }
+</style>
+</head>
+<body class="apply-body">
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="../index.html" class="brand boop" data-boop="y:-2"><i class="px-dot" aria-hidden="true"></i>Le Stage</a>
+    <span class="mono dim apply-crumb">Outil perso · lien d'acceptation</span>
+    <div class="nav-tools"><a href="../index.html" class="btn btn-sm boop" data-boop="y:-2">Le site</a></div>
+  </div>
+</header>
+
+<main class="gen">
+  <div class="wrap gen-in">
+    <form id="genForm" novalidate>
+      <p class="eyebrow mono">Candidat accepté</p>
+      <h1 class="h2">Son lien, son mail.</h1>
+      <p class="p">Remplis, et le lien se construit à droite. Rien n'est envoyé nulle part : les infos sont encodées dans l'adresse elle-même.</p>
+      <div class="row-2">
+        <label class="field"><span>Prénom</span><input type="text" id="p" placeholder="Jimmy" autocomplete="off"></label>
+        <label class="field"><span>Email</span><input type="email" id="e" placeholder="jimmy@exemple.com" autocomplete="off"></label>
+      </div>
+      <label class="field"><span>Son app</span><input type="text" id="a" placeholder="Nom de l'app" autocomplete="off"></label>
+      <label class="field"><span>Un mot pour lui <em class="dim">(affiché dans la bulle à gauche, facultatif)</em></span><textarea id="m" rows="3" placeholder="Ex. J'ai bien aimé ton angle sur les étudiants, on va le pousser dès le premier live."></textarea></label>
+      <div class="row-2">
+        <label class="field"><span>Place gardée pendant</span><input type="number" id="h" min="1" max="720" step="1"></label>
+        <label class="field"><span>Jusqu'au</span><input type="text" id="dl" readonly></label>
+      </div>
+      <p class="hint">Le délai se compte à partir de maintenant. Passé ce moment, la page dit au candidat que le délai est dépassé et de te répondre, mais tu peux toujours lui regénérer un lien.</p>
+    </form>
+
+    <div class="out">
+      <div class="warn px-card">Pas encore de lien Stripe dans data.js : la page dira au candidat que le paiement en ligne n'est pas ouvert. Colle le Payment Link dans <code>SITE_DATA.stripe.paymentLink</code> pour activer le bouton.</div>
+      <div class="out-box px-card">
+        <div class="mono lbl"><span>Le lien</span><button type="button" class="btn copy" data-copy="url">Copier</button></div>
+        <p class="url" id="url">Remplis au moins le prénom.</p>
+      </div>
+      <div class="out-box px-card">
+        <div class="mono lbl"><span>Le mail, prêt à coller</span><button type="button" class="btn copy" data-copy="mail">Copier</button></div>
+        <textarea id="mail" spellcheck="false"></textarea>
+        <p class="hint" style="margin-bottom:0">Objet suggéré : <b id="subject">Le Stage · c'est oui</b></p>
+      </div>
+      <div class="nav-row" style="margin-top:0"><a class="btn" id="preview" href="#" target="_blank" rel="noopener">Voir la page comme lui</a></div>
+    </div>
+  </div>
+</main>
+
+<div id="particles" aria-hidden="true"></div>
+<div id="toast" class="toast px" role="status" aria-live="polite" hidden></div>
+
+<script src="../data.js"></script>
+<script src="../app.js"></script>
+<script>
+(() => {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const CFG = (typeof SITE_DATA !== "undefined" && SITE_DATA.stripe) || {};
+  if (!CFG.paymentLink) document.body.classList.add("is-nolink");
+  const BASE = location.hostname === "localhost" || location.hostname === "127.0.0.1" ? location.origin + "/bienvenue.html" : "https://stage.sachaclauzade.me/bienvenue.html";
+  $("#h").value = CFG.delaiHeures || 48;
+
+  const encode = (obj) => {
+    const bytes = new TextEncoder().encode(JSON.stringify(obj));
+    let bin = ""; bytes.forEach((b) => (bin += String.fromCharCode(b)));
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  };
+  const fmt = (dt) => dt.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
+  function build() {
+    const p = $("#p").value.trim(), e = $("#e").value.trim(), a = $("#a").value.trim(), m = $("#m").value.trim();
+    const h = Math.max(1, +$("#h").value || 48);
+    const d = new Date(Date.now() + h * 3600e3);
+    $("#dl").value = fmt(d);
+    if (!p) { $("#url").textContent = "Remplis au moins le prénom."; $("#mail").value = ""; $("#preview").href = "#"; return; }
+    const url = BASE + "#" + encode({ p, e, a, m, d: d.toISOString() });
+    $("#url").textContent = url; $("#preview").href = url;
+    $("#subject").textContent = `Le Stage · c'est oui${a ? " pour " + a : ""}`;
+    $("#mail").value = [
+      `Salut ${p},`,
+      ``,
+      `J'ai lu ta candidature${a ? " pour " + a : ""}, et c'est oui : tu as une place dans la promo du 15 novembre.`,
+      ``,
+      `Tout est là, avec le récap et le paiement pour réserver ta place :`,
+      url,
+      ``,
+      `Je la garde jusqu'au ${fmt(d)}. Après, je la propose au suivant sur la liste.`,
+      ``,
+      `Une question avant ? Réponds à ce mail.`,
+      ``,
+      `À très vite,`,
+      `Sacha`,
+    ].join("\n");
+  }
+  ["p", "e", "a", "m", "h"].forEach((id) => $("#" + id).addEventListener("input", build));
+  build();
+
+  document.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
+    const text = b.dataset.copy === "url" ? $("#url").textContent : $("#mail").value;
+    if (!text || /Remplis/.test(text)) return;
+    try { await navigator.clipboard.writeText(text); b.textContent = "Copié"; setTimeout(() => (b.textContent = "Copier"), 1400); if (window.stageFx) window.stageFx.toast("Copié."); } catch { if (window.stageFx) window.stageFx.toast("Sélectionne et copie à la main."); }
+  }));
+})();
+</script>
+</body>
+</html>

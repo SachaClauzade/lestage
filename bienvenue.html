@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F3F3F1">
+<title>Tu es sélectionné · Le Stage</title>
+<meta name="description" content="Ta place dans la promo du 15 novembre.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
+<link rel="shortcut icon" href="favicon.ico?v=3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="postuler.css">
+<style>
+  .welcome { padding: 64px 0 96px; overflow-x: clip; }
+  .welcome-in { display: grid; grid-template-columns: 240px 1fr; gap: 64px; align-items: start; }
+  .welcome-side { position: sticky; top: 90px; }
+  .welcome-side .side-note { margin-top: 0; }
+  .welcome-side .side-note p + p { margin-top: 8px; }
+  .welcome-main { max-width: 640px; }
+  .welcome-main .h2 { margin-bottom: 14px; }
+  .welcome-main .h2 .px-dot { margin-left: .2em; vertical-align: baseline; }
+  .welcome-main .p { margin-bottom: 18px; }
+  .welcome .recap { margin-top: 26px; }
+  .before { margin: 36px 0 0; }
+  .before .h3 { margin-bottom: 6px; }
+  .before ol { margin: 14px 0 0; padding: 0; list-style: none; counter-reset: b; }
+  .before li { position: relative; padding: 12px 0 12px 42px; border-top: 1px solid var(--line); font-size: 15px; line-height: 1.5; color: var(--ink-2); counter-increment: b; }
+  .before li::before { content: counter(b, decimal-leading-zero); position: absolute; left: 0; top: 13px; font-family: var(--display); font-size: 12px; color: var(--px); }
+  .before li b { color: var(--ink); font-weight: 600; }
+  .pay { margin-top: 36px; padding: 24px; display: grid; gap: 14px; }
+  .pay-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .pay-head b { font-size: 26px; letter-spacing: -0.02em; }
+  .pay-head .mono { font-size: 12px; color: var(--g3); }
+  .pay .btn-xl { width: 100%; justify-content: center; }
+  .pay-foot { font-size: 12px; color: var(--g3); line-height: 1.5; margin: 0; }
+  .pay-foot b { color: var(--ink-2); font-weight: 500; }
+  .expired, .nolink { display: none; }
+  .is-expired .expired { display: block; }
+  .is-expired .pay-cta { display: none; }
+  .is-nolink .nolink { display: block; }
+  .is-nolink .pay-cta { display: none; }
+  .generic { display: none; }
+  .is-generic .generic { display: block; }
+  .is-generic .personal { display: none; }
+  @media (max-width: 860px) { .welcome-in { grid-template-columns: 1fr; gap: 28px; } .welcome { padding: 36px 0 72px; } .welcome-side { position: static; } .welcome-side .side-note { display: flex; } }
+  @media (max-width: 560px) { .pay { padding: 20px 16px; } .before li { padding-left: 34px; } }
+</style>
+</head>
+<body class="apply-body">
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="index.html" class="brand boop" data-boop="y:-2"><i class="px-dot" aria-hidden="true"></i>Le Stage</a>
+    <span class="mono dim apply-crumb">Promo du 15 novembre · ta place</span>
+    <div class="nav-tools">
+      <a href="index.html" class="btn btn-sm boop" data-boop="y:-2">Le site</a>
+    </div>
+  </div>
+</header>
+
+<main class="welcome">
+  <div class="wrap welcome-in">
+
+    <aside class="welcome-side">
+      <div class="side-note px-card">
+        <img src="assets/sacha.png" alt="" width="36" height="36">
+        <div>
+          <p id="sideMsg">J'ai lu ta candidature moi-même. Ta place est gardée le temps que tu la confirmes, et je te retrouve sur Discord dès que c'est fait.</p>
+          <p class="dim" style="margin-top:8px">Une question avant de réserver ? Réponds simplement au mail dans lequel tu as reçu ce lien.</p>
+        </div>
+      </div>
+    </aside>
+
+    <div class="welcome-main">
+      <p class="eyebrow mono">Candidature acceptée</p>
+
+      <div class="personal">
+        <h1 class="h2">Bienvenue, <span id="prenom">toi</span>.<span class="px-dot"></span></h1>
+        <p class="p" id="welcomeIntro">Ta candidature est acceptée. Il te reste une chose à faire : réserver ta place.</p>
+        <div class="recap px-card">
+          <dl>
+            <div><dt>Ton app</dt><dd id="rApp">—</dd></div>
+            <div><dt>Ton mail</dt><dd id="rEmail">—</dd></div>
+            <div><dt>Promo</dt><dd>15 novembre 2026 · quinze jours · 20 places</dd></div>
+            <div><dt>Place gardée</dt><dd id="rDeadline">—</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="generic">
+        <h1 class="h2">Ce lien est personnel.<span class="px-dot"></span></h1>
+        <p class="p">Il manque les informations qui vont avec. Reprends le lien complet depuis le mail où tu l'as reçu, ou écris-moi et je t'en renvoie un.</p>
+        <div class="nav-row"><a class="btn" href="index.html">Retour au site</a></div>
+      </div>
+
+      <section class="before personal">
+        <h3 class="h3">Avant de commencer</h3>
+        <ol>
+          <li><b>Tu réserves ta place ici.</b> Paiement unique de 490 €, par carte ou Apple Pay, via Stripe. Tu reçois le reçu par mail tout de suite.</li>
+          <li><b>Tu reçois ton invitation Discord</b> dans les 24 h, à l'adresse ci-dessus. C'est là que tout se passe : les lives, les replays écrits, le groupe.</li>
+          <li><b>Le 15 novembre, on démarre.</b> Deux lives par semaine en vocal, 1 h 30 chacun, et je passe sur ton compte à chaque fois.</li>
+          <li><b>D'ici là, prépare deux choses</b> : le lien de ton app sur le store, et un compte TikTok dédié à ton app, même vide. On le chauffe ensemble dès le premier jour.</li>
+        </ol>
+      </section>
+
+      <section class="pay px-card personal" id="pay">
+        <div class="pay-head"><b>490 €</b><span class="mono">paiement unique · tout compris</span></div>
+        <div class="pay-cta">
+          <a class="btn btn-ink btn-xl boop magnet" id="payBtn" href="#" data-boop="y:-3;scale:1.02" data-pixel-target>Réserver ma place</a>
+          <p class="pay-foot" style="margin-top:12px">Paiement sécurisé par <b>Stripe</b>. Le lien reprend ton mail, tu n'as rien à retaper. Si tu changes d'avis avant le 15 novembre, un message et je rembourse.</p>
+        </div>
+        <div class="expired">
+          <p class="p" style="margin:0">Le délai pour cette place est passé. Il en reste peut-être une : réponds au mail dans lequel tu as reçu ce lien et je te dis ça tout de suite.</p>
+        </div>
+        <div class="nolink">
+          <p class="p" style="margin:0">Le paiement en ligne n'est pas encore ouvert. Réponds au mail dans lequel tu as reçu ce lien et on règle ça ensemble.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div id="particles" aria-hidden="true"></div>
+<div id="toast" class="toast px" role="status" aria-live="polite" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script src="bienvenue.js"></script>
+</body>
+</html>

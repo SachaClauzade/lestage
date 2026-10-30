@@ -47,7 +47,7 @@
       $$("section[id]").forEach((sec) => {
         if (seen.has(sec.id)) return;
         const r = sec.getBoundingClientRect(), vis = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
-        if (vis >= Math.min(r.height * 0.25, 200)) { seen.add(sec.id); track("section_vue", { section: sec.id }); }
+        if (r.height > 0 && vis >= Math.min(r.height * 0.25, 200)) { seen.add(sec.id); track("section_vue", { section: sec.id }); }
       });
     };
     const onScroll = () => { if (!tick) tick = setTimeout(check, 120); };

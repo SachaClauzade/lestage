@@ -14,6 +14,15 @@ const SITE_DATA = {
      bandeau). Crée un compte sur cloud.umami.is, ajoute le site
      stage.sachaclauzade.me, et colle ici l'identifiant "Website ID".
      Tant que c'est vide, rien n'est chargé ni envoyé. */
+  /* Paiement des places : un Payment Link Stripe, créé dans ton tableau de
+     bord Stripe (Produit "Le Stage · promo du 15 novembre", 490 €, paiement
+     unique, redirection après paiement vers https://stage.sachaclauzade.me/merci.html,
+     limite de 20 paiements). Colle ici l'adresse https://buy.stripe.com/...
+     La page bienvenue.html y ajoute l'email du candidat et son prénom + app
+     en référence, pour que tu saches qui a payé.
+     "delaiHeures" : combien de temps la place est gardée après l'envoi du lien. */
+  stripe: { paymentLink: "", delaiHeures: 48 },
+
   analytics: { umamiWebsiteId: "8bb79345-8dd1-4b33-908c-92bfdd97d866", umamiHost: "https://cloud.umami.is", domaines: "stage.sachaclauzade.me" },
 
   /* Tes posts TikTok qui ont marché, du plus vu au moins vu.

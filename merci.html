@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F3F3F1">
+<title>C'est réservé · Le Stage</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
+<link rel="shortcut icon" href="favicon.ico?v=3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="postuler.css">
+<style>
+  .thanks { padding: 80px 0 120px; }
+  .thanks-in { max-width: 640px; }
+  .thanks .h2 .px-dot { margin-left: .2em; vertical-align: baseline; }
+  .next { margin: 28px 0 0; padding: 0; list-style: none; }
+  .next li { position: relative; padding: 12px 0 12px 42px; border-top: 1px solid var(--line); font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+  .next li::before { content: ""; position: absolute; left: 0; top: 19px; width: 10px; height: 10px; background: var(--px); }
+  .next li b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 560px) { .thanks { padding: 48px 0 80px; } }
+</style>
+</head>
+<body class="apply-body">
+
+<header class="nav">
+  <div class="wrap nav-in">
+    <a href="index.html" class="brand boop" data-boop="y:-2"><i class="px-dot" aria-hidden="true"></i>Le Stage</a>
+    <span class="mono dim apply-crumb">Promo du 15 novembre · place réservée</span>
+    <div class="nav-tools"><a href="index.html" class="btn btn-sm boop" data-boop="y:-2">Le site</a></div>
+  </div>
+</header>
+
+<main class="thanks">
+  <div class="wrap thanks-in">
+    <p class="eyebrow mono">Paiement reçu</p>
+    <h1 class="h2">C'est réservé.<span class="px-dot"></span></h1>
+    <p class="p">Ta place dans la promo du 15 novembre est à toi. Stripe t'envoie le reçu par mail dans la minute.</p>
+    <ul class="next">
+      <li><b>Dans les 24 h</b>, tu reçois ton invitation Discord, à l'adresse utilisée pour le paiement. Vérifie les spams si rien n'arrive.</li>
+      <li><b>D'ici le 15</b>, prépare le lien de ton app sur le store et un compte TikTok dédié, même vide.</li>
+      <li><b>Le 15 novembre</b>, premier live. Deux par semaine en vocal, 1 h 30, ton compte passé en revue à chaque fois.</li>
+    </ul>
+    <div class="nav-row"><a class="btn btn-ink btn-lg" href="index.html">Retour au site</a></div>
+  </div>
+</main>
+
+<div id="particles" aria-hidden="true"></div>
+<div id="toast" class="toast px" role="status" aria-live="polite" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  if (window.stageTrack) window.stageTrack("paiement_reussi", {});
+  if (window.stageFx && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) setTimeout(() => window.stageFx.confetti(innerWidth / 2, 180), 600);
+</script>
+</body>
+</html>
