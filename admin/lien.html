@@ -43,10 +43,10 @@
     <form id="genForm" novalidate>
       <p class="eyebrow mono">Candidat accepté</p>
       <h1 class="h2">Son lien, son mail.</h1>
-      <p class="p">L'email suffit : il part dans le lien, et Stripe le retrouve au paiement. Le prénom ne sert qu'au texte du mail.</p>
+      <p class="p">L'email et le prénom partent dans le lien : la page dit « Bienvenue, Jimmy » et Stripe retrouve le mail au paiement.</p>
       <div class="row-2">
         <label class="field"><span>Email du candidat</span><input type="email" id="e" placeholder="jimmy@exemple.com" autocomplete="off"></label>
-        <label class="field"><span>Prénom <em class="dim">(pour le mail seulement)</em></span><input type="text" id="p" placeholder="Jimmy" autocomplete="off"></label>
+        <label class="field"><span>Prénom <em class="dim">(pour le « Bienvenue, … » et le mail)</em></span><input type="text" id="p" placeholder="Jimmy" autocomplete="off"></label>
       </div>
       <p class="hint">Les places sont gardées jusqu'au <b id="dl"></b>. Ça se change dans data.js, ligne <code>stripe.dateLimite</code>.</p>
     </form>
@@ -87,7 +87,7 @@
   function build() {
     const e = $("#e").value.trim(), p = $("#p").value.trim();
     if (!e) { $("#url").textContent = "Remplis l'email."; $("#mail").value = ""; $("#preview").href = "#"; return; }
-    const url = BASE + "#email=" + e;
+    const url = BASE + "#email=" + e + (p ? "&prenom=" + encodeURIComponent(p).replace(/%20/g, "+") : "");
     $("#url").textContent = url; $("#preview").href = url;
     $("#mail").value = [
       `Salut${p ? " " + p : ""},`,
