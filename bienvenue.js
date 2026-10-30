@@ -28,18 +28,18 @@
     return decode(h); // anciens liens, encodés
   }
   const data = readHash(location.hash.slice(1));
-  if (!data || !data.p) { document.body.classList.add("is-generic"); track("acceptation_vue", { etat: "lien incomplet" }); return; }
+  if (!data || !(data.e || data.p)) { document.body.classList.add("is-generic"); track("acceptation_vue", { etat: "lien incomplet" }); return; }
 
   /* ---------- remplissage ------------------------------------------ */
   const prenom = String(data.p).trim(), email = String(data.e || "").trim(), app = String(data.a || "").trim();
-  $("#prenom").textContent = prenom;
-  $("#rApp").textContent = app || "—";
+  $("#hello").textContent = prenom ? `Bienvenue, ${prenom}.` : "Bienvenue.";
   $("#rEmail").textContent = email || "—";
-  if (app) $("#welcomeIntro").textContent = `J'ai lu ta candidature pour ${app}, et c'est oui. Il te reste une chose à faire : réserver ta place.`;
+  if (app) { $("#rApp").textContent = app; $("#welcomeIntro").textContent = `J'ai lu ta candidature pour ${app}, et c'est oui. Il te reste une chose à faire : réserver ta place.`; }
+  else $("#rowApp").remove();
   if (data.m) $("#sideMsg").textContent = data.m;
-  document.title = `${prenom}, ta place · Le Stage`;
+  if (prenom) document.title = `${prenom}, ta place · Le Stage`;
 
-  const deadline = data.d ? new Date(data.d) : null;
+  const deadline = data.d ? new Date(data.d) : CFG.dateLimite ? new Date(CFG.dateLimite) : null;
   const fmt = (dt) => dt.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
   const expired = deadline && !isNaN(deadline) && Date.now() > deadline.getTime();
   $("#rDeadline").textContent = deadline && !isNaN(deadline) ? (expired ? "délai passé" : "jusqu'au " + fmt(deadline)) : "quelques jours";
@@ -52,7 +52,7 @@
   else {
     const u = new URL(CFG.paymentLink);
     if (email) u.searchParams.set("prefilled_email", email);
-    u.searchParams.set("client_reference_id", slug(prenom + (app ? "-" + app : "")) || "candidat");
+    u.searchParams.set("client_reference_id", slug([prenom, app].filter(Boolean).join("-") || email.split("@")[0]) || "candidat");
     btn.href = u.toString();
     btn.addEventListener("click", () => track("paiement_clic", { app: app || "—" }));
   }

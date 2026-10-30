@@ -20,8 +20,9 @@ const SITE_DATA = {
      limite de 20 paiements). Colle ici l'adresse https://buy.stripe.com/...
      La page bienvenue.html y ajoute l'email du candidat et son prénom + app
      en référence, pour que tu saches qui a payé.
-     "delaiHeures" : combien de temps la place est gardée après l'envoi du lien. */
-  stripe: { paymentLink: "https://buy.stripe.com/14A8wO2Oo1tM2VxeXIg3600", delaiHeures: 48 },
+     "dateLimite" : jusqu'à quand les places sont gardées (affiché sur la page
+     et dans le mail ; vide = "quelques jours", jamais de blocage). */
+  stripe: { paymentLink: "https://buy.stripe.com/14A8wO2Oo1tM2VxeXIg3600", dateLimite: "2026-11-12T23:59" },
 
   analytics: { umamiWebsiteId: "8bb79345-8dd1-4b33-908c-92bfdd97d866", umamiHost: "https://cloud.umami.is", domaines: "stage.sachaclauzade.me" },
 
