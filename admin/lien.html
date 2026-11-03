@@ -82,7 +82,8 @@
   const fmt = (dt) => dt.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) + " à " + dt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
   const HRS = +CFG.delaiHeures || 48;
   const z = (n) => String(n).padStart(2, "0");
-  $("#hrs").textContent = HRS + " h";
+  const duree = HRS % 24 === 0 && HRS >= 48 ? HRS / 24 + " jours" : HRS + " h";
+  $("#hrs").textContent = duree;
 
   function build() {
     const e = $("#e").value.trim(), p = $("#p").value.trim();
@@ -100,7 +101,7 @@
       `Tout est là, avec le récap et le paiement pour réserver ta place :`,
       url,
       ``,
-      `Je la garde ${HRS} h, jusqu'au ${limiteTxt}. Après, je la propose au suivant sur la liste.`,
+      `Je la garde ${duree}, jusqu'au ${limiteTxt}. Après, je la propose au suivant sur la liste.`,
       ``,
       `Une question avant ? Réponds à ce mail.`,
       ``,
