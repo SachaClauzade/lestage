@@ -24,6 +24,16 @@ const SITE_DATA = {
      le générateur écrit l'échéance dans le lien. */
   stripe: { paymentLink: "https://buy.stripe.com/14A8wO2Oo1tM2VxeXIg3600", delaiHeures: 120 },
 
+  /* L'espace vidéos (espace.html). L'adresse et la clé sont publiques, c'est
+     normal : sans être sur la liste de la promo, elles n'ouvrent rien.
+     Remplies par outils/installer-espace.mjs, "discord" par outils/creer-discord.mjs.
+     Vides : la page affiche « bientôt » en ligne, et un mode démo en local. */
+  espace: {
+    supabaseUrl: "",
+    supabaseCle: "",
+    discord: {},
+  },
+
   analytics: { umamiWebsiteId: "8bb79345-8dd1-4b33-908c-92bfdd97d866", umamiHost: "https://cloud.umami.is", domaines: "stage.sachaclauzade.me" },
 
   /* Tes posts TikTok qui ont marché, du plus vu au moins vu.

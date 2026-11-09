@@ -169,6 +169,7 @@
     }
     layer.appendChild(frag);
   }
+  window.stageBurst = burst;
   function confetti(x, y) {
     burst(x, y, { n: 44, r: 240, sizes: [5, 11], dur: [900, 1600] });
     setTimeout(() => burst(x + rand(-60, 60), y + rand(-30, 30), { n: 26, r: 170, sizes: [4, 8] }), 120);
