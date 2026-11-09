@@ -108,7 +108,8 @@
           objectif: plein ? "Une phrase qui dit ce que tu auras fait ce soir." : null,
           video: plein ? "https://youtu.be/aqz-KE-bpKQ" : null,
           taches: plein ? "Regarder la vidéo en entier\nÉcrire 5 idées de posts\nPublier ton premier post" : null,
-          ressources: plein ? "Le Sheet du jour | https://docs.google.com/\nLes prompts (PDF) | https://example.com/prompts.pdf" : null };
+          ressources: plein ? "Le Sheet du jour | https://docs.google.com/\nLes prompts (PDF) | https://example.com/prompts.pdf" : null,
+          encart: plein ? "À savoir\n**Une règle en gras**, puis la suite de la phrase.\nUn second paragraphe, plus court." : null };
       },
       async deconnexion() { memoire.del("demo.session"); },
     };
@@ -365,6 +366,12 @@
     }).join("");
     return `<nav class="rail" aria-label="Les jours">${p}<a class="rail-tout" href="espace.html" data-go>Les ${d.jours.length} jours</a></nav>`;
   }
+  function blocEncart(s) {
+    const [titre, ...corps] = lignes(s);
+    if (!titre) return "";
+    const gras = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    return `<section class="encart"><h2>${esc(titre)}</h2>${corps.map((l) => `<p>${gras(l)}</p>`).join("")}</section>`;
+  }
   function ressource(l) {
     const k = l.lastIndexOf("|");
     const texte = (k > 0 ? l.slice(0, k) : l).trim(), url = (k > 0 ? l.slice(k + 1) : l).trim();
@@ -399,6 +406,7 @@
     const plan = taches.length ? `<section><h2 class="jb-t">Plan d'action</h2><ul class="plan">${taches.map((t, i) => `<li><label><input type="checkbox" data-i="${i}" ${coches[i] ? "checked" : ""}><span class="box" aria-hidden="true"></span><span class="txt">${esc(t)}</span></label></li>`).join("")}</ul><p class="plan-note" id="note"></p></section>` : "";
     const cta = [DISCORD.jours && DISCORD.jours[n] && lien(DISCORD.jours[n], "btn btn-ink", `Discuter dans #jour-${n}`), DISCORD.contenu && lien(DISCORD.contenu, "btn", "Montrer mon contenu")].filter(Boolean).join("");
     const cote = res.length || cta ? `<aside>${res.length ? `<h2 class="jb-t">Ressources</h2><ul class="res">${res.join("")}</ul>` : ""}${cta ? `<div class="jb-cta">${cta}</div>` : ""}</aside>` : "";
+    const encart = blocEncart(j.encart), gauche = plan || encart ? `<div>${plan}${encart}</div>` : "";
     const avant = d.jours[n - 2], apres = d.jours[n];
     const accessible = (x) => x && (x.ouvert || d.staff);
     const pager = `<nav class="pager">${accessible(avant) ? `<a href="espace.html?jour=${n - 1}" data-go>← Jour ${n - 1}</a>` : "<i></i>"}${accessible(apres) ? `<a href="espace.html?jour=${n + 1}" data-go>Jour ${n + 1} →</a>` : apres ? `<span>Jour ${n + 1} · ${esc(court(ms(apres)))} à ${esc(heure(ms(apres)))}</span>` : "<i></i>"}</nav>`;
@@ -411,7 +419,7 @@
         ${j.apercu ? `<p class="apercu">Aperçu : s'ouvre pour la promo ${esc(court(quand))} à ${esc(heure(quand))}</p>` : ""}
       </header>
       <div class="player">${player}</div>
-      ${plan || cote ? `<div class="jb ${plan && cote ? "" : "is-seul"}">${plan}${cote}</div>` : ""}
+      ${gauche || cote ? `<div class="jb ${gauche && cote ? "" : "is-seul"}">${gauche}${cote}</div>` : ""}
       ${pager}
     </div>`;
     track("espace_jour", { jour: n });

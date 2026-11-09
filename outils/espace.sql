@@ -8,7 +8,8 @@
 --            staff = true voit tous les jours en avance.
 --   jours  : une ligne par jour. titre, objectif, video (lien YouTube non
 --            répertorié, Loom ou Bunny), taches (une par ligne),
---            ressources (une par ligne : Texte | https://lien).
+--            ressources (une par ligne : Texte | https://lien),
+--            encart (1re ligne = titre, puis un paragraphe par ligne, **gras**).
 --            ouvre_le s'affiche en UTC : 05:00 UTC = 6 h à Paris en novembre.
 --
 -- Aucune politique d'accès sur ces tables : personne ne les lit
@@ -32,6 +33,8 @@ create table if not exists public.jours (
   taches     text,
   ressources text
 );
+
+alter table public.jours add column if not exists encart text;
 
 alter table public.eleves enable row level security;
 alter table public.jours  enable row level security;
@@ -116,7 +119,7 @@ begin
   return jsonb_build_object(
     'numero', j.numero, 'titre', j.titre, 'ouvre_le', j.ouvre_le,
     'objectif', j.objectif, 'video', j.video,
-    'taches', j.taches, 'ressources', j.ressources,
+    'taches', j.taches, 'ressources', j.ressources, 'encart', j.encart,
     'ouvert', j.ouvre_le <= now(),
     'apercu', j.ouvre_le > now(),
     'maintenant', now()

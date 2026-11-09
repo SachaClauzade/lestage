@@ -29,8 +29,8 @@ const SITE_DATA = {
      Remplies par outils/installer-espace.mjs, "discord" par outils/creer-discord.mjs.
      Vides : la page affiche « bientôt » en ligne, et un mode démo en local. */
   espace: {
-    supabaseUrl: "",
-    supabaseCle: "",
+    supabaseUrl: "https://xnjgknrhttrjrdnniwor.supabase.co",
+    supabaseCle: "sb_publishable_tS64ArguAaCXP2UZhgyA-Q_WRaKtEP7",
     discord: {},
   },
 

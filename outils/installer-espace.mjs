@@ -30,7 +30,7 @@ async function lireEnv() {
 function arreter(msg) { console.error(`\n✗ ${msg}\n`); process.exit(1); }
 
 const env = await lireEnv();
-for (const k of ["SUPABASE_PROJECT_REF", "SUPABASE_ACCESS_TOKEN", "RESEND_API_KEY"]) {
+for (const k of ["SUPABASE_PROJECT_REF", "SUPABASE_ACCESS_TOKEN"]) {
   if (!env[k]) arreter(`${k} est vide dans .env.`);
 }
 
@@ -55,25 +55,38 @@ try {
   await supabase("POST", `${projet}/database/query`, { query: await readFile(fichier("outils/espace.sql"), "utf8") });
 
   console.log("2/5  La connexion par code et l'envoi des mails");
-  const gabarit = await readFile(fichier("outils/mail-code.html"), "utf8");
   await supabase("PATCH", `${projet}/config/auth`, {
     site_url: SITE,
     external_email_enabled: true,
     mailer_otp_exp: 600,
     mailer_otp_length: 6,
-    mailer_subjects_magic_link: SUJET,
-    mailer_templates_magic_link_content: gabarit,
-    mailer_subjects_confirmation: SUJET,
-    mailer_templates_confirmation_content: gabarit,
-    smtp_admin_email: EXPEDITEUR,
-    smtp_sender_name: "Le Stage",
-    smtp_host: "smtp.resend.com",
-    smtp_port: "465",
-    smtp_user: "resend",
-    smtp_pass: env.RESEND_API_KEY,
-    smtp_max_frequency: 60,
   });
-  await supabase("PATCH", `${projet}/config/auth`, { rate_limit_email_sent: 100 });
+  if (env.RESEND_API_KEY) {
+    await supabase("PATCH", `${projet}/config/auth`, {
+      smtp_admin_email: EXPEDITEUR,
+      smtp_sender_name: "Le Stage",
+      smtp_host: "smtp.resend.com",
+      smtp_port: "465",
+      smtp_user: "resend",
+      smtp_pass: env.RESEND_API_KEY,
+      smtp_max_frequency: 60,
+      rate_limit_email_sent: 100,
+    });
+  } else {
+    console.log("     Pas de clé Resend : envoi de test de Supabase, 2 mails par heure, vers ton adresse seulement.");
+  }
+  const gabarit = await readFile(fichier("outils/mail-code.html"), "utf8");
+  try {
+    await supabase("PATCH", `${projet}/config/auth`, {
+      mailer_subjects_magic_link: SUJET,
+      mailer_templates_magic_link_content: gabarit,
+      mailer_subjects_confirmation: SUJET,
+      mailer_templates_confirmation_content: gabarit,
+    });
+  } catch (e) {
+    if (env.RESEND_API_KEY) throw e;
+    console.warn(`     ⚠ Modèle de mail non appliqué sans Resend (${e.message}).`);
+  }
 
   console.log("3/5  La liste : seules les adresses inscrites reçoivent un code");
   try {
@@ -95,8 +108,20 @@ try {
     .replace(/supabaseCle: ".*?"/, () => `supabaseCle: "${publique.api_key}"`);
   await writeFile(fichier("data.js"), data);
 
+  if (!env.RESEND_API_KEY) {
+    console.log("5/5  Resend : pas encore de clé, étape passée");
+    console.log("\n✓ Supabase est prêt. Ajoute RESEND_API_KEY dans .env et relance pour envoyer les codes à toute la promo.\n");
+    process.exit(0);
+  }
   console.log("5/5  Le domaine d'envoi chez Resend");
-  const liste = await resend("GET", "/domains");
+  let liste;
+  try {
+    liste = await resend("GET", "/domains");
+  } catch (e) {
+    if (e.status !== 401 || !/restricted/.test(e.message)) throw e;
+    console.log(`\n✓ Supabase est prêt. Ta clé Resend sert seulement à envoyer : vérifie que ${DOMAINE} est bien « Verified » sur resend.com/domains.\n`);
+    process.exit(0);
+  }
   let domaine = (liste.data || []).find((d) => d.name === DOMAINE);
   domaine = domaine ? await resend("GET", `/domains/${domaine.id}`) : await resend("POST", "/domains", { name: DOMAINE });
   if (domaine.status === "verified") {
