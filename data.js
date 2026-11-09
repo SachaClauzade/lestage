@@ -31,7 +31,7 @@ const SITE_DATA = {
   espace: {
     supabaseUrl: "https://xnjgknrhttrjrdnniwor.supabase.co",
     supabaseCle: "sb_publishable_tS64ArguAaCXP2UZhgyA-Q_WRaKtEP7",
-    discord: {},
+    discord: {"jours":{"1":"https://discord.com/channels/1569367530693337233/1569369157852471427","2":"https://discord.com/channels/1569367530693337233/1569369165037314048","3":"https://discord.com/channels/1569367530693337233/1569369172377473144","4":"https://discord.com/channels/1569367530693337233/1569369177796513886","5":"https://discord.com/channels/1569367530693337233/1569369184133976064","6":"https://discord.com/channels/1569367530693337233/1569369188865278112","7":"https://discord.com/channels/1569367530693337233/1569369192988279025","8":"https://discord.com/channels/1569367530693337233/1569369197954334741","9":"https://discord.com/channels/1569367530693337233/1569369202513412217","10":"https://discord.com/channels/1569367530693337233/1569369208364736595"},"general":"https://discord.com/channels/1569367530693337233/1569367534405157087","contenu":"https://discord.com/channels/1569367530693337233/1569369148482396342"},
   },
 
   analytics: { umamiWebsiteId: "8bb79345-8dd1-4b33-908c-92bfdd97d866", umamiHost: "https://cloud.umami.is", domaines: "stage.sachaclauzade.me" },

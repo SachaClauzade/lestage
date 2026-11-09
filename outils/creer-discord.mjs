@@ -7,8 +7,9 @@
    2. discord.com/developers/applications > New Application > Bot >
       Reset Token, et colle-le dans .env (DISCORD_BOT_TOKEN).
    3. Lance le script : il affiche un lien pour inviter le bot sur le serveur.
-   4. Relance-le : il crée les salons, poste le lien de la vidéo dans chaque
-      jour, et écrit les adresses des salons dans data.js.
+   4. Relance-le : il crée les salons et écrit leurs adresses dans data.js.
+   5. node outils/brancher-annonces.mjs : le lien de chaque jour sera posté
+      dans son salon à 6 h, le matin même. Ce script-ci n'en poste aucun.
 
    Pour ajouter un salon plus tard : ajoute-le à STRUCTURE et relance.
    Ce qui existe déjà n'est ni recréé ni reposté.
@@ -20,11 +21,9 @@ const SITE = "https://stage.sachaclauzade.me/espace.html";
 const API = "https://discord.com/api/v10";
 const NB_JOURS = 10;
 
-const lienJour = (n) => `${SITE}?jour=${n}`;
 const jour = (n) => ({
   nom: `jour-${n}`,
-  sujet: `La vidéo du jour ${n} : ${lienJour(n)}`,
-  message: `**Jour ${n}**\nTa vidéo : <${lienJour(n)}>\nTes questions sur ce jour, c'est ici.`,
+  sujet: `La vidéo du jour ${n} tombe ici à 6 h. Tes questions, c'est ici aussi.`,
   cle: n,
 });
 const STRUCTURE = [
@@ -108,11 +107,14 @@ for (const [iCat, groupe] of STRUCTURE.entries()) {
       salon = await discord("PATCH", `/channels/${salon.id}`, { parent_id: cat.id, topic: salon.topic || s.sujet, position: i });
       console.log(`~ #${s.nom} rangé dans ${groupe.categorie}`);
     }
-    const derniers = await discord("GET", `/channels/${salon.id}/messages?limit=50`);
-    if (!derniers.some((m) => m.author.id === bot.id)) {
-      const msg = await discord("POST", `/channels/${salon.id}/messages`, { content: s.message });
-      await discord("PUT", `/channels/${salon.id}/pins/${msg.id}`);
-      console.log(`  message épinglé dans #${s.nom}`);
+    if (s.message) {
+      const derniers = await discord("GET", `/channels/${salon.id}/messages?limit=50`);
+      /* type 0 = un vrai message : « Pixel vient d'arriver » ne compte pas */
+      if (!derniers.some((m) => m.author.id === bot.id && m.type === 0)) {
+        const msg = await discord("POST", `/channels/${salon.id}/messages`, { content: s.message });
+        await discord("PUT", `/channels/${salon.id}/pins/${msg.id}`);
+        console.log(`  message épinglé dans #${s.nom}`);
+      }
     }
     if (typeof s.cle === "number") liens.jours[s.cle] = url(salon.id);
     else liens[s.cle] = url(salon.id);
