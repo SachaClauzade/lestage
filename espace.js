@@ -77,6 +77,8 @@
       async verifierCode(email, token) { const { error } = await sb.auth.verifyOtp({ email, token, type: "email" }); if (error) throw traduire(error); },
       espace: () => rpc("espace"),
       jour: (n) => rpc("espace_jour", { n }),
+      dossier: () => rpc("dossier"),
+      enregistrerDossier: (champs) => rpc("dossier_enregistrer", { champs }),
       async deconnexion() { await sb.auth.signOut(); },
     };
   }
@@ -109,8 +111,14 @@
           video: plein ? "https://youtu.be/aqz-KE-bpKQ" : null,
           taches: plein ? "Regarder la vidéo en entier\nÉcrire 5 idées de posts\nPublier ton premier post" : null,
           ressources: plein ? "Le Sheet du jour | https://docs.google.com/\nLes prompts (PDF) | https://example.com/prompts.pdf" : null,
-          encart: plein ? "À savoir\n**Une règle en gras**, puis la suite de la phrase.\nUn second paragraphe, plus court." : null };
+          encart: plein ? "À savoir\n**Une règle en gras**, puis la suite de la phrase.\nUn second paragraphe, plus court." : null,
+          prompts: plein ? [
+            { titre: "Tes mots-clés, depuis ta cible", quand: "Pour ta liste de départ.", texte: "Tu es un expert TikTok.\n\nMA CIBLE\n- Qui elle est : {{profil|[profil]}}\n- Son objectif n°1 : {{envie_objectif|[envie]}}\n\nMa cible en entier :\n{{cible|[colle ta cible]}}\n\nDonne-moi 15 recherches TikTok, une par ligne.", apres: "Garde celles qui sonnent comme ta cible." },
+            { titre: "Ton app, tenue en main", texte: "Crée une photo ultra-réaliste, au format vertical.\nLa scène se déroule [LIEU].", outil: "image" },
+          ] : null };
       },
+      async dossier() { await attendre(120); return { donnees: memoire.get("demo.dossier") || {}, modifie_le: null }; },
+      async enregistrerDossier(champs) { await attendre(300); memoire.set("demo.dossier", { ...(memoire.get("demo.dossier") || {}), ...champs }); return { modifie_le: new Date().toISOString() }; },
       async deconnexion() { memoire.del("demo.session"); },
     };
   }
@@ -305,9 +313,15 @@
   }
 
   async function vueParcours(id) {
-    const d = await api.espace();
+    const [d, dr] = await Promise.all([api.espace(), api.dossier().catch(() => null)]);
     if (id !== routeId) return;
     caler(d.maintenant);
+    const faits = dr ? remplis(dr.donnees || {}) : 0;
+    const carte = dr ? `<a class="dos-carte" href="espace.html?dossier" data-go>
+        <span class="dos-carte-t">Mon dossier</span>
+        <span class="dos-carte-p">Ton app, ta cible, tes mots-clés. Tu le remplis au fil des jours, tes prompts s'en servent.</span>
+        <span class="dos-carte-n mono">${faits} / ${CHAMPS.length}${faits === CHAMPS.length ? " · complet" : ""}</span>
+      </a>` : "";
     const ouverts = d.jours.filter((j) => j.ouvert);
     const dernier = ouverts[ouverts.length - 1];
     const suivant = d.jours.find((j) => !j.ouvert);
@@ -339,6 +353,7 @@
     const sall = [DISCORD.general && lien(DISCORD.general, "btn", "#général"), DISCORD.contenu && lien(DISCORD.contenu, "btn", "#montre-ton-contenu")].filter(Boolean).join("");
     vue.innerHTML = `<div class="esp-w">${une}
       <ul class="cal">${d.jours.map((j) => caseJour(j, d, aujCase)).join("")}</ul>
+      ${carte}
       ${sall ? `<section class="dsc"><p>Sur le Discord</p>${sall}</section>` : ""}
     </div>`;
     document.title = "Ton espace · Le Stage";
@@ -372,6 +387,63 @@
     const gras = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
     return `<section class="encart"><h2>${esc(titre)}</h2>${corps.map((l) => `<p>${gras(l)}</p>`).join("")}</section>`;
   }
+  /* Les prompts : le texte se remplit sur place, puis part dans le presse-papiers ou dans Claude. */
+  /* Dans un prompt, {{cle|texte de repli}} prend la valeur du dossier, ou le repli s'il est vide. */
+  function ciblePour(d) {
+    const L = [["Profil", d.profil], ["Son objectif n°1", d.envie_objectif], ["Ce qu'elle n'arrive pas à obtenir seule", d.envie_seule],
+      ["Ce qui la bloque le plus", d.douleur_blocage], ["Sa plus grande peur", d.douleur_peur], ["Ce qu'elle a déjà essayé", d.douleur_essaye]]
+      .filter((x) => String(x[1] ?? "").trim());
+    return L.length >= 3 ? L.map(([a, b]) => `- ${a} : ${String(b).trim()}`).join("\n") : "";
+  }
+  const remplir = (t, d) => String(t).replace(/\{\{(\w+)\|([^}]*)\}\}/g, (_, k, repli) => (k === "cible" ? ciblePour(d) : String(d[k] ?? "").trim()) || repli);
+  const promptsDe = (liste, dos) => (Array.isArray(liste) ? liste : []).filter((p) => p && p.texte).map((p) => ({ ...p, texte: remplir(p.texte, dos || {}) }));
+  const brouillon = (n, i, base) => { const b = store.get(`stage.espace.p${n}`, {})[i]; return b && b.b === base && typeof b.v === "string" ? b.v : base; };
+
+  function blocPrompts(liste, n, dos) {
+    const ps = promptsDe(liste, dos);
+    if (!ps.length) return "";
+    return `<section class="prompts"><h2 class="jb-t">Les prompts du jour</h2><p class="prompts-aide">Ils reprennent ce que tu as écrit dans <a href="espace.html?dossier" data-go>ton dossier</a>. Ce qui reste entre [crochets], complète-le là-bas ou ici. Un prompt propose, c'est toi qui choisis.</p>${ps.map((p, i) => {
+      const texte = brouillon(n, i, p.texte);
+      return `<article class="prompt" data-i="${i}">
+        <h3>${esc(p.titre || `Prompt ${i + 1}`)}</h3>
+        ${p.quand ? `<p class="prompt-q"><b>Quand</b> ${esc(p.quand)}</p>` : ""}
+        <textarea spellcheck="false" aria-label="${esc(p.titre || "Prompt")}" rows="${Math.min(14, Math.max(5, Math.ceil(texte.length / 70)))}">${esc(texte)}</textarea>
+        <div class="prompt-b">
+          <button type="button" class="btn btn-ink" data-copier>Copier</button>
+          ${p.outil === "image" ? '<span class="prompt-n">À coller dans un outil qui génère des images, avec ta capture en pièce jointe.</span>' : '<button type="button" class="btn" data-claude>Ouvrir dans Claude ↗</button>'}
+          <button type="button" class="prompt-r" data-reset ${texte === p.texte ? "hidden" : ""}>Revenir au texte d'origine</button>
+        </div>
+        ${p.apres ? `<p class="prompt-a"><b>Avec la réponse</b> ${esc(p.apres)}</p>` : ""}
+      </article>`;
+    }).join("")}</section>`;
+  }
+  function brancherPrompts(liste, n, dos) {
+    const ps = promptsDe(liste, dos);
+    $$(".prompt").forEach((el) => {
+      const i = +el.dataset.i, p = ps[i], zone = $("textarea", el), reset = $("[data-reset]", el);
+      if (!p || !zone) return;
+      const garder = () => {
+        const b = store.get(`stage.espace.p${n}`, {});
+        if (zone.value === p.texte) delete b[i]; else b[i] = { b: p.texte, v: zone.value };
+        store.set(`stage.espace.p${n}`, b);
+        reset.hidden = zone.value === p.texte;
+      };
+      zone.addEventListener("input", garder);
+      reset.addEventListener("click", () => { zone.value = p.texte; garder(); });
+      $("[data-copier]", el).addEventListener("click", async (e) => {
+        const b = e.currentTarget;
+        try { await navigator.clipboard.writeText(zone.value); }
+        catch { zone.select(); try { document.execCommand("copy"); } catch {} }
+        b.textContent = "Copié";
+        setTimeout(() => { b.textContent = "Copier"; }, 1600);
+        track("espace_prompt", { jour: n, prompt: i, action: "copier" });
+      });
+      $("[data-claude]", el)?.addEventListener("click", () => {
+        window.open(`https://claude.ai/new?q=${encodeURIComponent(zone.value)}`, "_blank", "noopener");
+        track("espace_prompt", { jour: n, prompt: i, action: "claude" });
+      });
+    });
+  }
   function ressource(l) {
     const k = l.lastIndexOf("|");
     const texte = (k > 0 ? l.slice(0, k) : l).trim(), url = (k > 0 ? l.slice(k + 1) : l).trim();
@@ -380,8 +452,9 @@
   }
 
   async function vueJour(n, id) {
-    const [d, j] = await Promise.all([api.espace(), api.jour(n)]);
+    const [d, j, dr] = await Promise.all([api.espace(), api.jour(n), api.dossier().catch(() => null)]);
     if (id !== routeId) return;
+    const dos = (dr && dr.donnees) || {};
     caler(j.maintenant);
     const quand = ms(j), total = d.jours.length;
     document.title = `Jour ${n} · Le Stage`;
@@ -404,7 +477,7 @@
     const taches = lignes(j.taches), res = lignes(j.ressources).map(ressource).filter(Boolean);
     const coches = avancement(n);
     const plan = taches.length ? `<section><h2 class="jb-t">Plan d'action</h2><ul class="plan">${taches.map((t, i) => `<li><label><input type="checkbox" data-i="${i}" ${coches[i] ? "checked" : ""}><span class="box" aria-hidden="true"></span><span class="txt">${esc(t)}</span></label></li>`).join("")}</ul><p class="plan-note" id="note"></p></section>` : "";
-    const cta = [DISCORD.jours && DISCORD.jours[n] && lien(DISCORD.jours[n], "btn btn-ink", `Discuter dans #jour-${n}`), DISCORD.contenu && lien(DISCORD.contenu, "btn", "Montrer mon contenu")].filter(Boolean).join("");
+    const cta = [DISCORD.jours && DISCORD.jours[n] && lien(DISCORD.jours[n], "btn btn-ink", `Discuter dans #jour-${n}`), DISCORD.contenu && lien(DISCORD.contenu, "btn", "Montrer mon contenu"), '<a class="btn" href="espace.html?dossier" data-go>Mon dossier</a>'].filter(Boolean).join("");
     const cote = res.length || cta ? `<aside>${res.length ? `<h2 class="jb-t">Ressources</h2><ul class="res">${res.join("")}</ul>` : ""}${cta ? `<div class="jb-cta">${cta}</div>` : ""}</aside>` : "";
     const encart = blocEncart(j.encart), gauche = plan || encart ? `<div>${plan}${encart}</div>` : "";
     const avant = d.jours[n - 2], apres = d.jours[n];
@@ -420,10 +493,12 @@
       </header>
       <div class="player">${player}</div>
       ${gauche || cote ? `<div class="jb ${gauche && cote ? "" : "is-seul"}">${gauche}${cote}</div>` : ""}
+      ${blocPrompts(j.prompts, n, dos)}
       ${pager}
     </div>`;
     track("espace_jour", { jour: n });
     brancherPlan(n, taches.length);
+    brancherPrompts(j.prompts, n, dos);
     const prochain = apres && !apres.ouvert ? ms(apres) : 0;
     battre(prochain && !d.staff ? prochain : 0);
   }
@@ -446,6 +521,100 @@
     }));
   }
 
+  /* ---------- le dossier ------------------------------------------------- */
+  const DOSSIER = [
+    { titre: "Ton app", jour: 1, champs: [
+      { k: "app_nom", l: "Le nom de ton app", ph: "BellySafe" },
+      { k: "app_fait", l: "Ce qu'elle fait, en 2 phrases", long: 3 },
+      { k: "app_probleme", l: "Le problème qu'elle règle, en une phrase", long: 2 },
+      { k: "feature", l: "La feature que tu montres", aide: "Celle qui a passé la checklist « Feature TikTokable »." },
+    ] },
+    { titre: "Ta cible", jour: 1, intro: "Une personne qu'on pourrait croiser dans la rue, pas « les gens qui veulent… ».", champs: [
+      { k: "profil", l: "Son profil", aide: "Prénom, âge, situation, débutante ou expérimentée dans le sujet, métier, journée type.", long: 3 },
+      { k: "envie_objectif", l: "Son objectif n°1", long: 2 },
+      { k: "envie_seule", l: "Ce qu'elle veut obtenir mais n'arrive pas à avoir seule", long: 2 },
+      { k: "douleur_blocage", l: "Ce qui la bloque le plus", long: 2 },
+      { k: "douleur_peur", l: "Sa plus grande peur", long: 2 },
+      { k: "douleur_essaye", l: "Ce qu'elle a déjà essayé", long: 2 },
+      { k: "sous_niche", l: "Ta sous-niche", ph: "femmes enceintes, première grossesse", aide: "La plus petite audience qui a ce problème tous les jours." },
+      { k: "phrase", l: "Ta phrase", ph: "Mon app aide les … à …, …", long: 2 },
+    ] },
+    { titre: "Tes mots-clés", jour: 1, intro: "Les recherches que ta cible tape dans TikTok, avec ses mots à elle.", champs: [
+      { k: "mots_cles", l: "10 à 15 recherches, une par ligne", long: 8, lignes: true },
+    ] },
+  ];
+  const CHAMPS = DOSSIER.flatMap((s) => s.champs);
+  const remplis = (d) => CHAMPS.filter((c) => String(d[c.k] ?? "").trim()).length;
+  let viderDossier = null;
+  addEventListener("visibilitychange", () => { if (document.hidden && viderDossier) viderDossier(); });
+
+  async function vueDossier(id) {
+    const r = await api.dossier();
+    if (id !== routeId) return;
+    const d = { ...(r.donnees || {}) };
+    document.title = "Mon dossier · Le Stage";
+    const champ = (c) => {
+      const v = esc(d[c.k] ?? ""), ph = c.ph ? ` placeholder="${esc(c.ph)}"` : "";
+      return `<label class="champ dos-c"><span>${esc(c.l)}${c.lignes ? ' <i class="dos-nb" data-nb></i>' : ""}</span>${c.aide ? `<small>${esc(c.aide)}</small>` : ""}${c.long
+        ? `<textarea name="${c.k}" rows="${c.long}"${ph} maxlength="4000">${v}</textarea>`
+        : `<input name="${c.k}" type="text" autocomplete="off"${ph} maxlength="300" value="${v}">`}</label>`;
+    };
+    vue.innerHTML = `<div class="esp-w dos">
+      <header class="jh">
+        <p class="eyebrow mono"><a href="espace.html" data-go>← Les jours</a></p>
+        <h1 class="h2">Mon dossier${point}</h1>
+        <p class="p">Tout ce que tu sais de ton app et de ta cible, au même endroit. Tu le remplis au fil des jours, et tes prompts se remplissent avec.</p>
+        <p class="dos-etat mono"><span id="dNb"></span><span id="dEtat" role="status"></span></p>
+      </header>
+      <form id="fDos" novalidate>${DOSSIER.map((s) => `<section class="dos-s">
+        <div class="dos-st"><h2 class="jb-t">${esc(s.titre)}</h2><span class="mono">Jour ${s.jour}</span></div>
+        ${s.intro ? `<p class="dos-i">${esc(s.intro)}</p>` : ""}
+        ${s.champs.map(champ).join("")}
+      </section>`).join("")}</form>
+      <p class="dos-suite mono">Tes phrases arrivent au jour 2, tes angles et tes hooks au jour 3.</p>
+    </div>`;
+
+    const nb = $("#dNb"), etat = $("#dEtat"), ici = () => id === routeId;
+    const dire = (t, rate) => { if (ici()) { etat.textContent = t; etat.classList.toggle("is-rate", !!rate); } };
+    const compter = () => {
+      nb.textContent = `${remplis(d)} / ${CHAMPS.length} remplis`;
+      $$("[data-nb]").forEach((el) => { const n = lignes(el.closest("label").querySelector("textarea").value).length; el.textContent = n ? `· ${n}` : ""; });
+    };
+    compter();
+    let attente = {}, minuteur = 0, encours = false;
+    const envoyer = async () => {
+      clearTimeout(minuteur); minuteur = 0;
+      if (encours || !Object.keys(attente).length) return;
+      const lot = attente; attente = {}; encours = true;
+      dire("Enregistrement…");
+      try {
+        await api.enregistrerDossier(lot);
+        dire(Object.keys(attente).length ? "Enregistrement…" : "Enregistré");
+      } catch (e) {
+        attente = { ...lot, ...attente };
+        dire(e.code === "reseau" ? "Pas de connexion. Je réessaie." : "Pas enregistré. Je réessaie.", true);
+        if (ici()) minuteur = setTimeout(envoyer, 5000);
+        encours = false;
+        return;
+      }
+      encours = false;
+      if (Object.keys(attente).length) envoyer();
+    };
+    viderDossier = envoyer;
+    $("#fDos").addEventListener("submit", (e) => e.preventDefault());
+    $("#fDos").addEventListener("input", (e) => {
+      const el = e.target;
+      if (!el.name) return;
+      d[el.name] = attente[el.name] = el.value;
+      compter();
+      dire("…");
+      clearTimeout(minuteur);
+      minuteur = setTimeout(envoyer, 900);
+    });
+    $("#fDos").addEventListener("focusout", () => { if (Object.keys(attente).length) envoyer(); });
+    track("espace_dossier", { remplis: remplis(d) });
+  }
+
   /* ---------- messages --------------------------------------------------- */
   function vueMessage(titre, texte, bouton) {
     clearInterval(ticker);
@@ -463,9 +632,11 @@
     if (!session) return vueConnexion();
     sortir.hidden = false;
     if (!vue.firstElementChild || vue.querySelector(".ac")) vue.innerHTML = '<div class="esp-load" aria-label="Chargement"><i></i><i></i><i></i></div>';
-    const n = parseInt(new URLSearchParams(location.search).get("jour"), 10);
+    const q = new URLSearchParams(location.search), n = parseInt(q.get("jour"), 10);
+    if (viderDossier) { viderDossier(); viderDossier = null; }
     try {
-      if (n >= 1) await vueJour(n, id);
+      if (q.has("dossier")) await vueDossier(id);
+      else if (n >= 1) await vueJour(n, id);
       else await vueParcours(id);
     } catch (e) {
       if (id !== routeId) return;

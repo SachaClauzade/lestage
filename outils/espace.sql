@@ -35,6 +35,8 @@ create table if not exists public.jours (
 );
 
 alter table public.jours add column if not exists encart text;
+-- Les prompts du jour : [{ "titre", "quand", "texte", "apres", "outil" }, …]
+alter table public.jours add column if not exists prompts jsonb;
 
 alter table public.eleves enable row level security;
 alter table public.jours  enable row level security;
@@ -120,6 +122,7 @@ begin
     'numero', j.numero, 'titre', j.titre, 'ouvre_le', j.ouvre_le,
     'objectif', j.objectif, 'video', j.video,
     'taches', j.taches, 'ressources', j.ressources, 'encart', j.encart,
+    'prompts', j.prompts,
     'ouvert', j.ouvre_le <= now(),
     'apercu', j.ouvre_le > now(),
     'maintenant', now()
@@ -130,6 +133,57 @@ revoke all on function public.espace() from public, anon;
 revoke all on function public.espace_jour(int) from public, anon;
 grant execute on function public.espace() to authenticated;
 grant execute on function public.espace_jour(int) to authenticated;
+
+-- Le dossier : ce que l'élève sait de son app et de sa cible, rempli au fil
+-- des jours. Une ligne par élève, lue et écrite seulement par ces fonctions.
+create table if not exists public.dossiers (
+  email      text primary key references public.eleves (email) on update cascade on delete cascade,
+  donnees    jsonb not null default '{}'::jsonb,
+  modifie_le timestamptz not null default now()
+);
+alter table public.dossiers enable row level security;
+
+create or replace function public.dossier() returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  e public.eleves;
+  d public.dossiers;
+begin
+  select * into e from public.eleves where email = lower(auth.jwt() ->> 'email');
+  if not found then
+    raise exception 'pas_inscrit';
+  end if;
+  select * into d from public.dossiers where email = e.email;
+  return jsonb_build_object('donnees', coalesce(d.donnees, '{}'::jsonb), 'modifie_le', d.modifie_le);
+end $$;
+
+-- Enregistre les champs reçus par-dessus ceux déjà là. Les autres ne bougent pas.
+create or replace function public.dossier_enregistrer(champs jsonb) returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  e public.eleves;
+  nouveau jsonb;
+begin
+  select * into e from public.eleves where email = lower(auth.jwt() ->> 'email');
+  if not found then
+    raise exception 'pas_inscrit';
+  end if;
+  if champs is null or jsonb_typeof(champs) <> 'object' then
+    raise exception 'dossier_invalide';
+  end if;
+  select coalesce((select donnees from public.dossiers where email = e.email), '{}'::jsonb) || champs into nouveau;
+  if length(nouveau::text) > 200000 then
+    raise exception 'dossier_trop_long';
+  end if;
+  insert into public.dossiers (email, donnees) values (e.email, nouveau)
+  on conflict (email) do update set donnees = excluded.donnees, modifie_le = now();
+  return jsonb_build_object('modifie_le', now());
+end $$;
+
+revoke all on function public.dossier() from public, anon;
+revoke all on function public.dossier_enregistrer(jsonb) from public, anon;
+grant execute on function public.dossier() to authenticated;
+grant execute on function public.dossier_enregistrer(jsonb) to authenticated;
 
 -- Une adresse hors de la liste ne reçoit aucun code.
 create or replace function public.hook_avant_inscription(event jsonb) returns jsonb

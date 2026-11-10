@@ -164,6 +164,51 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 .jb-cta .btn { justify-content: center; }
 .jb.is-seul .jb-cta { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 
+/* --- le dossier ------------------------------------------- */
+.dos-carte { display: grid; grid-template-columns: 1fr auto; gap: 4px 20px; align-items: center; margin-top: 10px; padding: 18px 20px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; color: inherit; text-decoration: none; transition: border-color 150ms; }
+.dos-carte:hover { border-color: var(--ink); }
+.dos-carte-t { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+.dos-carte-p { grid-column: 1; font-size: 14px; line-height: 1.45; color: var(--ink-2); }
+.dos-carte-n { grid-column: 2; grid-row: 1 / span 2; font-size: 12px; color: var(--g4); white-space: nowrap; }
+.dos { max-width: 760px; }
+.dos .eyebrow a { color: inherit; text-decoration: none; }
+.dos .eyebrow a:hover { color: var(--ink); }
+.dos-etat { position: sticky; top: 64px; z-index: 2; display: flex; justify-content: space-between; gap: 16px; margin: 20px 0 0; padding: 10px 14px; background: var(--paper-2); border: 1px solid var(--line); border-radius: 8px; font-size: 12px; color: var(--g4); }
+.dos-etat .is-rate { color: var(--px); }
+.dos-s { margin-top: 44px; }
+.dos-st { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.dos-st .jb-t { margin: 0; }
+.dos-st .mono { font-size: 12px; color: var(--g4); }
+.dos-i { margin: 14px 0 0; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+.dos-c { margin: 20px 0 0; }
+.dos-c > span { margin-bottom: 4px; font-size: 15px; color: var(--ink); }
+.dos-c small { display: block; margin-bottom: 8px; font-size: 13px; line-height: 1.4; color: var(--g4); }
+.dos-c input, .dos-c textarea { margin-top: 4px; }
+.dos-nb { font-style: normal; font-family: var(--display); font-size: 12px; color: var(--g4); }
+.champ textarea { display: block; width: 100%; resize: vertical; font: inherit; line-height: 1.5; color: var(--ink); background: var(--card); border: 1px solid var(--line-2); border-radius: 8px; padding: 13px 14px; transition: border-color 150ms, box-shadow 150ms; }
+.champ textarea::placeholder { color: var(--g3); }
+.champ textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--px-soft); }
+.dos-suite { margin: 44px 0 0; padding-top: 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--g4); }
+@media (max-width: 600px) { .dos-carte { grid-template-columns: 1fr; } .dos-carte-n { grid-column: 1; grid-row: auto; } }
+
+.prompts { margin-top: 48px; }
+.prompts-aide a { color: var(--ink); }
+.prompts-aide { margin: 0 0 20px; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+.prompt { padding: 20px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.prompt + .prompt { margin-top: 16px; }
+.prompt h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -.01em; }
+.prompt-q, .prompt-a { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.prompt-q b, .prompt-a b { margin-right: 6px; font-family: var(--display); font-size: 11px; font-weight: 400; letter-spacing: .02em; color: var(--g4); }
+.prompt textarea { display: block; width: 100%; margin: 14px 0 12px; padding: 14px 16px; resize: vertical; font-family: var(--display); font-size: 13px; line-height: 1.6; color: var(--ink); background: var(--paper); border: 1px solid var(--line-2); border-radius: 8px; }
+.prompt textarea:focus-visible { outline: 2px solid var(--px); outline-offset: 2px; }
+.prompt-b { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.prompt-b .btn { padding: 10px 16px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+.prompt-n { font-size: 13px; line-height: 1.4; color: var(--g4); }
+.prompt-r { margin-left: auto; padding: 0; background: none; border: 0; font: inherit; font-size: 13px; color: var(--g4); text-decoration: underline; cursor: pointer; }
+.prompt-r:hover { color: var(--ink); }
+.prompt-a { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+@media (max-width: 600px) { .prompt { padding: 16px; } .prompt-r { margin-left: 0; } }
+
 .pager { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 15px; }
 .pager a { color: var(--ink); text-decoration: none; font-weight: 500; transition: color 150ms; }
 .pager a:hover { color: var(--px); }
