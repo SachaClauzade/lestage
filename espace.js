@@ -319,7 +319,7 @@
     const faits = dr ? remplis(dr.donnees || {}) : 0;
     const carte = dr ? `<a class="dos-carte" href="espace.html?dossier" data-go>
         <span class="dos-carte-t">Mon dossier</span>
-        <span class="dos-carte-p">Ton app, ta cible, tes mots-clés. Tu le remplis au fil des jours, tes prompts s'en servent.</span>
+        <span class="dos-carte-p">Ton app, ta cible, tes mots-clés, tes phrases, tes angles, tes hooks. Tu le remplis au fil des jours, tes prompts s'en servent.</span>
         <span class="dos-carte-n mono">${faits} / ${CHAMPS.length}${faits === CHAMPS.length ? " · complet" : ""}</span>
       </a>` : "";
     const ouverts = d.jours.filter((j) => j.ouvert);
@@ -395,7 +395,26 @@
       .filter((x) => String(x[1] ?? "").trim());
     return L.length >= 3 ? L.map(([a, b]) => `- ${a} : ${String(b).trim()}`).join("\n") : "";
   }
-  const remplir = (t, d) => String(t).replace(/\{\{(\w+)\|([^}]*)\}\}/g, (_, k, repli) => (k === "cible" ? ciblePour(d) : String(d[k] ?? "").trim()) || repli);
+  /* Les phrases de la cible : [{ t: la phrase, s: la source, l: les likes, a: l'angle }, …] */
+  const phrasesDe = (d) => (Array.isArray(d.phrases) ? d.phrases : []).filter((p) => p && String(p.t ?? "").trim());
+  const lignePhrase = (p) => `${String(p.t).trim()}${+p.l > 0 ? ` (${+p.l} likes)` : ""}`;
+  function anglesDe(d) {
+    const m = new Map();
+    for (const p of phrasesDe(d)) {
+      const nom = String(p.a ?? "").trim();
+      if (!nom) continue;
+      const cle = nom.toLowerCase(), a = m.get(cle) || { nom, n: 0, likes: 0, phrases: [] };
+      a.n++; a.likes += +p.l > 0 ? +p.l : 0; a.phrases.push(p);
+      m.set(cle, a);
+    }
+    return [...m.values()].sort((x, y) => y.likes - x.likes || y.n - x.n);
+  }
+  const CALCULS = {
+    cible: ciblePour,
+    phrases: (d) => phrasesDe(d).map(lignePhrase).join("\n"),
+    angle1: (d) => { const a = anglesDe(d)[0]; return a ? `Angle : ${a.nom}\n${a.phrases.map(lignePhrase).join("\n")}` : ""; },
+  };
+  const remplir = (t, d) => String(t).replace(/\{\{(\w+)\|([^}]*)\}\}/g, (_, k, repli) => (CALCULS[k] ? CALCULS[k](d) : String(d[k] ?? "").trim()) || repli);
   const promptsDe = (liste, dos) => (Array.isArray(liste) ? liste : []).filter((p) => p && p.texte).map((p) => ({ ...p, texte: remplir(p.texte, dos || {}) }));
   const brouillon = (n, i, base) => { const b = store.get(`stage.espace.p${n}`, {})[i]; return b && b.b === base && typeof b.v === "string" ? b.v : base; };
 
@@ -543,8 +562,18 @@
       { k: "mots_cles", l: "10 à 15 recherches, une par ligne", long: 8, lignes: true },
     ] },
   ];
-  const CHAMPS = DOSSIER.flatMap((s) => s.champs);
-  const remplis = (d) => CHAMPS.filter((c) => String(d[c.k] ?? "").trim()).length;
+  const HOOKS = { k: "hooks", l: "Les hooks que tu gardes, un par ligne", aide: "Vise 12 : 3 par type de post.", long: 8, lignes: true };
+  const SOURCES = ["TikTok", "Reddit", "App Store", "Autre"];
+  const N_PHRASES = 30, N_HOOKS = 12;
+  /* Ce qui compte dans l'avancement : chaque champ, plus les phrases, les angles et les hooks. */
+  const ETAPES = [
+    ...DOSSIER.flatMap((s) => s.champs).map((c) => (d) => !!String(d[c.k] ?? "").trim()),
+    (d) => phrasesDe(d).length >= N_PHRASES,
+    (d) => phrasesDe(d).length > 0 && phrasesDe(d).every((p) => String(p.a ?? "").trim()),
+    (d) => lignes(d.hooks).length >= N_HOOKS,
+  ];
+  const CHAMPS = ETAPES;
+  const remplis = (d) => ETAPES.filter((f) => f(d)).length;
   let viderDossier = null;
   addEventListener("visibilitychange", () => { if (document.hidden && viderDossier) viderDossier(); });
 
@@ -570,14 +599,27 @@
         <div class="dos-st"><h2 class="jb-t">${esc(s.titre)}</h2><span class="mono">Jour ${s.jour}</span></div>
         ${s.intro ? `<p class="dos-i">${esc(s.intro)}</p>` : ""}
         ${s.champs.map(champ).join("")}
-      </section>`).join("")}</form>
-      <p class="dos-suite mono">Tes phrases arrivent au jour 2, tes angles et tes hooks au jour 3.</p>
+      </section>`).join("")}
+      <section class="dos-s">
+        <div class="dos-st"><h2 class="jb-t">Tes phrases</h2><span class="mono">Jour 2 · <b id="pNb"></b></span></div>
+        <p class="dos-i">${N_PHRASES} phrases de ta cible, copiées mot pour mot : les hooks de ta Viral Bank, leurs commentaires, Reddit, les avis App Store. Tu peux coller plusieurs lignes d'un coup dans une case, depuis un tableur aussi.</p>
+        <div class="phr" id="phr"></div>
+        <button class="btn btn-sm" id="pPlus" type="button">Ajouter 10 lignes</button>
+      </section>
+      <section class="dos-s">
+        <div class="dos-st"><h2 class="jb-t">Tes angles et tes hooks</h2><span class="mono">Jour 3</span></div>
+        <p class="dos-i">Un angle, c'est le problème ou l'envie dont parle une phrase. Lance le prompt des angles du jour 3, puis colle ici son 2e bloc de code : la colonne Angle de tes phrases se remplit dans l'ordre.</p>
+        <label class="champ dos-c"><span>Les angles, un par ligne, dans l'ordre de tes phrases</span><textarea id="aColle" rows="4" placeholder="La peur de mal faire&#10;Les infos contradictoires&#10;…"></textarea></label>
+        <div class="dos-a"><button class="btn btn-sm" id="aGo" type="button">Remplir la colonne Angle</button><span class="mono" id="aNote" role="status"></span></div>
+        <div id="aTab"></div>
+        ${champ(HOOKS)}
+      </section></form>
     </div>`;
 
     const nb = $("#dNb"), etat = $("#dEtat"), ici = () => id === routeId;
     const dire = (t, rate) => { if (ici()) { etat.textContent = t; etat.classList.toggle("is-rate", !!rate); } };
     const compter = () => {
-      nb.textContent = `${remplis(d)} / ${CHAMPS.length} remplis`;
+      nb.textContent = `${remplis(d)} / ${CHAMPS.length} étapes`;
       $$("[data-nb]").forEach((el) => { const n = lignes(el.closest("label").querySelector("textarea").value).length; el.textContent = n ? `· ${n}` : ""; });
     };
     compter();
@@ -601,15 +643,74 @@
       if (Object.keys(attente).length) envoyer();
     };
     viderDossier = envoyer;
+    const noter = () => { compter(); dire("…"); clearTimeout(minuteur); minuteur = setTimeout(envoyer, 900); };
+
+    /* Les phrases : un tableau de lignes, toujours au moins N_PHRASES à l'écran. */
+    const phr = $("#phr");
+    let P = phrasesDe(d).map((p) => ({ t: String(p.t), s: SOURCES.includes(p.s) ? p.s : SOURCES[0], l: +p.l > 0 ? Math.round(+p.l) : "", a: String(p.a ?? "") }));
+    const vide = () => ({ t: "", s: SOURCES[0], l: "", a: "" });
+    const completer = (n) => { while (P.length < n) P.push(vide()); };
+    const peindrePhrases = () => {
+      completer(N_PHRASES);
+      const noms = anglesDe({ phrases: P }).map((a) => a.nom);
+      phr.innerHTML = `<div class="phr-t mono" aria-hidden="true"><span></span><span>La phrase, mot pour mot</span><span>Source</span><span>Likes</span><span>Angle</span></div>${P.map((p, i) => `<div class="phr-l" data-i="${i}">
+        <span class="phr-n mono">${i + 1}</span>
+        <input data-f="t" type="text" aria-label="Phrase ${i + 1}" maxlength="600" value="${esc(p.t)}">
+        <select data-f="s" aria-label="Source de la phrase ${i + 1}">${SOURCES.map((s) => `<option${s === p.s ? " selected" : ""}>${s}</option>`).join("")}</select>
+        <input data-f="l" type="text" inputmode="numeric" aria-label="Likes de la phrase ${i + 1}" maxlength="9" value="${esc(p.l)}">
+        <input data-f="a" type="text" list="aNoms" aria-label="Angle de la phrase ${i + 1}" maxlength="80" value="${esc(p.a)}">
+      </div>`).join("")}<datalist id="aNoms">${noms.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`;
+    };
+    const peindreAngles = () => {
+      const A = anglesDe({ phrases: P }), sans = phrasesDe({ phrases: P }).filter((p) => !p.a.trim()).length;
+      $("#pNb").textContent = `${phrasesDe({ phrases: P }).length} / ${N_PHRASES}`;
+      $("#aTab").innerHTML = A.length ? `<table class="ang"><thead><tr><th>Angle</th><th>Phrases</th><th>Likes</th></tr></thead><tbody>${A.map((a, i) => `<tr${i ? "" : ' class="is-1"'}><td>${esc(a.nom)}${i ? "" : " <i>ton angle n°1</i>"}</td><td>${a.n}</td><td>${a.likes || "—"}</td></tr>`).join("")}</tbody></table>${sans ? `<p class="dos-i">${sans} phrase${sans > 1 ? "s" : ""} sans angle.</p>` : ""}` : "";
+    };
+    const garderPhrases = () => {
+      d.phrases = attente.phrases = phrasesDe({ phrases: P }).map((p) => ({ t: p.t.trim(), s: p.s, l: +p.l > 0 ? Math.round(+p.l) : 0, a: p.a.trim() }));
+      peindreAngles();
+      noter();
+    };
+    peindrePhrases(); peindreAngles();
+    phr.addEventListener("input", (e) => {
+      const l = e.target.closest(".phr-l"), f = e.target.dataset.f;
+      if (!l || !f) return;
+      e.stopPropagation();
+      if (f === "l") e.target.value = e.target.value.replace(/\D/g, "");
+      P[+l.dataset.i][f] = e.target.value;
+      garderPhrases();
+    });
+    phr.addEventListener("paste", (e) => {
+      const l = e.target.closest(".phr-l"), texte = (e.clipboardData || window.clipboardData).getData("text");
+      if (!l || e.target.dataset.f !== "t" || !/\n/.test(texte.trim())) return;
+      e.preventDefault();
+      const recues = texte.split(/\r?\n/).map((x) => x.split("\t")).filter((c) => c[0] && c[0].trim());
+      let i = +l.dataset.i;
+      completer(i + recues.length);
+      for (const c of recues) {
+        const likes = (c[1] || "").replace(/\D/g, "");
+        P[i] = { ...P[i], t: c[0].trim().slice(0, 600), l: likes ? +likes : P[i].l };
+        i++;
+      }
+      peindrePhrases(); garderPhrases();
+    });
+    $("#pPlus").addEventListener("click", () => { completer(P.length + 10); peindrePhrases(); });
+    $("#aGo").addEventListener("click", () => {
+      const noms = lignes($("#aColle").value).map((x) => x.replace(/^[-*\d.\s]+/, "").slice(0, 80)), cibles = P.filter((p) => p.t.trim());
+      const note = $("#aNote");
+      if (!noms.length) { note.textContent = "Colle d'abord les angles."; return; }
+      if (noms.length !== cibles.length) { note.textContent = `Tu as ${cibles.length} phrase${cibles.length > 1 ? "s" : ""} et ${noms.length} angle${noms.length > 1 ? "s" : ""} : il en faut autant.`; return; }
+      cibles.forEach((p, i) => { p.a = noms[i]; });
+      $("#aColle").value = ""; note.textContent = "Colonne remplie.";
+      peindrePhrases(); garderPhrases();
+    });
+
     $("#fDos").addEventListener("submit", (e) => e.preventDefault());
     $("#fDos").addEventListener("input", (e) => {
       const el = e.target;
       if (!el.name) return;
       d[el.name] = attente[el.name] = el.value;
-      compter();
-      dire("…");
-      clearTimeout(minuteur);
-      minuteur = setTimeout(envoyer, 900);
+      noter();
     });
     $("#fDos").addEventListener("focusout", () => { if (Object.keys(attente).length) envoyer(); });
     track("espace_dossier", { remplis: remplis(d) });

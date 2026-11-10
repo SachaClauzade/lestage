@@ -1,2 +1,6 @@
 .DS_Store
 .env
+
+# La base des hooks : jamais dans le dépôt public
+100K Niche Hooks.xlsx
+*.xlsx
