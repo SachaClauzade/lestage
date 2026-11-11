@@ -316,11 +316,11 @@
     const [d, dr] = await Promise.all([api.espace(), api.dossier().catch(() => null)]);
     if (id !== routeId) return;
     caler(d.maintenant);
-    const faits = dr ? remplis(dr.donnees || {}) : 0;
+    const etapes = etapesDe(d), faits = dr ? remplis(dr.donnees || {}, etapes) : 0;
     const carte = dr ? `<a class="dos-carte" href="espace.html?dossier" data-go>
         <span class="dos-carte-t">Mon dossier</span>
-        <span class="dos-carte-p">Ton app, ta cible, tes mots-clés, tes phrases, tes angles, tes hooks. Tu le remplis au fil des jours, tes prompts s'en servent.</span>
-        <span class="dos-carte-n mono">${faits} / ${CHAMPS.length}${faits === CHAMPS.length ? " · complet" : ""}</span>
+        <span class="dos-carte-p">Ton app, ta cible, tes mots-clés. De nouvelles parties s'ajoutent au fil des jours, et tes prompts s'en servent.</span>
+        <span class="dos-carte-n mono">${faits} / ${etapes.length}${faits === etapes.length ? " · complet" : ""}</span>
       </a>` : "";
     const coaching = d.coaching ? lien(d.coaching, "dos-carte", `
         <span class="dos-carte-t">Coaching one-to-one</span>
@@ -575,15 +575,18 @@
   const rempli = (d, k) => !!String(d[k] ?? "").trim();
   const anglesOk = (d) => phrasesDe(d).length > 0 && phrasesDe(d).every((p) => String(p.a ?? "").trim());
   const hooksOk = (d) => lignes(d.hooks).length >= N_HOOKS;
-  /* Ce qui compte dans l'avancement : chaque champ, plus les phrases, les angles et les hooks. */
+  /* Ce qui compte dans l'avancement : chaque champ, plus les phrases, les angles et les hooks,
+     chacun rattaché au jour où sa partie du dossier apparaît. */
   const ETAPES = [
-    ...DOSSIER.flatMap((s) => s.champs).map((c) => (d) => rempli(d, c.k)),
-    (d) => phrasesDe(d).length >= N_PHRASES,
-    anglesOk,
-    hooksOk,
+    ...DOSSIER.flatMap((s) => s.champs.map((c) => ({ jour: s.jour, ok: (d) => rempli(d, c.k) }))),
+    { jour: 2, ok: (d) => phrasesDe(d).length >= N_PHRASES },
+    { jour: 3, ok: anglesOk },
+    { jour: 3, ok: hooksOk },
   ];
-  const CHAMPS = ETAPES;
-  const remplis = (d) => ETAPES.filter((f) => f(d)).length;
+  /* Une partie du dossier n'apparaît qu'une fois son jour ouvert (le staff voit tout, en aperçu). */
+  const jourOuvert = (e, n) => { const j = e.jours.find((x) => x.numero === n); return !j || j.ouvert || !!e.staff; };
+  const etapesDe = (e) => ETAPES.filter((x) => jourOuvert(e, x.jour));
+  const remplis = (d, liste = ETAPES) => liste.filter((x) => x.ok(d)).length;
   let viderDossier = null;
   addEventListener("visibilitychange", () => { if (document.hidden && viderDossier) viderDossier(); });
 
@@ -593,10 +596,9 @@
     caler(e.maintenant);
     const d = { ...(r.donnees || {}) }, ex = r.exemples || {};
     document.title = "Mon dossier · Le Stage";
-    const jourN = (n) => e.jours.find((x) => x.numero === n);
-    const ouvert = (n) => { const j = jourN(n); return !j || j.ouvert || !!e.staff; };
+    const ouvert = (n) => jourOuvert(e, n);
+    const apercu = e.staff && e.jours.some((j) => j.numero <= 3 && !j.ouvert);
     const tete = (titre, sid) => `<div class="dos-st"><h2 class="jb-t">${esc(titre)}</h2><span class="dos-prog" data-prog="${sid}"></span></div>`;
-    const verrou = (n, titre) => { const j = jourN(n); return `<section class="dos-s is-verrou"><div class="dos-st"><h2 class="jb-t">${esc(titre)}</h2><span class="mono">Jour ${n}${j ? ` · ${esc(court(ms(j)))} à ${esc(heure(ms(j)))}` : ""}</span></div></section>`; };
     const champ = (c) => {
       const v = String(d[c.k] ?? ""), ph = c.ph ? ` placeholder="${esc(c.ph)}"` : "";
       const boite = c.court
@@ -614,6 +616,7 @@
         <p class="eyebrow mono"><a href="espace.html" data-go>← Les jours</a></p>
         <h1 class="h2">Mon dossier${point}</h1>
         <p class="p">Réponds avec tes mots, même court. Tes prompts s'en servent, et tout s'enregistre tout seul.</p>
+        ${apercu ? `<p class="apercu">Aperçu staff : tu vois toutes les parties. Un élève ne voit que celles des jours déjà ouverts.</p>` : ""}
       </header>
       <form id="fDos" novalidate>${DOSSIER.map((s, i) => `<section class="dos-s">
         ${tete(s.titre, `s${i}`)}
@@ -625,7 +628,7 @@
         <p class="dos-i">${N_PHRASES} phrases de ta cible, mot pour mot, avec leurs likes : les hooks de ta Viral Bank, leurs commentaires, Reddit, les avis App Store. Tu peux en coller plusieurs d'un coup, depuis un tableur aussi.</p>
         <div class="phr" id="phr"></div>
         <button class="btn btn-sm" id="pPlus" type="button">Ajouter 10 lignes</button>
-      </section>` : verrou(2, "Tes phrases")}
+      </section>` : ""}
       ${avecAngles ? `<section class="dos-s">
         ${tete("Tes angles et tes hooks", "angles")}
         <p class="dos-i">Lance le prompt des angles du jour 3, puis colle ici son 2e bloc de code : la colonne Angle de tes phrases se remplit dans l'ordre.</p>
@@ -633,7 +636,7 @@
         <div class="dos-a"><button class="btn btn-sm" id="aGo" type="button">Remplir la colonne Angle</button><span class="mono" id="aNote" role="status"></span></div>
         <div id="aTab"></div>
         ${champ(HOOKS)}
-      </section>` : verrou(3, "Tes angles et tes hooks")}
+      </section>` : ""}
       </form>
       <p class="dos-etat mono" id="dEtat" role="status" aria-live="polite"></p>
     </div>`;
@@ -773,7 +776,7 @@
       noter();
     });
     $("#fDos").addEventListener("focusout", () => { if (Object.keys(attente).length) envoyer(); });
-    track("espace_dossier", { remplis: remplis(d) });
+    track("espace_dossier", { remplis: remplis(d, etapesDe(e)) });
   }
 
   /* ---------- messages --------------------------------------------------- */

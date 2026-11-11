@@ -201,9 +201,6 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 .champ textarea { display: block; width: 100%; resize: vertical; font: inherit; line-height: 1.5; color: var(--ink); background: var(--card); border: 1px solid var(--line-2); border-radius: 8px; padding: 13px 14px; transition: border-color 150ms, box-shadow 150ms; }
 .champ textarea::placeholder { color: var(--g3); }
 .champ textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--px-soft); }
-/* Une section qui n'est pas encore ouverte : juste son titre et sa date. */
-.dos-s.is-verrou { padding-block: 16px; background: transparent; border-style: dashed; }
-.dos-s.is-verrou .jb-t { font-size: 17px; color: var(--g4); }
 /* L'état de l'enregistrement : une pastille en bas à droite, seulement quand il se passe quelque chose. */
 .dos-etat { position: fixed; right: 16px; bottom: 16px; z-index: 20; margin: 0; padding: 8px 13px; background: var(--paper-2); border: 1px solid var(--line-2); border-radius: 999px; font-size: 12px; color: var(--g4); opacity: 0; transform: translateY(6px); transition: opacity 200ms, transform 200ms; pointer-events: none; }
 .dos-etat.is-on { opacity: 1; transform: none; }
