@@ -41,6 +41,8 @@ alter table public.jours add column if not exists prompts jsonb;
 -- Les réglages de la promo, une ligne par clé. Les valeurs ne vivent que
 -- dans Supabase, jamais dans ce dépôt public.
 --   coaching : le lien de réservation du coaching one-to-one (Calendly).
+--   dossier_exemples : un objet JSON { champ: "exemple BellySafe" }, affiché
+--                      sous chaque question de Mon dossier.
 create table if not exists public.reglages (
   cle    text primary key,
   valeur text
@@ -164,7 +166,8 @@ begin
     raise exception 'pas_inscrit';
   end if;
   select * into d from public.dossiers where email = e.email;
-  return jsonb_build_object('donnees', coalesce(d.donnees, '{}'::jsonb), 'modifie_le', d.modifie_le);
+  return jsonb_build_object('donnees', coalesce(d.donnees, '{}'::jsonb), 'modifie_le', d.modifie_le,
+    'exemples', (select r.valeur::jsonb from public.reglages r where r.cle = 'dossier_exemples'));
 end $$;
 
 -- Enregistre les champs reçus par-dessus ceux déjà là. Les autres ne bougent pas.
