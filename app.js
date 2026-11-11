@@ -349,7 +349,7 @@
 
   const sayText = $("#sayText");
   if (sayText) {
-    const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 6 200 € par mois, zéro pub.", "Prochaine promo le 15 novembre. 20 places.", "Je lis chaque candidature moi-même, réponse en 24 h.", "Si ton app n'est pas prête, je te le dis."];
+    const lines = ["Salut, moi c'est Sacha.", "Ma première app ? 200 vues par post, pendant deux mois.", "BellySafe : 7 000 € par mois, zéro pub.", "Prochaine promo le 15 novembre. 20 places.", "Je lis chaque candidature moi-même, réponse en 24 h.", "Si ton app n'est pas prête, je te le dis."];
     let li = 0;
     function type(text, done) {
       let k = 0; sayText.textContent = "";

@@ -91,7 +91,7 @@ const SITE_DATA = {
     ],
     stats: [
       { valeur: 28700, suffixe: " €", label: "encaissés depuis février 2026", sub: "RevenueCat, 9 mois" },
-      { valeur: 6200, suffixe: " €", label: "par mois avec BellySafe", sub: "100 % organique" },
+      { valeur: 7000, suffixe: " €", label: "par mois avec BellySafe", sub: "100 % organique" },
       { valeur: 0, suffixe: " €", label: "dépensés en pub", sub: "depuis le premier jour" },
       { valeur: 1, suffixe: " compte", label: "jusqu'à 3 000 € par mois", sub: "les cinq autres sont venus après" },
     ],
