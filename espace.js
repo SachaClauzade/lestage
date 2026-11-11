@@ -538,17 +538,19 @@
   /* ---------- le dossier ------------------------------------------------- */
   /* Tout ce que l'élève remplit vit ici : plus aucun Google Sheet à copier.
      g : un intertitre au-dessus du champ · court : une ligne · rows : hauteur de départ
-     · objectif : une liste, une ligne par entrée, comptée jusqu'à ce nombre.
+     · liste : une case par entrée, avec ce bouton pour en ajouter · objectif : le nombre d'entrées visé
+     · prompt : le prompt du jour (titre qui contient ces mots) à lancer depuis ce champ, rempli au moment du clic
+     · nom : comment on désigne le champ quand il manque au prompt.
      Les exemples affichés sous chaque question viennent de Supabase (reglages.dossier_exemples). */
   const DOSSIER = [
     { titre: "Ton app", jour: 1, champs: [
       { k: "app_nom", l: "Son nom", court: true },
       { k: "app_fait", l: "Ce qu'elle fait, en 2 phrases" },
       { k: "app_probleme", l: "Le problème qu'elle règle, en une phrase" },
-      { k: "feature", l: "La feature que tu montres", aide: "Celle qui a eu 5 ou 6 oui à la checklist « Feature TikTokable »." },
+      { k: "feature", l: "Tes features TikTokables, une par case", aide: "Celles qui ont eu 5 ou 6 oui à la checklist « Feature TikTokable ».", liste: "Ajouter une feature", min: 2, max: 300 },
     ] },
     { titre: "Ta cible", jour: 1, intro: "Une personne qu'on pourrait croiser dans la rue, pas « les gens qui veulent… ».", champs: [
-      { k: "profil", g: "Son profil", l: "Qui est-ce ?", aide: "Prénom, âge, situation, débutante ou pas dans le sujet, métier, journée type.", rows: 2 },
+      { k: "profil", g: "Son profil", l: "Qui est-ce ?", nom: "son profil", aide: "Prénom, âge, situation, débutante ou pas dans le sujet, métier, journée type.", rows: 2 },
       { k: "envie_objectif", g: "Ses envies", l: "Son objectif n°1" },
       { k: "envie_seule", l: "Ce qu'elle veut, mais n'arrive pas à avoir seule" },
       { k: "douleur_blocage", g: "Ses douleurs", l: "Ce qui la bloque le plus" },
@@ -558,29 +560,23 @@
       { k: "phrase", l: "Ta phrase", ph: "Mon app aide les … à …, …" },
     ] },
     { titre: "Tes mots-clés", jour: 1, intro: "Ce que ta cible tape dans la recherche TikTok, avec ses mots à elle.", champs: [
-      { k: "mots_cles", l: "10 à 15 recherches, une par ligne", rows: 4, objectif: 10 },
+      { k: "mots_cles", l: "10 à 15 recherches, une par case", liste: "Ajouter un mot-clé", objectif: 10, prompt: "mots-clés" },
     ] },
   ];
   const ANGLES = { k: "angles", l: "Tes angles, un par ligne, ton angle n°1 en premier", aide: "Entre 3 et 6. Colle le bloc de code du prompt des angles, et renomme ceux qui ne te parlent pas.", rows: 3, lignes: true };
   const HOOKS = { k: "hooks", l: "Les hooks que tu gardes, un par ligne", aide: "Vise 12 : 3 par type de post.", rows: 4, lignes: true };
-  const N_PHRASES = 30, N_VIRAL = 20, N_HOOKS = 12, PAR_TYPE = 5, SORTIE = 7;
+  const N_PHRASES = 30, N_VIRAL = 20, N_HOOKS = 12, PAR_TYPE = 5;
   const TYPES = ["POV", "Storytelling", "Avant / Après", "Tips & conseils"];
-  const MOMENTS = [["m", "Matin", "recherche"], ["a", "Après-midi", "pour toi"], ["s", "Soir", "interagir plus"]];
   const rempli = (d, k) => !!String(d[k] ?? "").trim();
   /* La Viral Bank : [{ u: le lien, n: ce qui inspire, y: le type de post (jour 3) }, …] */
   const viralDe = (d) => (Array.isArray(d.viral) ? d.viral : []).filter((v) => v && (String(v.u ?? "").trim() || String(v.n ?? "").trim()));
   const parType = (d, t) => viralDe(d).filter((v) => v.y === t).length;
-  /* Le warm-up : { "1m": true, "1a": true, … } (jour + moment), plus test_sortie (sur 10) au jour 3. */
-  const warmupFait = (d, n) => MOMENTS.every(([m]) => !!(d.warmup || {})[`${n}${m}`]);
   const hooksOk = (d) => lignes(d.hooks).length >= N_HOOKS;
   /* Ce qui compte dans l'avancement, chaque étape rattachée au jour où sa partie apparaît. */
   const ETAPES = [
     ...DOSSIER.flatMap((s) => s.champs.map((c) => ({ jour: s.jour, ok: (d) => rempli(d, c.k) }))),
-    { jour: 1, ok: (d) => warmupFait(d, 1) },
-    { jour: 2, ok: (d) => warmupFait(d, 2) },
     { jour: 2, ok: (d) => viralDe(d).length >= N_VIRAL },
     { jour: 2, ok: (d) => phrasesDe(d).length >= N_PHRASES },
-    { jour: 3, ok: (d) => warmupFait(d, 3) && +d.test_sortie >= SORTIE },
     { jour: 3, ok: (d) => TYPES.every((t) => parType(d, t) >= PAR_TYPE) },
     { jour: 3, ok: (d) => lignes(d.angles).length >= 3 },
     { jour: 3, ok: hooksOk },
@@ -593,7 +589,7 @@
   addEventListener("visibilitychange", () => { if (document.hidden && viderDossier) viderDossier(); });
 
   async function vueDossier(id) {
-    const [e, r] = await Promise.all([api.espace(), api.dossier()]);
+    const [e, r, j1] = await Promise.all([api.espace(), api.dossier(), api.jour(1).catch(() => null)]);
     if (id !== routeId) return;
     caler(e.maintenant);
     const d = { ...(r.donnees || {}) }, ex = r.exemples || {};
@@ -607,7 +603,27 @@
         <div class="dos-st"><h2 class="jb-t">${esc(titre)}</h2><span class="dos-prog" data-prog="${sid}"></span></div>`;
     };
     const exemple = (k) => (ex[k] ? `<p class="dos-i dos-ex"><b class="mono">Ex.</b>${esc(ex[k])}</p>` : "");
+    /* Un prompt du jour lancé depuis le dossier : il se remplit au moment du clic, avec ce qui est écrit à cet instant. */
+    const TOUS = DOSSIER.flatMap((x) => x.champs);
+    const NOMS = { cible: "ta cible", ...Object.fromEntries(TOUS.map((c) => [c.k, c.nom || c.l.charAt(0).toLowerCase() + c.l.slice(1)])) };
+    const promptDe = (c) => (c && c.prompt ? (j1 && Array.isArray(j1.prompts) ? j1.prompts : []).find((p) => p && p.texte && String(p.titre || "").toLowerCase().includes(c.prompt)) : null);
+    const manquants = (p) => [...new Set([...p.texte.matchAll(/\{\{(\w+)\|/g)].map((m) => m[1]))]
+      .filter((k) => !String((CALCULS[k] ? CALCULS[k](d) : d[k]) ?? "").trim()).map((k) => NOMS[k] || k);
+    const enListe = (l) => (l.length > 1 ? `${l.slice(0, -1).join(", ")} et ${l[l.length - 1]}` : l[0] || "");
+    const blocPrompt = (c) => (promptDe(c) ? `<div class="dos-pr" data-pr="${c.k}">
+        <p class="dos-pr-t"><b>Le prompt des ${esc(c.prompt)}</b> · il reprend ce que tu as écrit dans ton dossier.</p>
+        <p class="dos-pr-m" data-manque></p>
+        <div class="prompt-b"><button type="button" class="btn btn-ink" data-copier>Copier le prompt</button><button type="button" class="btn" data-claude>Ouvrir dans Claude ↗</button></div>
+        <details class="dos-pr-v"><summary>Voir le prompt</summary><pre data-texte></pre></details>
+        <p class="dos-pr-a">Avec la réponse : garde celles qui sonnent comme ta cible, et colle-les dans la première case. Elles se rangent une par case.</p>
+      </div>` : "");
     const champ = (c) => {
+      if (c.liste) return `${c.g ? `<p class="dos-g mono">${esc(c.g)}</p>` : ""}<div class="champ dos-c">
+        <span class="dos-l sans-px">${esc(c.l)}</span>
+        ${c.aide ? `<small>${esc(c.aide)}</small>` : ""}
+        ${ex[c.k] ? `<small class="dos-ex"><b class="mono">Ex.</b>${esc(ex[c.k])}</small>` : ""}
+        ${blocPrompt(c)}
+        <div class="lst" id="l_${c.k}"></div></div>`;
       const v = String(d[c.k] ?? ""), ph = c.ph ? ` placeholder="${esc(c.ph)}"` : "";
       const boite = c.court
         ? `<input name="${c.k}" type="text" autocomplete="off"${ph} maxlength="300" value="${esc(v)}">`
@@ -618,8 +634,7 @@
         ${ex[c.k] ? `<small class="dos-ex"><b class="mono">Ex.</b>${esc(ex[c.k])}</small>` : ""}
         ${boite}</label>`;
     };
-    const joursWu = [1, 2, 3].filter(ouvert), avecJ2 = ouvert(2), avecJ3 = ouvert(3);
-    const wu = d.warmup || {};
+    const avecJ2 = ouvert(2), avecJ3 = ouvert(3);
     vue.innerHTML = `<div class="esp-w dos">
       <header class="jh">
         <p class="eyebrow mono"><a href="espace.html" data-go>← Les jours</a></p>
@@ -632,19 +647,9 @@
         ${s.intro ? `<p class="dos-i">${esc(s.intro)}</p>` : ""}
         ${s.champs.map(champ).join("")}
       </section>`).join("")}
-      <section class="dos-s">
-        ${tete("Ton warm-up", "warmup", 1, "Jours 1 à 3")}
-        <p class="dos-i">30 minutes par jour, sans rien publier. Coche chaque moment une fois fait.</p>
-        <div class="wu" id="wu">${joursWu.map((n) => `<div class="wu-l"><span class="wu-j mono">Jour ${n}</span>${MOMENTS.map(([m, quand, quoi]) => `<label class="wu-c"><input type="checkbox" data-wu="${n}${m}"${wu[`${n}${m}`] ? " checked" : ""}><span class="box" aria-hidden="true"></span><span><b>${quand}</b> · ${quoi}</span></label>`).join("")}</div>`).join("")}</div>
-        ${avecJ3 ? `<label class="champ dos-c${rempli(d, "test_sortie") ? " is-ok" : ""}">
-          <span class="dos-l">Le test de sortie</span>
-          <small>Après ta 3e journée, ouvre ton fil « Pour toi » : sur les 10 premières vidéos, combien sont dans ta niche ?</small>
-          <span class="dos-sortie"><input name="test_sortie" class="dos-num" type="text" inputmode="numeric" maxlength="2" autocomplete="off" value="${esc(d.test_sortie ?? "")}"><span class="mono">/ 10</span><b id="wuV" role="status"></b></span>
-        </label>` : ""}
-      </section>
       ${avecJ2 ? `<section class="dos-s">
         ${tete("Ta Viral Bank", "viral", 2)}
-        <p class="dos-i">Les vidéos de ta niche à plus de 10 000 vues qui t'inspirent, aussi rangées dans ta collection TikTok « Viral Bank ». Vise ${N_VIRAL}.${avecJ3 ? ` Au jour 3, range-les dans les 4 types de posts : ${PAR_TYPE} par type.` : ""}</p>
+        <p class="dos-i">Les vidéos de ta niche à plus de 10 000 vues qui t'inspirent, aussi rangées dans ta collection TikTok « Viral Bank ». Vise au moins ${N_VIRAL}, et ajoutes-en dès que tu en trouves d'autres.${avecJ3 ? ` Au jour 3, range-les dans les 4 types de posts : ${PAR_TYPE} par type.` : ""}</p>
         ${exemple("viral")}
         ${avecJ3 ? `<div class="vt" id="vt"></div>` : ""}
         <div class="lst" id="lViral"></div>
@@ -685,10 +690,8 @@
           ? { id: `s${i}`, total: liste.objectif, n: () => Math.min(lignes(d[liste.k]).length, liste.objectif) }
           : { id: `s${i}`, total: s.champs.length, n: () => s.champs.filter((c) => rempli(d, c.k)).length };
       }),
-      { id: "warmup", total: joursWu.length * MOMENTS.length + (avecJ3 ? 1 : 0),
-        n: () => joursWu.reduce((t, j) => t + MOMENTS.filter(([m]) => (d.warmup || {})[`${j}${m}`]).length, 0) + (avecJ3 && +d.test_sortie >= SORTIE ? 1 : 0) },
-      { id: "viral", total: N_VIRAL, n: () => Math.min(viralDe(d).length, N_VIRAL) },
-      { id: "phrases", total: N_PHRASES, n: () => Math.min(phrasesDe(d).length, N_PHRASES) },
+      { id: "viral", total: N_VIRAL, n: () => viralDe(d).length },
+      { id: "phrases", total: N_PHRASES, n: () => phrasesDe(d).length },
       { id: "angles", total: 2, n: () => (lignes(d.angles).length >= 3 ? 1 : 0) + (hooksOk(d) ? 1 : 0) },
     ];
     const compter = () => {
@@ -703,8 +706,12 @@
       $$("[data-nb]").forEach((el) => { const n = lignes(el.closest("label").querySelector("textarea").value).length; el.textContent = n ? `· ${n}` : ""; });
       const vt = $("#vt");
       if (vt) vt.innerHTML = TYPES.map((t) => { const n = parType(d, t); return `<span${n >= PAR_TYPE ? ' class="is-ok"' : ""}>${esc(t)}<b class="mono">${n} / ${PAR_TYPE}</b></span>`; }).join("");
-      const v = $("#wuV");
-      if (v) { const n = parseInt(d.test_sortie, 10); v.textContent = isNaN(n) ? "" : n >= SORTIE ? "Ton compte est chaud." : "Fais une journée de plus avant de publier."; }
+      for (const el of $$("[data-pr]")) {
+        const p = promptDe(TOUS.find((c) => c.k === el.dataset.pr)), m = manquants(p), ligne = $("[data-manque]", el);
+        ligne.textContent = m.length ? `Il manque encore ${enListe(m)}. Le prompt marche quand même, mais il sera moins précis.` : "Ta cible est complète : le prompt est prêt.";
+        ligne.classList.toggle("is-pret", !m.length);
+        if ($("details", el).open) $("[data-texte]", el).textContent = remplir(p.texte, d);
+      }
     };
     let attente = {}, minuteur = 0, encours = false;
     const envoyer = async () => {
@@ -728,15 +735,16 @@
     viderDossier = envoyer;
     const noter = () => { compter(); clearTimeout(minuteur); minuteur = setTimeout(envoyer, 900); };
 
-    /* Une liste de lignes (Viral Bank, phrases) : au moins `min` lignes, et toujours 2 lignes vides
-       sous la dernière remplie. Coller plusieurs lignes d'un coup remplit les suivantes
+    /* Une liste de lignes (Viral Bank, phrases) : au moins `min` lignes, toujours 2 lignes vides
+       sous la dernière remplie, et un bouton pour en ajouter une si on veut. Coller plusieurs lignes d'un coup remplit les suivantes
        (depuis un tableur, les colonnes séparées par des tabulations vont dans les colonnes suivantes). */
-    const liste = (el, cle, cols, min) => {
+    const liste = (el, cle, cols, min, ajouter, enTexte) => {
       if (!el) return;
       const textes = cols.filter((c) => !c.options).map((c) => c.f);
       const plein = (x) => textes.some((f) => String(x[f] ?? "").trim());
       const vide = () => Object.fromEntries(cols.map((c) => [c.f, ""]));
-      const L = (Array.isArray(d[cle]) ? d[cle] : []).filter((x) => x && plein(x)).map((x) => Object.fromEntries(cols.map((c) => [c.f, String(x[c.f] ?? "")])));
+      const depart = typeof d[cle] === "string" ? lignes(d[cle]).map((t) => ({ [cols[0].f]: t })) : Array.isArray(d[cle]) ? d[cle] : [];
+      const L = depart.filter((x) => x && plein(x)).map((x) => Object.fromEntries(cols.map((c) => [c.f, String(x[c.f] ?? "")])));
       const gabarit = `22px ${cols.map((c) => c.w || "minmax(0, 1fr)").join(" ")}`;
       const completer = () => { let fin = 0; L.forEach((x, i) => { if (plein(x)) fin = i + 1; }); while (L.length < Math.max(min, fin + 2)) L.push(vide()); };
       const ligne = (x, i) => `<div class="lst-l" data-i="${i}" style="--cols: ${gabarit}"><span class="lst-n mono">${i + 1}</span>${cols.map((c) => (c.options
@@ -746,8 +754,24 @@
         completer();
         el.innerHTML = (cols.length > 1 ? `<div class="lst-t mono" aria-hidden="true" style="--cols: ${gabarit}"><span></span>${cols.map((c) => `<span>${esc(c.l)}</span>`).join("")}</div>` : "") + L.map(ligne).join("");
       };
-      const garder = () => { d[cle] = attente[cle] = L.filter(plein).map((x) => Object.fromEntries(cols.map((c) => [c.f, String(x[c.f]).trim()]))); noter(); };
+      const garder = () => {
+        const propres = L.filter(plein).map((x) => Object.fromEntries(cols.map((c) => [c.f, String(x[c.f]).trim()])));
+        d[cle] = attente[cle] = enTexte ? propres.map((x) => x[cols[0].f]).join("\n") : propres;
+        noter();
+      };
       peindre();
+      if (ajouter) {
+        el.insertAdjacentHTML("afterend", `<button class="btn btn-sm lst-plus" type="button">+ ${esc(ajouter)}</button>`);
+        /* Le bouton mène à la première ligne libre sous la dernière remplie, et en crée une s'il n'y en a plus. */
+        el.nextElementSibling.addEventListener("click", () => {
+          let fin = 0;
+          L.forEach((x, i) => { if (plein(x)) fin = i + 1; });
+          if (fin >= L.length) { L.push(vide()); el.insertAdjacentHTML("beforeend", ligne(L[fin], fin)); }
+          const champ = el.querySelector(`.lst-l[data-i="${fin}"] input`);
+          champ.focus();
+          champ.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+        });
+      }
       el.addEventListener("input", (ev) => {
         const l = ev.target.closest(".lst-l"), f = ev.target.dataset.f;
         if (!l || !f) return;
@@ -774,23 +798,33 @@
       { f: "u", l: "Le lien de la vidéo", ph: "https://www.tiktok.com/…" },
       { f: "n", l: "Ce qui t'inspire", ph: "le hook, l'image, le format", w: "minmax(0, 1.3fr)" },
       ...(avecJ3 ? [{ f: "y", l: "Type de post", ph: "Type…", options: TYPES, w: "160px" }] : []),
-    ], 5);
+    ], 5, "Ajouter une vidéo");
     liste($("#lPhrases"), "phrases", [{ f: "t", l: "La phrase, mot pour mot", max: 600 }], 10);
+    /* Les champs du dossier en liste (features, mots-clés) restent enregistrés en texte, une entrée par ligne. */
+    for (const c of DOSSIER.flatMap((x) => x.champs).filter((x) => x.liste)) liste($(`#l_${c.k}`), c.k, [{ f: "t", l: c.l, ph: c.ph, max: c.max || 120 }], c.min || 5, c.liste, true);
     compter();
 
-    const blocWu = $("#wu");
-    blocWu.addEventListener("change", (ev) => {
-      const k = ev.target.dataset.wu;
-      if (!k) return;
-      d.warmup = attente.warmup = { ...(d.warmup || {}), [k]: ev.target.checked };
-      noter();
-    });
+    for (const el of $$("[data-pr]")) {
+      const p = promptDe(TOUS.find((c) => c.k === el.dataset.pr)), texte = () => remplir(p.texte, d);
+      $("details", el).addEventListener("toggle", () => { $("[data-texte]", el).textContent = texte(); });
+      $("[data-copier]", el).addEventListener("click", async (ev) => {
+        const b = ev.currentTarget;
+        try { await navigator.clipboard.writeText(texte()); }
+        catch { const t = document.createElement("textarea"); t.value = texte(); document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch {} t.remove(); }
+        b.textContent = "Copié";
+        setTimeout(() => { b.textContent = "Copier le prompt"; }, 1600);
+        track("espace_dossier_prompt", { champ: el.dataset.pr, action: "copier" });
+      });
+      $("[data-claude]", el).addEventListener("click", () => {
+        window.open(`https://claude.ai/new?q=${encodeURIComponent(texte())}`, "_blank", "noopener");
+        track("espace_dossier_prompt", { champ: el.dataset.pr, action: "claude" });
+      });
+    }
     $("#fDos").addEventListener("submit", (ev) => ev.preventDefault());
     $("#fDos").addEventListener("input", (ev) => {
       const el = ev.target;
       if (el.matches("textarea[data-grow]")) grandir(el);
       if (!el.name) return;
-      if (el.name === "test_sortie") el.value = el.value.replace(/\D/g, "").slice(0, 2);
       d[el.name] = attente[el.name] = el.value;
       const lab = el.closest(".dos-c");
       if (lab) lab.classList.toggle("is-ok", !!el.value.trim());
