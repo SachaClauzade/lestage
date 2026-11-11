@@ -178,6 +178,7 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 .dos-s { padding: 24px 26px 28px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
 .dos-s + .dos-s { margin-top: 14px; }
 .dos-st { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.dos-s .dos-j { margin: 0 0 8px; font-size: 11px; }
 .dos-st .jb-t { margin: 0; }
 .dos-st > .mono { font-size: 12px; color: var(--g4); }
 .dos-prog { display: inline-flex; align-items: center; gap: 4px; }

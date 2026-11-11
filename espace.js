@@ -598,7 +598,12 @@
     document.title = "Mon dossier · Le Stage";
     const ouvert = (n) => jourOuvert(e, n);
     const apercu = e.staff && e.jours.some((j) => j.numero <= 3 && !j.ouvert);
-    const tete = (titre, sid) => `<div class="dos-st"><h2 class="jb-t">${esc(titre)}</h2><span class="dos-prog" data-prog="${sid}"></span></div>`;
+    /* L'en-tête d'un bloc : son jour (et, pour le staff, quand il s'ouvrira), son titre, son avancement. */
+    const tete = (titre, sid, n) => {
+      const j = e.jours.find((x) => x.numero === n), plusTard = j && !j.ouvert;
+      return `<p class="eyebrow dos-j">Jour ${n}${plusTard ? ` · aperçu, s'ouvre le ${esc(court(ms(j)))} à ${esc(heure(ms(j)))}` : ""}</p>
+        <div class="dos-st"><h2 class="jb-t">${esc(titre)}</h2><span class="dos-prog" data-prog="${sid}"></span></div>`;
+    };
     const champ = (c) => {
       const v = String(d[c.k] ?? ""), ph = c.ph ? ` placeholder="${esc(c.ph)}"` : "";
       const boite = c.court
@@ -619,18 +624,18 @@
         ${apercu ? `<p class="apercu">Aperçu staff : tu vois toutes les parties. Un élève ne voit que celles des jours déjà ouverts.</p>` : ""}
       </header>
       <form id="fDos" novalidate>${DOSSIER.map((s, i) => `<section class="dos-s">
-        ${tete(s.titre, `s${i}`)}
+        ${tete(s.titre, `s${i}`, s.jour)}
         ${s.intro ? `<p class="dos-i">${esc(s.intro)}</p>` : ""}
         ${s.champs.map(champ).join("")}
       </section>`).join("")}
       ${avecPhrases ? `<section class="dos-s">
-        ${tete("Tes phrases", "phrases")}
+        ${tete("Tes phrases", "phrases", 2)}
         <p class="dos-i">${N_PHRASES} phrases de ta cible, mot pour mot, avec leurs likes : les hooks de ta Viral Bank, leurs commentaires, Reddit, les avis App Store. Tu peux en coller plusieurs d'un coup, depuis un tableur aussi.</p>
         <div class="phr" id="phr"></div>
         <button class="btn btn-sm" id="pPlus" type="button">Ajouter 10 lignes</button>
       </section>` : ""}
       ${avecAngles ? `<section class="dos-s">
-        ${tete("Tes angles et tes hooks", "angles")}
+        ${tete("Tes angles et tes hooks", "angles", 3)}
         <p class="dos-i">Lance le prompt des angles du jour 3, puis colle ici son 2e bloc de code : la colonne Angle de tes phrases se remplit dans l'ordre.</p>
         <label class="champ dos-c"><span class="dos-l sans-px">Les angles, un par ligne, dans l'ordre de tes phrases</span><textarea id="aColle" rows="3" data-grow placeholder="La peur de mal faire&#10;Les infos contradictoires&#10;…"></textarea></label>
         <div class="dos-a"><button class="btn btn-sm" id="aGo" type="button">Remplir la colonne Angle</button><span class="mono" id="aNote" role="status"></span></div>
