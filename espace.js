@@ -20,6 +20,8 @@
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const CFG = (typeof SITE_DATA !== "undefined" && SITE_DATA.espace) || {};
   const DISCORD = CFG.discord || {};
+  /* Le logo Discord, devant chaque bouton qui ouvre un salon. Il prend la couleur du texte du bouton. */
+  const ICONE_DISCORD = '<svg class="ico-dc" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.865-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .078-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>';
   const vue = $("#vue");
   const TZ = "Europe/Paris";
   const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
@@ -354,7 +356,7 @@
       </section>`;
     }
     const aujCase = dernier && memeJour(ms(dernier), maintenant()) ? dernier : null;
-    const sall = [DISCORD.general && lien(DISCORD.general, "btn", "#général"), DISCORD.contenu && lien(DISCORD.contenu, "btn", "#montre-ton-contenu")].filter(Boolean).join("");
+    const sall = [DISCORD.general && lien(DISCORD.general, "btn", `${ICONE_DISCORD}#général`), DISCORD.contenu && lien(DISCORD.contenu, "btn", `${ICONE_DISCORD}#montre-ton-contenu`)].filter(Boolean).join("");
     vue.innerHTML = `<div class="esp-w">${une}
       <ul class="cal">${d.jours.map((j) => caseJour(j, d, aujCase)).join("")}</ul>
       ${carte}
@@ -400,24 +402,12 @@
       .filter((x) => String(x[1] ?? "").trim());
     return L.length >= 3 ? L.map(([a, b]) => `- ${a} : ${String(b).trim()}`).join("\n") : "";
   }
-  /* Les phrases de la cible : [{ t: la phrase, s: la source, l: les likes, a: l'angle }, …] */
+  /* Les phrases de la cible, copiées mot pour mot : [{ t: la phrase }, …] */
   const phrasesDe = (d) => (Array.isArray(d.phrases) ? d.phrases : []).filter((p) => p && String(p.t ?? "").trim());
-  const lignePhrase = (p) => `${String(p.t).trim()}${+p.l > 0 ? ` (${+p.l} likes)` : ""}`;
-  function anglesDe(d) {
-    const m = new Map();
-    for (const p of phrasesDe(d)) {
-      const nom = String(p.a ?? "").trim();
-      if (!nom) continue;
-      const cle = nom.toLowerCase(), a = m.get(cle) || { nom, n: 0, likes: 0, phrases: [] };
-      a.n++; a.likes += +p.l > 0 ? +p.l : 0; a.phrases.push(p);
-      m.set(cle, a);
-    }
-    return [...m.values()].sort((x, y) => y.likes - x.likes || y.n - x.n);
-  }
   const CALCULS = {
     cible: ciblePour,
-    phrases: (d) => phrasesDe(d).map(lignePhrase).join("\n"),
-    angle1: (d) => { const a = anglesDe(d)[0]; return a ? `Angle : ${a.nom}\n${a.phrases.map(lignePhrase).join("\n")}` : ""; },
+    phrases: (d) => phrasesDe(d).map((p) => String(p.t).trim()).join("\n"),
+    angle1: (d) => lignes(d.angles)[0] || "",
   };
   const remplir = (t, d) => String(t).replace(/\{\{(\w+)\|([^}]*)\}\}/g, (_, k, repli) => (CALCULS[k] ? CALCULS[k](d) : String(d[k] ?? "").trim()) || repli);
   const promptsDe = (liste, dos) => (Array.isArray(liste) ? liste : []).filter((p) => p && p.texte).map((p) => ({ ...p, texte: remplir(p.texte, dos || {}) }));
@@ -501,7 +491,7 @@
     const taches = lignes(j.taches), res = lignes(j.ressources).map(ressource).filter(Boolean);
     const coches = avancement(n);
     const plan = taches.length ? `<section><h2 class="jb-t">Plan d'action</h2><ul class="plan">${taches.map((t, i) => `<li><label><input type="checkbox" data-i="${i}" ${coches[i] ? "checked" : ""}><span class="box" aria-hidden="true"></span><span class="txt">${esc(t)}</span></label></li>`).join("")}</ul><p class="plan-note" id="note"></p></section>` : "";
-    const cta = [DISCORD.jours && DISCORD.jours[n] && lien(DISCORD.jours[n], "btn btn-ink", `Discuter dans #jour-${n}`), DISCORD.contenu && lien(DISCORD.contenu, "btn", "Montrer mon contenu"), '<a class="btn" href="espace.html?dossier" data-go>Mon dossier</a>', d.coaching && lien(d.coaching, "btn", "Réserver un coaching")].filter(Boolean).join("");
+    const cta = [DISCORD.jours && DISCORD.jours[n] && lien(DISCORD.jours[n], "btn btn-ink", `${ICONE_DISCORD}Discuter dans #jour-${n}`), DISCORD.contenu && lien(DISCORD.contenu, "btn", `${ICONE_DISCORD}Montrer mon contenu`), '<a class="btn" href="espace.html?dossier" data-go>Mon dossier</a>', d.coaching && lien(d.coaching, "btn", "Réserver un coaching")].filter(Boolean).join("");
     const cote = res.length || cta ? `<aside>${res.length ? `<h2 class="jb-t">Ressources</h2><ul class="res">${res.join("")}</ul>` : ""}${cta ? `<div class="jb-cta">${cta}</div>` : ""}</aside>` : "";
     const encart = blocEncart(j.encart), gauche = plan || encart ? `<div>${plan}${encart}</div>` : "";
     const avant = d.jours[n - 2], apres = d.jours[n];
@@ -546,7 +536,8 @@
   }
 
   /* ---------- le dossier ------------------------------------------------- */
-  /* g : un intertitre au-dessus du champ · court : une ligne · rows : hauteur de départ
+  /* Tout ce que l'élève remplit vit ici : plus aucun Google Sheet à copier.
+     g : un intertitre au-dessus du champ · court : une ligne · rows : hauteur de départ
      · objectif : une liste, une ligne par entrée, comptée jusqu'à ce nombre.
      Les exemples affichés sous chaque question viennent de Supabase (reglages.dossier_exemples). */
   const DOSSIER = [
@@ -570,17 +561,28 @@
       { k: "mots_cles", l: "10 à 15 recherches, une par ligne", rows: 4, objectif: 10 },
     ] },
   ];
+  const ANGLES = { k: "angles", l: "Tes angles, un par ligne, ton angle n°1 en premier", aide: "Entre 3 et 6. Colle le bloc de code du prompt des angles, et renomme ceux qui ne te parlent pas.", rows: 3, lignes: true };
   const HOOKS = { k: "hooks", l: "Les hooks que tu gardes, un par ligne", aide: "Vise 12 : 3 par type de post.", rows: 4, lignes: true };
-  const N_PHRASES = 30, N_HOOKS = 12;
+  const N_PHRASES = 30, N_VIRAL = 20, N_HOOKS = 12, PAR_TYPE = 5, SORTIE = 7;
+  const TYPES = ["POV", "Storytelling", "Avant / Après", "Tips & conseils"];
+  const MOMENTS = [["m", "Matin", "recherche"], ["a", "Après-midi", "pour toi"], ["s", "Soir", "interagir plus"]];
   const rempli = (d, k) => !!String(d[k] ?? "").trim();
-  const anglesOk = (d) => phrasesDe(d).length > 0 && phrasesDe(d).every((p) => String(p.a ?? "").trim());
+  /* La Viral Bank : [{ u: le lien, n: ce qui inspire, y: le type de post (jour 3) }, …] */
+  const viralDe = (d) => (Array.isArray(d.viral) ? d.viral : []).filter((v) => v && (String(v.u ?? "").trim() || String(v.n ?? "").trim()));
+  const parType = (d, t) => viralDe(d).filter((v) => v.y === t).length;
+  /* Le warm-up : { "1m": true, "1a": true, … } (jour + moment), plus test_sortie (sur 10) au jour 3. */
+  const warmupFait = (d, n) => MOMENTS.every(([m]) => !!(d.warmup || {})[`${n}${m}`]);
   const hooksOk = (d) => lignes(d.hooks).length >= N_HOOKS;
-  /* Ce qui compte dans l'avancement : chaque champ, plus les phrases, les angles et les hooks,
-     chacun rattaché au jour où sa partie du dossier apparaît. */
+  /* Ce qui compte dans l'avancement, chaque étape rattachée au jour où sa partie apparaît. */
   const ETAPES = [
     ...DOSSIER.flatMap((s) => s.champs.map((c) => ({ jour: s.jour, ok: (d) => rempli(d, c.k) }))),
+    { jour: 1, ok: (d) => warmupFait(d, 1) },
+    { jour: 2, ok: (d) => warmupFait(d, 2) },
+    { jour: 2, ok: (d) => viralDe(d).length >= N_VIRAL },
     { jour: 2, ok: (d) => phrasesDe(d).length >= N_PHRASES },
-    { jour: 3, ok: anglesOk },
+    { jour: 3, ok: (d) => warmupFait(d, 3) && +d.test_sortie >= SORTIE },
+    { jour: 3, ok: (d) => TYPES.every((t) => parType(d, t) >= PAR_TYPE) },
+    { jour: 3, ok: (d) => lignes(d.angles).length >= 3 },
     { jour: 3, ok: hooksOk },
   ];
   /* Une partie du dossier n'apparaît qu'une fois son jour ouvert (le staff voit tout, en aperçu). */
@@ -599,11 +601,12 @@
     const ouvert = (n) => jourOuvert(e, n);
     const apercu = e.staff && e.jours.some((j) => j.numero <= 3 && !j.ouvert);
     /* L'en-tête d'un bloc : son jour (et, pour le staff, quand il s'ouvrira), son titre, son avancement. */
-    const tete = (titre, sid, n) => {
+    const tete = (titre, sid, n, etiquette) => {
       const j = e.jours.find((x) => x.numero === n), plusTard = j && !j.ouvert;
-      return `<p class="eyebrow dos-j">Jour ${n}${plusTard ? ` · aperçu, s'ouvre le ${esc(court(ms(j)))} à ${esc(heure(ms(j)))}` : ""}</p>
+      return `<p class="eyebrow dos-j">${esc(etiquette || `Jour ${n}`)}${plusTard ? ` · aperçu, s'ouvre le ${esc(court(ms(j)))} à ${esc(heure(ms(j)))}` : ""}</p>
         <div class="dos-st"><h2 class="jb-t">${esc(titre)}</h2><span class="dos-prog" data-prog="${sid}"></span></div>`;
     };
+    const exemple = (k) => (ex[k] ? `<p class="dos-i dos-ex"><b class="mono">Ex.</b>${esc(ex[k])}</p>` : "");
     const champ = (c) => {
       const v = String(d[c.k] ?? ""), ph = c.ph ? ` placeholder="${esc(c.ph)}"` : "";
       const boite = c.court
@@ -615,7 +618,8 @@
         ${ex[c.k] ? `<small class="dos-ex"><b class="mono">Ex.</b>${esc(ex[c.k])}</small>` : ""}
         ${boite}</label>`;
     };
-    const avecPhrases = ouvert(2), avecAngles = ouvert(3);
+    const joursWu = [1, 2, 3].filter(ouvert), avecJ2 = ouvert(2), avecJ3 = ouvert(3);
+    const wu = d.warmup || {};
     vue.innerHTML = `<div class="esp-w dos">
       <header class="jh">
         <p class="eyebrow mono"><a href="espace.html" data-go>← Les jours</a></p>
@@ -628,19 +632,32 @@
         ${s.intro ? `<p class="dos-i">${esc(s.intro)}</p>` : ""}
         ${s.champs.map(champ).join("")}
       </section>`).join("")}
-      ${avecPhrases ? `<section class="dos-s">
+      <section class="dos-s">
+        ${tete("Ton warm-up", "warmup", 1, "Jours 1 à 3")}
+        <p class="dos-i">30 minutes par jour, sans rien publier. Coche chaque moment une fois fait.</p>
+        <div class="wu" id="wu">${joursWu.map((n) => `<div class="wu-l"><span class="wu-j mono">Jour ${n}</span>${MOMENTS.map(([m, quand, quoi]) => `<label class="wu-c"><input type="checkbox" data-wu="${n}${m}"${wu[`${n}${m}`] ? " checked" : ""}><span class="box" aria-hidden="true"></span><span><b>${quand}</b> · ${quoi}</span></label>`).join("")}</div>`).join("")}</div>
+        ${avecJ3 ? `<label class="champ dos-c${rempli(d, "test_sortie") ? " is-ok" : ""}">
+          <span class="dos-l">Le test de sortie</span>
+          <small>Après ta 3e journée, ouvre ton fil « Pour toi » : sur les 10 premières vidéos, combien sont dans ta niche ?</small>
+          <span class="dos-sortie"><input name="test_sortie" class="dos-num" type="text" inputmode="numeric" maxlength="2" autocomplete="off" value="${esc(d.test_sortie ?? "")}"><span class="mono">/ 10</span><b id="wuV" role="status"></b></span>
+        </label>` : ""}
+      </section>
+      ${avecJ2 ? `<section class="dos-s">
+        ${tete("Ta Viral Bank", "viral", 2)}
+        <p class="dos-i">Les vidéos de ta niche à plus de 10 000 vues qui t'inspirent, aussi rangées dans ta collection TikTok « Viral Bank ». Vise ${N_VIRAL}.${avecJ3 ? ` Au jour 3, range-les dans les 4 types de posts : ${PAR_TYPE} par type.` : ""}</p>
+        ${exemple("viral")}
+        ${avecJ3 ? `<div class="vt" id="vt"></div>` : ""}
+        <div class="lst" id="lViral"></div>
+      </section>
+      <section class="dos-s">
         ${tete("Tes phrases", "phrases", 2)}
-        <p class="dos-i">${N_PHRASES} phrases de ta cible, copiées mot pour mot : les hooks de ta Viral Bank, leurs commentaires, Reddit, les avis App Store. Note les likes quand il y en a. Tu peux en coller plusieurs d'un coup, depuis un tableur aussi.</p>
-        ${ex.phrases ? `<p class="dos-i dos-ex"><b class="mono">Ex.</b>${esc(ex.phrases)}</p>` : ""}
-        <div class="phr" id="phr"></div>
-        <button class="btn btn-sm" id="pPlus" type="button">Ajouter 10 lignes</button>
+        <p class="dos-i">${N_PHRASES} phrases de ta cible, copiées mot pour mot : les hooks de ta Viral Bank, leurs commentaires, Reddit, les avis App Store. Tu peux en coller plusieurs d'un coup.</p>
+        ${exemple("phrases")}
+        <div class="lst" id="lPhrases"></div>
       </section>` : ""}
-      ${avecAngles ? `<section class="dos-s">
+      ${avecJ3 ? `<section class="dos-s">
         ${tete("Tes angles et tes hooks", "angles", 3)}
-        <p class="dos-i">Lance le prompt des angles du jour 3, puis colle ici son 2e bloc de code : la colonne Angle de tes phrases se remplit dans l'ordre.</p>
-        <label class="champ dos-c"><span class="dos-l sans-px">Les angles, un par ligne, dans l'ordre de tes phrases</span><textarea id="aColle" rows="3" data-grow placeholder="La peur de mal faire&#10;Les infos contradictoires&#10;…"></textarea></label>
-        <div class="dos-a"><button class="btn btn-sm" id="aGo" type="button">Remplir la colonne Angle</button><span class="mono" id="aNote" role="status"></span></div>
-        <div id="aTab"></div>
+        ${champ(ANGLES)}
         ${champ(HOOKS)}
       </section>` : ""}
       </form>
@@ -660,7 +677,7 @@
     const grandir = (t) => { t.style.height = "auto"; t.style.height = `${t.scrollHeight + 2}px`; };
     $$("textarea[data-grow]").forEach(grandir);
 
-    /* L'avancement de chaque section : un pixel par champ, ou un compteur pour les longues listes. */
+    /* L'avancement de chaque bloc : un pixel par étape, ou un compteur pour les longues listes. */
     const SECTIONS = [
       ...DOSSIER.map((s, i) => {
         const liste = s.champs.length === 1 && s.champs[0].objectif ? s.champs[0] : null;
@@ -668,8 +685,11 @@
           ? { id: `s${i}`, total: liste.objectif, n: () => Math.min(lignes(d[liste.k]).length, liste.objectif) }
           : { id: `s${i}`, total: s.champs.length, n: () => s.champs.filter((c) => rempli(d, c.k)).length };
       }),
+      { id: "warmup", total: joursWu.length * MOMENTS.length + (avecJ3 ? 1 : 0),
+        n: () => joursWu.reduce((t, j) => t + MOMENTS.filter(([m]) => (d.warmup || {})[`${j}${m}`]).length, 0) + (avecJ3 && +d.test_sortie >= SORTIE ? 1 : 0) },
+      { id: "viral", total: N_VIRAL, n: () => Math.min(viralDe(d).length, N_VIRAL) },
       { id: "phrases", total: N_PHRASES, n: () => Math.min(phrasesDe(d).length, N_PHRASES) },
-      { id: "angles", total: 2, n: () => (anglesOk(d) ? 1 : 0) + (hooksOk(d) ? 1 : 0) },
+      { id: "angles", total: 2, n: () => (lignes(d.angles).length >= 3 ? 1 : 0) + (hooksOk(d) ? 1 : 0) },
     ];
     const compter = () => {
       for (const s of SECTIONS) {
@@ -681,8 +701,11 @@
         el.innerHTML = (s.total <= 8 ? Array.from({ length: s.total }, (_, i) => `<i${i < n ? ' class="on"' : ""}></i>`).join("") : "") + `<b class="mono">${n} / ${s.total}</b>`;
       }
       $$("[data-nb]").forEach((el) => { const n = lignes(el.closest("label").querySelector("textarea").value).length; el.textContent = n ? `· ${n}` : ""; });
+      const vt = $("#vt");
+      if (vt) vt.innerHTML = TYPES.map((t) => { const n = parType(d, t); return `<span${n >= PAR_TYPE ? ' class="is-ok"' : ""}>${esc(t)}<b class="mono">${n} / ${PAR_TYPE}</b></span>`; }).join("");
+      const v = $("#wuV");
+      if (v) { const n = parseInt(d.test_sortie, 10); v.textContent = isNaN(n) ? "" : n >= SORTIE ? "Ton compte est chaud." : "Fais une journée de plus avant de publier."; }
     };
-    compter();
     let attente = {}, minuteur = 0, encours = false;
     const envoyer = async () => {
       clearTimeout(minuteur); minuteur = 0;
@@ -705,77 +728,69 @@
     viderDossier = envoyer;
     const noter = () => { compter(); clearTimeout(minuteur); minuteur = setTimeout(envoyer, 900); };
 
-    /* Les phrases : un tableau de lignes, toujours au moins N_PHRASES à l'écran.
-       La colonne Angle n'apparaît qu'au jour 3, ou dès qu'un angle est rempli. */
-    const phr = $("#phr");
-    let P = phrasesDe(d).map((p) => ({ t: String(p.t), l: +p.l > 0 ? Math.round(+p.l) : "", a: String(p.a ?? "") }));
-    const vide = () => ({ t: "", l: "", a: "" });
-    const completer = (n) => { while (P.length < n) P.push(vide()); };
-    const peindrePhrases = () => {
-      if (!phr) return;
-      completer(N_PHRASES);
-      const angle = avecAngles || P.some((p) => p.a.trim());
-      const noms = anglesDe({ phrases: P }).map((a) => a.nom);
-      phr.classList.toggle("sans-angle", !angle);
-      phr.innerHTML = `<div class="phr-t mono" aria-hidden="true"><span></span><span>La phrase, mot pour mot</span><span>Likes</span>${angle ? "<span>Angle</span>" : ""}</div>${P.map((p, i) => `<div class="phr-l" data-i="${i}">
-        <span class="phr-n mono">${i + 1}</span>
-        <input data-f="t" type="text" aria-label="Phrase ${i + 1}" maxlength="600" value="${esc(p.t)}">
-        <input data-f="l" type="text" inputmode="numeric" aria-label="Likes de la phrase ${i + 1}" placeholder="likes" maxlength="9" value="${esc(p.l)}">
-        ${angle ? `<input data-f="a" type="text" list="aNoms" aria-label="Angle de la phrase ${i + 1}" placeholder="angle" maxlength="80" value="${esc(p.a)}">` : ""}
-      </div>`).join("")}<datalist id="aNoms">${noms.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`;
-    };
-    const peindreAngles = () => {
-      const tab = $("#aTab");
-      if (!tab) return;
-      const A = anglesDe({ phrases: P }), sans = phrasesDe({ phrases: P }).filter((p) => !p.a.trim()).length;
-      tab.innerHTML = A.length ? `<table class="ang"><thead><tr><th>Angle</th><th>Phrases</th><th>Likes</th></tr></thead><tbody>${A.map((a, i) => `<tr${i ? "" : ' class="is-1"'}><td>${esc(a.nom)}${i ? "" : " <i>ton angle n°1</i>"}</td><td>${a.n}</td><td>${a.likes || "—"}</td></tr>`).join("")}</tbody></table>${sans ? `<p class="dos-i">${sans} phrase${sans > 1 ? "s" : ""} sans angle.</p>` : ""}` : "";
-    };
-    const garderPhrases = () => {
-      d.phrases = attente.phrases = phrasesDe({ phrases: P }).map((p) => ({ t: p.t.trim(), l: +p.l > 0 ? Math.round(+p.l) : 0, a: p.a.trim() }));
-      peindreAngles();
-      noter();
-    };
-    peindrePhrases(); peindreAngles();
-    if (phr) {
-      phr.addEventListener("input", (ev) => {
-        const l = ev.target.closest(".phr-l"), f = ev.target.dataset.f;
+    /* Une liste de lignes (Viral Bank, phrases) : au moins `min` lignes, et toujours 2 lignes vides
+       sous la dernière remplie. Coller plusieurs lignes d'un coup remplit les suivantes
+       (depuis un tableur, les colonnes séparées par des tabulations vont dans les colonnes suivantes). */
+    const liste = (el, cle, cols, min) => {
+      if (!el) return;
+      const textes = cols.filter((c) => !c.options).map((c) => c.f);
+      const plein = (x) => textes.some((f) => String(x[f] ?? "").trim());
+      const vide = () => Object.fromEntries(cols.map((c) => [c.f, ""]));
+      const L = (Array.isArray(d[cle]) ? d[cle] : []).filter((x) => x && plein(x)).map((x) => Object.fromEntries(cols.map((c) => [c.f, String(x[c.f] ?? "")])));
+      const gabarit = `22px ${cols.map((c) => c.w || "minmax(0, 1fr)").join(" ")}`;
+      const completer = () => { let fin = 0; L.forEach((x, i) => { if (plein(x)) fin = i + 1; }); while (L.length < Math.max(min, fin + 2)) L.push(vide()); };
+      const ligne = (x, i) => `<div class="lst-l" data-i="${i}" style="--cols: ${gabarit}"><span class="lst-n mono">${i + 1}</span>${cols.map((c) => (c.options
+        ? `<select data-f="${c.f}" aria-label="${esc(c.l)}, ligne ${i + 1}"><option value="">${esc(c.ph || "—")}</option>${c.options.map((o) => `<option${o === x[c.f] ? " selected" : ""}>${esc(o)}</option>`).join("")}</select>`
+        : `<input data-f="${c.f}" type="text" autocomplete="off" aria-label="${esc(c.l)}, ligne ${i + 1}"${c.ph ? ` placeholder="${esc(c.ph)}"` : ""} maxlength="${c.max || 300}" value="${esc(x[c.f])}">`)).join("")}</div>`;
+      const peindre = () => {
+        completer();
+        el.innerHTML = (cols.length > 1 ? `<div class="lst-t mono" aria-hidden="true" style="--cols: ${gabarit}"><span></span>${cols.map((c) => `<span>${esc(c.l)}</span>`).join("")}</div>` : "") + L.map(ligne).join("");
+      };
+      const garder = () => { d[cle] = attente[cle] = L.filter(plein).map((x) => Object.fromEntries(cols.map((c) => [c.f, String(x[c.f]).trim()]))); noter(); };
+      peindre();
+      el.addEventListener("input", (ev) => {
+        const l = ev.target.closest(".lst-l"), f = ev.target.dataset.f;
         if (!l || !f) return;
         ev.stopPropagation();
-        if (f === "l") ev.target.value = ev.target.value.replace(/\D/g, "");
-        P[+l.dataset.i][f] = ev.target.value;
-        garderPhrases();
+        const i = +l.dataset.i;
+        L[i][f] = ev.target.value;
+        if (i >= L.length - 2 && plein(L[i])) { const avant = L.length; completer(); el.insertAdjacentHTML("beforeend", L.slice(avant).map((x, k) => ligne(x, avant + k)).join("")); }
+        garder();
       });
-      phr.addEventListener("paste", (ev) => {
-        const l = ev.target.closest(".phr-l"), texte = (ev.clipboardData || window.clipboardData).getData("text");
-        if (!l || ev.target.dataset.f !== "t" || !/\n/.test(texte.trim())) return;
+      el.addEventListener("paste", (ev) => {
+        const l = ev.target.closest(".lst-l"), debut = textes.indexOf(ev.target.dataset.f), texte = (ev.clipboardData || window.clipboardData).getData("text");
+        if (!l || debut < 0 || !/\n/.test(texte.trim())) return;
         ev.preventDefault();
-        const recues = texte.split(/\r?\n/).map((x) => x.split("\t")).filter((c) => c[0] && c[0].trim());
         let i = +l.dataset.i;
-        completer(i + recues.length);
-        for (const c of recues) {
-          const likes = (c[1] || "").replace(/\D/g, "");
-          P[i] = { ...P[i], t: c[0].trim().slice(0, 600), l: likes ? +likes : P[i].l };
+        for (const c of texte.split(/\r?\n/).map((x) => x.split("\t")).filter((c) => c.some((v) => v.trim()))) {
+          while (L.length <= i) L.push(vide());
+          c.forEach((v, k) => { const f = textes[debut + k]; if (f) L[i][f] = v.trim().slice(0, 600); });
           i++;
         }
-        peindrePhrases(); garderPhrases();
+        peindre(); garder();
       });
-      $("#pPlus").addEventListener("click", () => { completer(P.length + 10); peindrePhrases(); });
-    }
-    if ($("#aGo")) $("#aGo").addEventListener("click", () => {
-      const noms = lignes($("#aColle").value).map((x) => x.replace(/^[-*\d.\s]+/, "").slice(0, 80)), cibles = P.filter((p) => p.t.trim());
-      const note = $("#aNote");
-      if (!noms.length) { note.textContent = "Colle d'abord les angles."; return; }
-      if (noms.length !== cibles.length) { note.textContent = `Tu as ${cibles.length} phrase${cibles.length > 1 ? "s" : ""} et ${noms.length} angle${noms.length > 1 ? "s" : ""} : il en faut autant.`; return; }
-      cibles.forEach((p, i) => { p.a = noms[i]; });
-      $("#aColle").value = ""; grandir($("#aColle")); note.textContent = "Colonne remplie.";
-      peindrePhrases(); garderPhrases();
-    });
+    };
+    liste($("#lViral"), "viral", [
+      { f: "u", l: "Le lien de la vidéo", ph: "https://www.tiktok.com/…" },
+      { f: "n", l: "Ce qui t'inspire", ph: "le hook, l'image, le format", w: "minmax(0, 1.3fr)" },
+      ...(avecJ3 ? [{ f: "y", l: "Type de post", ph: "Type…", options: TYPES, w: "160px" }] : []),
+    ], 5);
+    liste($("#lPhrases"), "phrases", [{ f: "t", l: "La phrase, mot pour mot", max: 600 }], 10);
+    compter();
 
+    const blocWu = $("#wu");
+    blocWu.addEventListener("change", (ev) => {
+      const k = ev.target.dataset.wu;
+      if (!k) return;
+      d.warmup = attente.warmup = { ...(d.warmup || {}), [k]: ev.target.checked };
+      noter();
+    });
     $("#fDos").addEventListener("submit", (ev) => ev.preventDefault());
     $("#fDos").addEventListener("input", (ev) => {
       const el = ev.target;
       if (el.matches("textarea[data-grow]")) grandir(el);
       if (!el.name) return;
+      if (el.name === "test_sortie") el.value = el.value.replace(/\D/g, "").slice(0, 2);
       d[el.name] = attente[el.name] = el.value;
       const lab = el.closest(".dos-c");
       if (lab) lab.classList.toggle("is-ok", !!el.value.trim());

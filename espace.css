@@ -161,6 +161,7 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 .res .ext { margin-left: auto; color: var(--g3); font-family: var(--display); font-size: 12px; }
 .res a:hover .ext { color: var(--ink); }
 .jb-cta { display: grid; gap: 8px; }
+.ico-dc { width: 18px; height: 18px; flex: none; }
 .jb-cta .btn { justify-content: center; }
 .jb.is-seul .jb-cta { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 
@@ -206,33 +207,47 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 .dos-etat { position: fixed; right: 16px; bottom: 16px; z-index: 20; margin: 0; padding: 8px 13px; background: var(--paper-2); border: 1px solid var(--line-2); border-radius: 999px; font-size: 12px; color: var(--g4); opacity: 0; transform: translateY(6px); transition: opacity 200ms, transform 200ms; pointer-events: none; }
 .dos-etat.is-on { opacity: 1; transform: none; }
 .dos-etat.is-rate { color: var(--px); }
-.phr { margin: 18px 0 12px; }
-.phr-t, .phr-l { display: grid; grid-template-columns: 22px minmax(0, 1fr) 80px 150px; gap: 6px; align-items: center; }
-.phr.sans-angle .phr-t, .phr.sans-angle .phr-l { grid-template-columns: 22px minmax(0, 1fr) 80px; }
-.phr-t { padding-bottom: 6px; font-size: 11px; color: var(--g4); }
-.phr-l + .phr-l { margin-top: 6px; }
-.phr-n { font-size: 11px; color: var(--g3); text-align: right; }
-.phr-l input { width: 100%; min-width: 0; font: inherit; font-size: 14px; color: var(--ink); background: var(--paper); border: 1px solid var(--line-2); border-radius: 6px; padding: 9px 10px; }
-.phr-l input::placeholder { color: var(--line-2); }
-.phr-l input:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--px-soft); }
-.dos-a { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 10px; font-size: 12px; color: var(--g4); }
-.dos .btn-sm { cursor: pointer; font: inherit; font-size: 14px; font-weight: 500; }
-.ang { width: 100%; margin-top: 22px; border-collapse: collapse; font-size: 15px; }
-.ang th { padding: 8px 0; border-bottom: 1px solid var(--line-2); font-family: var(--display); font-size: 11px; font-weight: 400; text-align: left; color: var(--g4); }
-.ang td { padding: 10px 0; border-bottom: 1px solid var(--line); }
-.ang th + th, .ang td + td { width: 80px; text-align: right; font-variant-numeric: tabular-nums; }
-.ang .is-1 td:first-child { font-weight: 600; }
-.ang i { margin-left: 8px; padding: 2px 7px; background: var(--c1); color: #0A0A0A; font-family: var(--display); font-size: 11px; font-style: normal; font-weight: 400; border-radius: 3px; }
+/* Les listes du dossier (Viral Bank, phrases) : une ligne par entrée, numérotée. */
+.lst { margin: 16px 0 4px; }
+.lst-t, .lst-l { display: grid; grid-template-columns: var(--cols); gap: 6px; align-items: center; }
+.lst-t { padding-bottom: 6px; font-size: 11px; color: var(--g4); }
+.lst-l + .lst-l { margin-top: 6px; }
+.lst-n { font-size: 11px; color: var(--g3); text-align: right; }
+.lst-l input, .lst-l select { width: 100%; min-width: 0; font: inherit; font-size: 14px; color: var(--ink); background: var(--paper); border: 1px solid var(--line-2); border-radius: 6px; padding: 9px 10px; }
+.lst-l select { padding-inline: 8px; cursor: pointer; }
+.lst-l input::placeholder { color: var(--line-2); }
+.lst-l input:focus, .lst-l select:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--px-soft); }
+/* Le warm-up : 3 moments par jour, à cocher. */
+.wu { display: grid; gap: 8px; margin-top: 16px; }
+.wu-l { display: grid; grid-template-columns: 58px repeat(3, minmax(0, 1fr)); gap: 8px; align-items: center; }
+.wu-j { font-size: 12px; color: var(--g4); }
+.wu-c { position: relative; display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: var(--paper); border: 1px solid var(--line-2); border-radius: 8px; cursor: pointer; font-size: 13px; line-height: 1.3; color: var(--g4); transition: border-color 150ms; }
+.wu-c b { font-weight: 500; color: var(--ink); }
+.wu-c input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.wu-c .box { width: 16px; height: 16px; flex: none; display: grid; place-items: center; border: 1px solid var(--line-2); transition: border-color 150ms; }
+.wu-c .box::after { content: ""; width: 8px; height: 8px; background: var(--px); transform: scale(0); transition: transform 320ms var(--spring); }
+.wu-c:hover { border-color: var(--g3); }
+.wu-c input:checked + .box { border-color: var(--px); }
+.wu-c input:checked + .box::after { transform: scale(1); }
+.wu-c input:focus-visible + .box { box-shadow: 0 0 0 3px var(--px-soft); }
+.dos-c > .dos-sortie { display: flex; align-items: center; gap: 10px; margin: 10px 0 0; font-size: 13px; font-weight: 400; color: var(--g4); }
+.dos .dos-c .dos-sortie input.dos-num { width: 64px; margin: 0; text-align: center; }
+.dos-sortie b { font-weight: 500; color: var(--ink); }
+/* Les 4 types de posts de la Viral Bank (jour 3) : combien de vidéos dans chacun. */
+.vt { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.vt span { display: inline-flex; align-items: center; gap: 8px; padding: 5px 11px; border: 1px solid var(--line-2); border-radius: 999px; font-size: 13px; color: var(--ink-2); }
+.vt b { font-size: 11px; font-weight: 400; color: var(--g4); }
+.vt span.is-ok { border-color: var(--px); color: var(--ink); }
 @media (max-width: 700px) {
   .dos-s { padding: 20px 16px 22px; }
-  .phr-t { display: none; }
-  .phr-l input::placeholder { color: var(--g3); }
-  .phr-l, .phr.sans-angle .phr-l { grid-template-columns: 22px minmax(0, 1fr) 80px; padding: 10px 0; border-top: 1px solid var(--line); }
-  .phr-l + .phr-l { margin-top: 0; }
-  .phr-l [data-f="t"] { grid-column: 2 / -1; }
-  .phr-l [data-f="a"] { grid-column: 2; grid-row: 2; }
-  .phr-l [data-f="l"] { grid-column: 3; grid-row: 2; }
-  .phr.sans-angle .phr-l [data-f="l"] { grid-column: 2; max-width: 120px; }
+  .lst-t { display: none; }
+  .lst-l { grid-template-columns: 22px minmax(0, 1fr); padding: 10px 0; border-top: 1px solid var(--line); }
+  .lst-l + .lst-l { margin-top: 0; }
+  .lst-l > :nth-child(n+3) { grid-column: 2; }
+  .lst-l input::placeholder { color: var(--g3); }
+  .wu-l { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+  .wu-j { grid-column: 1 / -1; }
+  .wu-c { flex-direction: column; align-items: flex-start; gap: 8px; }
 }
 @media (max-width: 600px) { .dos-carte { grid-template-columns: 1fr; } .dos-carte-n { grid-column: 1; grid-row: auto; } }
 
