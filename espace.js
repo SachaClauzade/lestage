@@ -630,7 +630,8 @@
       </section>`).join("")}
       ${avecPhrases ? `<section class="dos-s">
         ${tete("Tes phrases", "phrases", 2)}
-        <p class="dos-i">${N_PHRASES} phrases de ta cible, mot pour mot, avec leurs likes : les hooks de ta Viral Bank, leurs commentaires, Reddit, les avis App Store. Tu peux en coller plusieurs d'un coup, depuis un tableur aussi.</p>
+        <p class="dos-i">${N_PHRASES} phrases de ta cible, copiées mot pour mot : les hooks de ta Viral Bank, leurs commentaires, Reddit, les avis App Store. Note les likes quand il y en a. Tu peux en coller plusieurs d'un coup, depuis un tableur aussi.</p>
+        ${ex.phrases ? `<p class="dos-i dos-ex"><b class="mono">Ex.</b>${esc(ex.phrases)}</p>` : ""}
         <div class="phr" id="phr"></div>
         <button class="btn btn-sm" id="pPlus" type="button">Ajouter 10 lignes</button>
       </section>` : ""}
