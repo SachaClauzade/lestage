@@ -38,8 +38,17 @@ alter table public.jours add column if not exists encart text;
 -- Les prompts du jour : [{ "titre", "quand", "texte", "apres", "outil" }, …]
 alter table public.jours add column if not exists prompts jsonb;
 
-alter table public.eleves enable row level security;
-alter table public.jours  enable row level security;
+-- Les réglages de la promo, une ligne par clé. Les valeurs ne vivent que
+-- dans Supabase, jamais dans ce dépôt public.
+--   coaching : le lien de réservation du coaching one-to-one (Calendly).
+create table if not exists public.reglages (
+  cle    text primary key,
+  valeur text
+);
+
+alter table public.eleves   enable row level security;
+alter table public.jours    enable row level security;
+alter table public.reglages enable row level security;
 
 -- Un mail collé avec une majuscule ou une espace doit quand même marcher.
 create or replace function public.eleves_normalise() returns trigger
@@ -85,6 +94,7 @@ begin
     'prenom', e.prenom,
     'staff', e.staff,
     'maintenant', now(),
+    'coaching', (select r.valeur from public.reglages r where r.cle = 'coaching'),
     'jours', coalesce((
       select jsonb_agg(jsonb_build_object(
         'numero', j.numero,

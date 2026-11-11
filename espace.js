@@ -99,7 +99,7 @@
       async session() { const m = memoire.get("demo.session"); return m ? { email: m } : null; },
       async envoyerCode(email) { await attendre(); if (/refus/.test(email)) throw new Refus("pas_inscrit"); },
       async verifierCode(email, code) { await attendre(700); if (code !== "123456") throw new Refus("code_invalide"); memoire.set("demo.session", email); },
-      async espace() { await attendre(120); return { prenom: "Sacha", staff, maintenant: new Date(horloge()).toISOString(), jours: jours() }; },
+      async espace() { await attendre(120); return { prenom: "Sacha", staff, maintenant: new Date(horloge()).toISOString(), coaching: "https://calendly.com/", jours: jours() }; },
       async jour(n) {
         await attendre(120);
         const j = jours().find((x) => x.numero === n);
@@ -322,6 +322,10 @@
         <span class="dos-carte-p">Ton app, ta cible, tes mots-clés, tes phrases, tes angles, tes hooks. Tu le remplis au fil des jours, tes prompts s'en servent.</span>
         <span class="dos-carte-n mono">${faits} / ${CHAMPS.length}${faits === CHAMPS.length ? " · complet" : ""}</span>
       </a>` : "";
+    const coaching = d.coaching ? lien(d.coaching, "dos-carte", `
+        <span class="dos-carte-t">Coaching one-to-one</span>
+        <span class="dos-carte-p">On regarde ton app, tes chiffres, ton onboarding et ton paywall. Réserve ton appel quand tu veux.</span>
+        <span class="dos-carte-n mono">Réserver ↗</span>`) : "";
     const ouverts = d.jours.filter((j) => j.ouvert);
     const dernier = ouverts[ouverts.length - 1];
     const suivant = d.jours.find((j) => !j.ouvert);
@@ -354,6 +358,7 @@
     vue.innerHTML = `<div class="esp-w">${une}
       <ul class="cal">${d.jours.map((j) => caseJour(j, d, aujCase)).join("")}</ul>
       ${carte}
+      ${coaching}
       ${sall ? `<section class="dsc"><p>Sur le Discord</p>${sall}</section>` : ""}
     </div>`;
     document.title = "Ton espace · Le Stage";
@@ -496,7 +501,7 @@
     const taches = lignes(j.taches), res = lignes(j.ressources).map(ressource).filter(Boolean);
     const coches = avancement(n);
     const plan = taches.length ? `<section><h2 class="jb-t">Plan d'action</h2><ul class="plan">${taches.map((t, i) => `<li><label><input type="checkbox" data-i="${i}" ${coches[i] ? "checked" : ""}><span class="box" aria-hidden="true"></span><span class="txt">${esc(t)}</span></label></li>`).join("")}</ul><p class="plan-note" id="note"></p></section>` : "";
-    const cta = [DISCORD.jours && DISCORD.jours[n] && lien(DISCORD.jours[n], "btn btn-ink", `Discuter dans #jour-${n}`), DISCORD.contenu && lien(DISCORD.contenu, "btn", "Montrer mon contenu"), '<a class="btn" href="espace.html?dossier" data-go>Mon dossier</a>'].filter(Boolean).join("");
+    const cta = [DISCORD.jours && DISCORD.jours[n] && lien(DISCORD.jours[n], "btn btn-ink", `Discuter dans #jour-${n}`), DISCORD.contenu && lien(DISCORD.contenu, "btn", "Montrer mon contenu"), '<a class="btn" href="espace.html?dossier" data-go>Mon dossier</a>', d.coaching && lien(d.coaching, "btn", "Réserver un coaching")].filter(Boolean).join("");
     const cote = res.length || cta ? `<aside>${res.length ? `<h2 class="jb-t">Ressources</h2><ul class="res">${res.join("")}</ul>` : ""}${cta ? `<div class="jb-cta">${cta}</div>` : ""}</aside>` : "";
     const encart = blocEncart(j.encart), gauche = plan || encart ? `<div>${plan}${encart}</div>` : "";
     const avant = d.jours[n - 2], apres = d.jours[n];
