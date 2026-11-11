@@ -43,6 +43,8 @@ alter table public.jours add column if not exists prompts jsonb;
 --   coaching : le lien de réservation du coaching one-to-one (Calendly).
 --   dossier_exemples : un objet JSON { champ: "exemple BellySafe" }, affiché
 --                      sous chaque question de Mon dossier.
+--   checklist_feature : la checklist « Feature TikTokable » de Mon dossier
+--                       { questions: [{ q, note }], seuil, oui, non, retenir }.
 create table if not exists public.reglages (
   cle    text primary key,
   valeur text
@@ -167,7 +169,8 @@ begin
   end if;
   select * into d from public.dossiers where email = e.email;
   return jsonb_build_object('donnees', coalesce(d.donnees, '{}'::jsonb), 'modifie_le', d.modifie_le,
-    'exemples', (select r.valeur::jsonb from public.reglages r where r.cle = 'dossier_exemples'));
+    'exemples', (select r.valeur::jsonb from public.reglages r where r.cle = 'dossier_exemples'),
+    'checklist', (select r.valeur::jsonb from public.reglages r where r.cle = 'checklist_feature'));
 end $$;
 
 -- Enregistre les champs reçus par-dessus ceux déjà là. Les autres ne bougent pas.

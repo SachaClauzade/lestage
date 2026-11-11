@@ -119,7 +119,7 @@
             { titre: "Ton app, tenue en main", texte: "Crée une photo ultra-réaliste, au format vertical.\nLa scène se déroule [LIEU].", outil: "image" },
           ] : null };
       },
-      async dossier() { await attendre(120); return { donnees: memoire.get("demo.dossier") || {}, modifie_le: null, exemples: memoire.get("demo.exemples") }; },
+      async dossier() { await attendre(120); return { donnees: memoire.get("demo.dossier") || {}, modifie_le: null, exemples: memoire.get("demo.exemples"), checklist: memoire.get("demo.checklist") }; },
       async enregistrerDossier(champs) { await attendre(300); memoire.set("demo.dossier", { ...(memoire.get("demo.dossier") || {}), ...champs }); return { modifie_le: new Date().toISOString() }; },
       async deconnexion() { memoire.del("demo.session"); },
     };
@@ -540,14 +540,15 @@
      g : un intertitre au-dessus du champ · court : une ligne · rows : hauteur de départ
      · liste : une case par entrée, avec ce bouton pour en ajouter · objectif : le nombre d'entrées visé
      · prompt : le prompt du jour (titre qui contient ces mots) à lancer depuis ce champ, rempli au moment du clic
-     · nom : comment on désigne le champ quand il manque au prompt.
+     · nom : comment on désigne le champ quand il manque au prompt
+     · checklist : le champ devient la checklist « Feature TikTokable » quand Supabase la fournit (sinon une simple liste).
      Les exemples affichés sous chaque question viennent de Supabase (reglages.dossier_exemples). */
   const DOSSIER = [
     { titre: "Ton app", jour: 1, champs: [
       { k: "app_nom", l: "Son nom", court: true },
       { k: "app_fait", l: "Ce qu'elle fait, en 2 phrases" },
       { k: "app_probleme", l: "Le problème qu'elle règle, en une phrase" },
-      { k: "feature", l: "Tes features TikTokables, une par case", aide: "Celles qui ont eu 5 ou 6 oui à la checklist « Feature TikTokable ».", liste: "Ajouter une feature", min: 2, max: 300 },
+      { k: "feature", l: "Tes features, passées à la checklist « Feature TikTokable »", aide: "Celles qui ont eu 5 ou 6 oui à la checklist « Feature TikTokable ».", liste: "Ajouter une feature", min: 2, max: 300, checklist: true },
     ] },
     { titre: "Ta cible", jour: 1, intro: "Une personne qu'on pourrait croiser dans la rue, pas « les gens qui veulent… ».", champs: [
       { k: "profil", g: "Son profil", l: "Qui est-ce ?", nom: "son profil", aide: "Prénom, âge, situation, débutante ou pas dans le sujet, métier, journée type.", rows: 2 },
@@ -593,6 +594,7 @@
     if (id !== routeId) return;
     caler(e.maintenant);
     const d = { ...(r.donnees || {}) }, ex = r.exemples || {};
+    const ck = r.checklist && Array.isArray(r.checklist.questions) && r.checklist.questions.length ? r.checklist : null;
     document.title = "Mon dossier · Le Stage";
     const ouvert = (n) => jourOuvert(e, n);
     const apercu = e.staff && e.jours.some((j) => j.numero <= 3 && !j.ouvert);
@@ -618,6 +620,15 @@
         <p class="dos-pr-a">Avec la réponse : garde celles qui sonnent comme ta cible, et colle-les dans la première case. Elles se rangent une par case.</p>
       </div>` : "");
     const champ = (c) => {
+      if (c.checklist && ck) return `<div class="champ dos-c">
+        <span class="dos-l sans-px">${esc(c.l)}</span>
+        <small>Une carte par feature. Coche chaque oui : à partir de ${+ck.seuil || ck.questions.length - 1}, elle est ${esc(ck.oui || "TikTokable")}.</small>
+        ${ex[c.k] ? `<small class="dos-ex"><b class="mono">Ex.</b>${esc(ex[c.k])}</small>` : ""}
+        <div class="fx" id="fx"></div>
+        <button class="btn btn-sm lst-plus" type="button" id="fxPlus">+ ${esc(c.liste)}</button>
+        ${ck.non ? `<small class="fx-r">${esc(ck.non)}</small>` : ""}
+        ${ck.retenir ? `<small class="fx-r"><b>À retenir.</b> ${esc(ck.retenir)}</small>` : ""}
+      </div>`;
       if (c.liste) return `${c.g ? `<p class="dos-g mono">${esc(c.g)}</p>` : ""}<div class="champ dos-c">
         <span class="dos-l sans-px">${esc(c.l)}</span>
         ${c.aide ? `<small>${esc(c.aide)}</small>` : ""}
@@ -801,9 +812,55 @@
     ], 5, "Ajouter une vidéo");
     liste($("#lPhrases"), "phrases", [{ f: "t", l: "La phrase, mot pour mot", max: 600 }], 10);
     /* Les champs du dossier en liste (features, mots-clés) restent enregistrés en texte, une entrée par ligne. */
-    for (const c of DOSSIER.flatMap((x) => x.champs).filter((x) => x.liste)) liste($(`#l_${c.k}`), c.k, [{ f: "t", l: c.l, ph: c.ph, max: c.max || 120 }], c.min || 5, c.liste, true);
+    for (const c of DOSSIER.flatMap((x) => x.champs).filter((x) => x.liste && !(x.checklist && ck))) liste($(`#l_${c.k}`), c.k, [{ f: "t", l: c.l, ph: c.ph, max: c.max || 120 }], c.min || 5, c.liste, true);
     compter();
 
+    /* La checklist « Feature TikTokable » : une carte par feature, ses oui cochés, son score.
+       d.features_check garde toutes les cartes ; d.feature ne garde que les noms TikTokables, un par ligne. */
+    const fx = $("#fx");
+    if (fx && ck) {
+      const NQ = ck.questions.length, seuil = +ck.seuil || NQ - 1;
+      const net = (x) => ({ n: String(x.n ?? ""), o: Array.from({ length: NQ }, (_, i) => !!(x.o || [])[i]) });
+      const F = Array.isArray(d.features_check) ? d.features_check.map(net) : lignes(d.feature).map((n) => net({ n }));
+      if (!F.length) F.push(net({}));
+      const score = (x) => x.o.filter(Boolean).length;
+      const plein = (x) => !!(x.n.trim() || score(x));
+      const carte = (x, i) => `<div class="fx-c" data-i="${i}">
+          <div class="fx-h"><span class="fx-n mono">${i + 1}</span><input data-f="n" type="text" autocomplete="off" maxlength="200" placeholder="Le nom de la feature" aria-label="Le nom de la feature ${i + 1}" value="${esc(x.n)}"><span class="fx-s mono"></span></div>
+          <div class="fx-q">${ck.questions.map((qq, k) => `<label class="fx-o"><input type="checkbox" data-o="${k}"${x.o[k] ? " checked" : ""}><span class="box" aria-hidden="true"></span><span>${esc(qq.q)}${qq.note ? `<small>${esc(qq.note)}</small>` : ""}</span></label>`).join("")}</div>
+          <p class="fx-v mono">${esc(ck.oui || "TikTokable")}</p>
+        </div>`;
+      const verdicts = () => $$(".fx-c", fx).forEach((el) => {
+        const s = score(F[+el.dataset.i]);
+        $(".fx-s", el).textContent = `${s} / ${NQ}`;
+        el.classList.toggle("is-ok", s >= seuil);
+      });
+      const garder = () => {
+        const propres = F.filter(plein).map((x) => ({ n: x.n.trim(), o: x.o.map((b) => (b ? 1 : 0)) }));
+        d.features_check = attente.features_check = propres;
+        d.feature = attente.feature = propres.filter((x) => x.n && x.o.filter(Boolean).length >= seuil).map((x) => x.n).join("\n");
+        verdicts();
+        noter();
+      };
+      fx.innerHTML = F.map(carte).join("");
+      verdicts();
+      fx.addEventListener("input", (ev) => {
+        const c = ev.target.closest(".fx-c");
+        if (!c) return;
+        ev.stopPropagation();
+        const x = F[+c.dataset.i];
+        if (ev.target.dataset.f === "n") x.n = ev.target.value;
+        else if (ev.target.dataset.o != null) x.o[+ev.target.dataset.o] = ev.target.checked;
+        garder();
+      });
+      $("#fxPlus").addEventListener("click", () => {
+        let i = F.findIndex((x) => !plein(x));
+        if (i < 0) { F.push(net({})); i = F.length - 1; fx.insertAdjacentHTML("beforeend", carte(F[i], i)); verdicts(); }
+        const champ = $(`.fx-c[data-i="${i}"] input[data-f="n"]`, fx);
+        champ.focus();
+        champ.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+      });
+    }
     for (const el of $$("[data-pr]")) {
       const p = promptDe(TOUS.find((c) => c.k === el.dataset.pr)), texte = () => remplir(p.texte, d);
       $("details", el).addEventListener("toggle", () => { $("[data-texte]", el).textContent = texte(); });

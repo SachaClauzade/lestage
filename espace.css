@@ -218,6 +218,31 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 .lst-l input::placeholder { color: var(--line-2); }
 .lst-l input:focus, .lst-l select:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--px-soft); }
 .lst-plus { margin-top: 10px; cursor: pointer; font: inherit; font-size: 14px; font-weight: 500; }
+/* La checklist « Feature TikTokable » : une carte par feature, ses oui à cocher, son score. */
+.fx { display: grid; gap: 10px; margin-top: 12px; }
+.fx-c { padding: 12px 14px 14px; background: var(--paper); border: 1px solid var(--line-2); border-radius: 10px; transition: border-color 200ms; }
+.fx-c.is-ok { border-color: var(--px); }
+.fx-h { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.fx-n { font-size: 11px; color: var(--g3); text-align: right; }
+.dos .dos-c .fx-h input { margin: 0; padding: 9px 10px; font-size: 15px; background: var(--card); }
+.fx-s { font-size: 12px; color: var(--g4); white-space: nowrap; }
+.fx-c.is-ok .fx-s { color: var(--ink); }
+.fx-q { display: grid; gap: 2px; margin: 10px 0 0 30px; }
+.fx-o { position: relative; display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; cursor: pointer; font-size: 14px; line-height: 1.4; color: var(--ink-2); }
+.dos-c .fx-o small { display: block; margin: 2px 0 0; font-size: 12px; color: var(--g4); }
+.fx-o input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.fx-o .box { width: 16px; height: 16px; margin-top: 2px; flex: none; display: grid; place-items: center; border: 1px solid var(--line-2); transition: border-color 150ms; }
+.fx-o .box::after { content: ""; width: 8px; height: 8px; background: var(--px); transform: scale(0); transition: transform 320ms var(--spring); }
+.fx-o:hover .box { border-color: var(--g3); }
+.fx-o input:checked + .box { border-color: var(--px); }
+.fx-o input:checked + .box::after { transform: scale(1); }
+.fx-o input:focus-visible + .box { box-shadow: 0 0 0 3px var(--px-soft); }
+.fx-v { display: none; width: max-content; margin: 8px 0 0 30px; padding: 3px 9px; background: var(--px); color: #0A0A0A; font-size: 11px; border-radius: 3px; }
+.fx-c.is-ok .fx-v { display: block; }
+.dos-c small.fx-r { margin: 10px 0 0; }
+.dos-c small.fx-r + small.fx-r { margin-top: 4px; }
+.fx-r b { font-weight: 500; color: var(--ink); }
+@media (max-width: 700px) { .fx-q, .fx-v { margin-left: 0; } }
 /* Un prompt lancé depuis le dossier (les mots-clés) : il se remplit avec ce qui est écrit. */
 .dos-pr { margin-top: 14px; padding: 14px 16px; background: var(--paper); border: 1px solid var(--line-2); border-radius: 10px; }
 .dos-pr-t { margin: 0; font-size: 14px; line-height: 1.45; color: var(--g4); }
