@@ -616,14 +616,28 @@
     ] },
   ];
   const ANGLES = { k: "angles", l: "Tes angles, ton angle n°1 dans la case 1", aide: "Entre 3 et 6. Avec le prompt des angles, colle son bloc de code dans la première case : chaque angle va dans sa case. Renomme ceux qui ne te parlent pas.", liste: "Ajouter un angle", min: 4, max: 120, prompt: "angles" };
-  const HOOKS = { k: "hooks", l: "Les hooks que tu gardes, réécrits à ta manière", aide: "Vise 12 : 3 par type de post.", liste: "Ajouter un hook", min: 4, max: 300, prompt: "hooks" };
-  const N_PHRASES = 30, N_VIRAL = 20, N_HOOKS = 12, PAR_TYPE = 5;
+  const HOOKS = { k: "hooks", prompt: "hooks" };
+  const N_PHRASES = 30, N_VIRAL = 20, PAR_TYPE = 5, HOOKS_PAR_TYPE = 5;
   const TYPES = ["POV", "Storytelling", "Avant / Après", "Tips & conseils"];
+  /* Ce que veut dire chaque type, avec les mots du moteur à hooks (methode/hooks.md du kit). */
+  const TYPES_AIDE = { "POV": "Tu te mets dans la peau de ta cible.", "Storytelling": "Une histoire courte de sa vie.", "Avant / Après": "Une transformation rapide.", "Tips & conseils": "1 à 3 conseils rapides." };
+  /* Les hooks restent en texte, un par ligne (le moteur à hooks les lit ainsi), chacun préfixé par son type : « POV · … ».
+     Une ligne sans type connu (hooks d'avant ce rangement) va dans « À ranger ». */
+  const SEP_TYPE = " · ";
+  const hooksParType = (d) => {
+    const H = Object.fromEntries([...TYPES, ""].map((t) => [t, []]));
+    for (const l of lignes(d.hooks)) {
+      const t = TYPES.find((x) => l.startsWith(x + SEP_TYPE));
+      if (t) H[t].push(l.slice(t.length + SEP_TYPE.length).trim()); else H[""].push(l);
+    }
+    return H;
+  };
+  const hooksEnTexte = (H) => [...TYPES.flatMap((t) => H[t].map((h) => t + SEP_TYPE + h)), ...H[""]].join("\n");
   const rempli = (d, k) => !!String(d[k] ?? "").trim();
   /* La Viral Bank : [{ u: le lien, n: ce qui inspire, y: le type de post }, …], tout au jour 2 */
   const viralDe = (d) => (Array.isArray(d.viral) ? d.viral : []).filter((v) => v && (String(v.u ?? "").trim() || String(v.n ?? "").trim()));
   const parType = (d, t) => viralDe(d).filter((v) => v.y === t).length;
-  const hooksOk = (d) => lignes(d.hooks).length >= N_HOOKS;
+  const hooksOk = (d) => { const H = hooksParType(d); return TYPES.every((t) => H[t].length >= HOOKS_PAR_TYPE); };
   /* Ce qui compte dans l'avancement, chaque étape rattachée au jour où sa partie apparaît. */
   const ETAPES = [
     ...DOSSIER.flatMap((s) => s.champs.map((c) => ({ jour: s.jour, ok: (d) => rempli(d, c.k) }))),
@@ -687,6 +701,7 @@
       if (!p) return "";
       PR[cle] = p;
       return `<div class="dos-pr" data-pr="${esc(cle)}">
+        <p class="dos-pr-k mono"><i aria-hidden="true">›_</i>Prompt</p>
         <p class="dos-pr-t"><b>${esc(p.titre || "Le prompt")}</b>${jetons(p).length ? " · il reprend ce que tu as écrit dans ton dossier." : ""}</p>
         ${p.quand ? `<p class="dos-pr-q">${esc(p.quand)}</p>` : ""}
         ${jetons(p).length ? `<p class="dos-pr-m" data-manque></p>` : ""}
@@ -758,17 +773,36 @@
       ${avecJ3 ? `<section class="dos-s">
         ${tete("Tes angles et tes hooks", "angles", 3)}
         ${champ(ANGLES)}
-        ${r.cle_kit ? `<div class="kit">
-          <p class="kit-t"><b>Le moteur à hooks</b> · un kit Claude Code qui part de ton dossier et de 52 000 hooks qui ont marché sur TikTok, et t'écrit 10 hooks par angle.</p>
-          <p class="kit-a">Ce sont des pistes, pas tes hooks. Choisis, réécris à ta manière, avec les mots de ta cible. Le risque, c'est de te laisser porter.</p>
-          <div class="prompt-b">
-            ${r.kit_hooks ? `<a class="btn btn-ink" href="${esc(r.kit_hooks)}" download>Télécharger le kit ↓</a>` : ""}
-            <button type="button" class="btn" id="kitCle">Copier ma clé</button>
-            <span class="kit-c mono">${esc(r.cle_kit.slice(0, 4))}…${esc(r.cle_kit.slice(-4))}</span>
-          </div>
-          <p class="kit-n">Dans le kit, tape /installer et colle ta clé. Elle ouvre ton dossier : ne la partage pas.</p>
-        </div>` : ""}
-        ${champ(HOOKS)}
+        <div class="hk">
+          <div class="dos-st hk-st"><h3 class="hk-titre">Tes hooks · ${HOOKS_PAR_TYPE} par type de post</h3><span class="dos-prog" data-prog="hooks"></span></div>
+          <ol class="hk-etapes">
+            <li><b>Génère-les avec le moteur à hooks.</b> Le kit part de ton dossier et de 52 000 hooks qui ont marché sur TikTok.</li>
+            <li><b>Choisis et reformule.</b> Ce sont des pistes, pas tes hooks : réécris-les avec les mots de ta cible.</li>
+            <li><b>Range-les ici</b>, ${HOOKS_PAR_TYPE} dans chaque type de post, ${HOOKS_PAR_TYPE * TYPES.length} en tout.</li>
+          </ol>
+          ${r.cle_kit ? `<div class="kit">
+            <p class="kit-t"><b>Le moteur à hooks</b> · un kit Claude Code. Télécharge-le, ouvre-le dans Claude Code, tape /installer et colle ta clé.</p>
+            <div class="prompt-b">
+              ${r.kit_hooks ? `<a class="btn btn-ink" href="${esc(r.kit_hooks)}" download>Télécharger le kit ↓</a>` : ""}
+              <button type="button" class="btn" id="kitCle">Copier ma clé</button>
+              <span class="kit-c mono">${esc(r.cle_kit.slice(0, 4))}…${esc(r.cle_kit.slice(-4))}</span>
+            </div>
+            <p class="kit-n">Ta clé ouvre ton dossier : ne la partage pas. Ensuite, pour chaque type, copie sa commande ci-dessous et colle-la dans Claude Code.</p>
+          </div>` : ""}
+          <div class="vt" id="ht"></div>
+          ${TYPES.map((t, k) => `<div class="hk-g">
+            <div class="hk-h">
+              <div><p class="hk-t">${esc(t)}</p><p class="hk-a">${esc(TYPES_AIDE[t])}</p></div>
+              ${r.cle_kit ? `<button type="button" class="hk-cmd mono" data-cmd="/hooks ${HOOKS_PAR_TYPE} hooks ${esc(t)}" title="Copier la commande pour le moteur à hooks">/hooks ${HOOKS_PAR_TYPE} hooks ${esc(t)}<span>Copier</span></button>` : ""}
+            </div>
+            <div class="lst" id="h_${k}"></div>
+          </div>`).join("")}
+          ${hooksParType(d)[""].length ? `<div class="hk-g hk-sans">
+            <div class="hk-h"><div><p class="hk-t">À ranger</p><p class="hk-a">Des hooks notés sans type. Déplace chacun dans son type ci-dessus, puis efface-le ici.</p></div></div>
+            <div class="lst" id="h_x"></div>
+          </div>` : ""}
+          ${blocPrompt(promptPour(HOOKS.prompt), "hooks")}
+        </div>
       </section>` : ""}
       ${blocsLibres()}
       </form>
@@ -799,6 +833,7 @@
       { id: "viral", total: N_VIRAL, n: () => viralDe(d).length },
       { id: "phrases", total: N_PHRASES, n: () => phrasesDe(d).length },
       { id: "angles", total: 2, n: () => (lignes(d.angles).length >= 3 ? 1 : 0) + (hooksOk(d) ? 1 : 0) },
+      { id: "hooks", total: HOOKS_PAR_TYPE * TYPES.length, n: () => { const H = hooksParType(d); return TYPES.reduce((a, t) => a + Math.min(H[t].length, HOOKS_PAR_TYPE), 0); } },
     ];
     const compter = () => {
       for (const s of SECTIONS) {
@@ -811,6 +846,8 @@
       }
       const vt = $("#vt");
       if (vt) vt.innerHTML = TYPES.map((t) => { const n = parType(d, t); return `<span${n >= PAR_TYPE ? ' class="is-ok"' : ""}>${esc(t)}<b class="mono">${n} / ${PAR_TYPE}</b></span>`; }).join("");
+      const ht = $("#ht");
+      if (ht) { const H = hooksParType(d); ht.innerHTML = TYPES.map((t) => { const n = H[t].length; return `<span${n >= HOOKS_PAR_TYPE ? ' class="is-ok"' : ""}>${esc(t)}<b class="mono">${n} / ${HOOKS_PAR_TYPE}</b></span>`; }).join(""); }
       for (const el of $$("[data-pr]")) {
         const p = PR[el.dataset.pr], ligne = $("[data-manque]", el);
         if (!p) continue;
@@ -847,12 +884,13 @@
     /* Une liste de lignes (Viral Bank, phrases) : au moins `min` lignes, toujours 2 lignes vides
        sous la dernière remplie, et un bouton pour en ajouter une si on veut. Coller plusieurs lignes d'un coup remplit les suivantes
        (depuis un tableur, les colonnes séparées par des tabulations vont dans les colonnes suivantes). */
-    const liste = (el, cle, cols, min, ajouter, enTexte) => {
+    const liste = (el, cle, cols, min, ajouter, enTexte, sur) => {
       if (!el) return;
       const textes = cols.filter((c) => !c.options).map((c) => c.f);
       const plein = (x) => textes.some((f) => String(x[f] ?? "").trim());
       const vide = () => Object.fromEntries(cols.map((c) => [c.f, ""]));
-      const depart = typeof d[cle] === "string" ? lignes(d[cle]).map((t) => ({ [cols[0].f]: t })) : Array.isArray(d[cle]) ? d[cle] : [];
+      const source = sur ? sur.depart : d[cle];
+      const depart = typeof source === "string" ? lignes(source).map((t) => ({ [cols[0].f]: t })) : Array.isArray(source) ? source : [];
       const L = depart.filter((x) => x && plein(x)).map((x) => Object.fromEntries(cols.map((c) => [c.f, String(x[c.f] ?? "")])));
       const gabarit = `22px ${cols.map((c) => c.w || "minmax(0, 1fr)").join(" ")}`;
       const completer = () => { let fin = 0; L.forEach((x, i) => { if (plein(x)) fin = i + 1; }); while (L.length < Math.max(min, fin + 2)) L.push(vide()); };
@@ -865,7 +903,8 @@
       };
       const garder = () => {
         const propres = L.filter(plein).map((x) => Object.fromEntries(cols.map((c) => [c.f, String(x[c.f]).trim()])));
-        d[cle] = attente[cle] = enTexte ? propres.map((x) => x[cols[0].f]).join("\n") : propres;
+        if (sur) sur(propres);
+        else d[cle] = attente[cle] = enTexte ? propres.map((x) => x[cols[0].f]).join("\n") : propres;
         noter();
       };
       peindre();
@@ -911,7 +950,18 @@
     liste($("#lPhrases"), "phrases", [{ f: "t", l: "La phrase, mot pour mot", max: 600 }], 10);
     /* Les champs du dossier en liste (features, mots-clés, angles, hooks) restent enregistrés en texte, une entrée par ligne :
        le prompt des hooks et le moteur à hooks lisent les angles ainsi, l'angle n°1 en premier. */
-    for (const c of [...DOSSIER.flatMap((x) => x.champs), ANGLES, HOOKS].filter((x) => x.liste && !(x.checklist && ck))) liste($(`#l_${c.k}`), c.k, [{ f: "t", l: c.l, ph: c.ph, max: c.max || 120 }], c.min || 5, c.liste, true);
+    for (const c of [...DOSSIER.flatMap((x) => x.champs), ANGLES].filter((x) => x.liste && !(x.checklist && ck))) liste($(`#l_${c.k}`), c.k, [{ f: "t", l: c.l, ph: c.ph, max: c.max || 120 }], c.min || 5, c.liste, true);
+    /* Les hooks : une liste par type de post, toutes réunies dans d.hooks (« Type · hook », une ligne chacun). */
+    const HK = hooksParType(d);
+    const garderHooks = (t) => Object.assign((propres) => { HK[t] = propres.map((x) => x.t); d.hooks = attente.hooks = hooksEnTexte(HK); }, { depart: HK[t].join("\n") });
+    TYPES.forEach((t, k) => liste($(`#h_${k}`), `_h${k}`, [{ f: "t", l: `Hook ${t}`, ph: `Ton hook ${t}, réécrit à ta manière`, max: 300 }], HOOKS_PAR_TYPE, "Ajouter un hook", true, garderHooks(t)));
+    liste($("#h_x"), "_hx", [{ f: "t", l: "Hook à ranger", max: 300 }], 1, null, true, garderHooks(""));
+    $$("[data-cmd]").forEach((b) => b.addEventListener("click", async () => {
+      const t = b.dataset.cmd, lab = $("span", b);
+      try { await navigator.clipboard.writeText(t); } catch {}
+      lab.textContent = "Copié"; setTimeout(() => { lab.textContent = "Copier"; }, 1400);
+      track("espace_kit_hooks", { action: "commande" });
+    }));
     compter();
 
     /* La checklist « Feature TikTokable » : une carte par feature, ses oui cochés, son score.

@@ -402,3 +402,36 @@ a.tile-dos:hover .arrow { translate: 3px 0; }
   .vintro-mini .player { margin: 0 12px 12px; }
   .home-cal { margin-top: 26px; }
 }
+
+/* --- Mon dossier : les prompts se distinguent des champs ---- */
+.dos-pr { position: relative; padding: 14px 16px 16px 18px; background: color-mix(in srgb, var(--c1) 7%, var(--paper)); border: 1px solid color-mix(in srgb, var(--c1) 38%, var(--line-2)); border-left: 3px solid var(--c1); }
+.dos-pr-k { display: inline-flex; align-items: center; gap: 7px; margin: 0 0 8px; padding: 3px 9px 3px 7px; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: #0A0A0A; background: var(--c1); border-radius: 5px; }
+.dos-pr-k i { font-style: normal; font-weight: 600; letter-spacing: -.05em; }
+.dos-pr-t b { font-size: 15px; }
+
+/* --- Mon dossier : les hooks du jour 3, par type de post --- */
+.hk { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--line); }
+.hk-st { margin: 0; }
+.hk-titre { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.015em; }
+.hk-etapes { margin: 14px 0 0; padding: 0; list-style: none; counter-reset: hk; display: grid; gap: 8px; }
+.hk-etapes li { position: relative; padding-left: 30px; font-size: 14px; line-height: 1.5; color: var(--ink-2); counter-increment: hk; }
+.hk-etapes li::before { content: counter(hk); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; display: grid; place-items: center; font-family: var(--display); font-size: 11px; color: #fff; background: var(--px); border-radius: 4px; }
+.hk-etapes b { color: var(--ink); font-weight: 600; }
+.hk .kit { margin-top: 16px; }
+.hk .vt { margin-top: 18px; }
+.hk-g { margin-top: 12px; padding: 14px 14px 12px; background: var(--paper); border: 1px solid var(--line-2); border-radius: 10px; }
+.hk-g.hk-sans { border-style: dashed; }
+.hk-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px 14px; flex-wrap: wrap; }
+.hk-t { margin: 0; font-size: 15px; font-weight: 600; }
+.hk-a { margin: 2px 0 0; font-size: 13px; color: var(--g4); }
+.hk-cmd { display: inline-flex; align-items: center; gap: 10px; padding: 6px 6px 6px 10px; font-size: 12px; color: var(--ink-2); background: var(--card); border: 1px solid var(--line-2); border-radius: 6px; cursor: pointer; }
+.hk-cmd span { padding: 2px 7px; font-size: 11px; color: var(--ink); background: var(--paper-2); border-radius: 4px; }
+.hk-cmd:hover { border-color: var(--ink); }
+.dos .hk-g .lst { margin-top: 10px; }
+.dos .hk-g .lst-l input { margin: 0; padding: 9px 10px; background: var(--card); }
+.hk-g .lst-plus { margin-top: 8px; }
+.hk .dos-pr { margin-top: 18px; }
+@media (max-width: 560px) {
+  .hk-g { padding: 12px 10px 10px; }
+  .hk-cmd { width: 100%; justify-content: space-between; }
+}
