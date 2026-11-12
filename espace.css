@@ -373,7 +373,9 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 .tile-pied { display: grid; gap: 8px; }
 .tile-pied .tile-btns { margin-top: 0; }
 .tile-join { justify-content: center; }
-.tile .tile-cta { padding-top: 0; align-self: flex-start; }
+.tile .tile-cta { align-self: flex-start; }
+.tile-dos.is-ferme { border-color: var(--line); box-shadow: none; }
+.tile-cta.is-off { cursor: default; color: var(--g4); border-style: dashed; background: transparent; pointer-events: none; }
 .tile-dos .tile-cta { margin-top: auto; }
 .tile-btns { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 2px; }
 .tile-btns .btn { font-size: 12px; padding: 6px 10px; gap: 6px; }

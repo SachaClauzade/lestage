@@ -363,13 +363,19 @@
   function tuiles(d, dr, dernier) {
     const etapes = etapesDe(d), faits = dr ? remplis(dr.donnees || {}, etapes) : 0, total = etapes.length;
     const barre = total ? `<span class="tile-bar" aria-hidden="true">${etapes.map((_, k) => `<i class="${k < faits ? "on" : ""}"></i>`).join("")}</span>` : "";
-    const dossier = dr ? `<a class="tile tile-dos" href="espace.html?dossier" data-go>
+    const premier = d.jours[0];
+    const dossier = !dr ? "" : dossierFerme(d) ? `<div class="tile tile-dos is-ferme">
+        <span class="tile-k mono">Ton travail</span>
+        <span class="tile-t">Mon dossier</span>
+        <span class="tile-p">Ton app, ta cible, tes mots-clés. Tes prompts s'en servent, et de nouvelles parties s'ajoutent au fil des jours.</span>
+        <span class="btn tile-cta is-off" aria-disabled="true">S'ouvre ${esc(fJourSeul.format(ms(premier)))} à ${esc(heure(ms(premier)))}</span>
+      </div>` : `<a class="tile tile-dos" href="espace.html?dossier" data-go>
         <span class="tile-k mono">Ton travail</span>
         <span class="tile-t">Mon dossier</span>
         <span class="tile-p">Ton app, ta cible, tes mots-clés. Tes prompts s'en servent, et de nouvelles parties s'ajoutent au fil des jours.</span>
         <span class="tile-n">${total ? `${barre}<span class="mono">${faits} / ${total}${faits === total ? " · complet" : ""}</span>` : `<span class="mono">Ses premières cases s'ouvrent avec le jour 1.</span>`}</span>
         <span class="btn btn-ink tile-cta">Ouvrir mon dossier <span class="arrow">→</span></span>
-      </a>` : "";
+      </a>`;
 
     const dc = d.discord || {}, ouvreDc = Date.parse(dc.ouvre_le || "");
     const salonJour = dernier && DISCORD.jours && DISCORD.jours[dernier.numero];
@@ -629,6 +635,8 @@
   ];
   /* Une partie du dossier n'apparaît qu'une fois son jour ouvert (le staff voit tout, en aperçu). */
   const jourOuvert = (e, n) => { const j = e.jours.find((x) => x.numero === n); return !j || j.ouvert || !!e.staff; };
+  /* Le dossier reste fermé aux élèves tant que le jour 1 n'est pas ouvert ; le staff y a toujours accès. */
+  const dossierFerme = (e) => !e.staff && !e.jours.some((j) => j.ouvert);
   const etapesDe = (e) => ETAPES.filter((x) => jourOuvert(e, x.jour));
   const remplis = (d, liste = ETAPES) => liste.filter((x) => x.ok(d)).length;
   let viderDossier = null;
@@ -638,6 +646,18 @@
     const [e, r] = await Promise.all([api.espace(), api.dossier()]);
     if (id !== routeId) return;
     caler(e.maintenant);
+    if (dossierFerme(e)) {
+      const premier = e.jours[0], quand = ms(premier);
+      document.title = "Mon dossier · Le Stage";
+      vue.innerHTML = `<div class="esp-w"><section class="lock">
+        <p class="eyebrow mono">Mon dossier</p>
+        <h1 class="h2">Ton dossier s'ouvre avec le jour 1, ${esc(long(quand))} à ${esc(heure(quand))}${point}</h1>
+        ${compte(quand, "cd-xl")}
+        <div><a class="btn" href="espace.html" data-go>Retour à l'accueil</a></div>
+      </section></div>`;
+      battre(quand);
+      return;
+    }
     const d = { ...(r.donnees || {}) }, ex = r.exemples || {};
     const ck = r.checklist && Array.isArray(r.checklist.questions) && r.checklist.questions.length ? r.checklist : null;
     document.title = "Mon dossier · Le Stage";
