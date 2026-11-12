@@ -97,6 +97,19 @@
     const titre = (n) => (plein ? `Le titre du jour ${n}, écrit par Sacha` : null);
     const jours = () => dates.map((d, i) => { const ouvre_le = `2026-${d}T06:00:00+01:00`; return { numero: i + 1, titre: titre(i + 1), ouvre_le, ouvert: Date.parse(ouvre_le) <= horloge() }; });
     const attendre = (d = 350) => new Promise((r) => setTimeout(r, d));
+    /* Des prompts de démonstration, rangés par jour comme dans Supabase. */
+    const promptsDemo = {
+      1: [
+        { titre: "Ton client idéal, si tu sèches", quand: "Tu n'arrives pas à décrire une personne précise.", texte: "Mon app : {{app_fait|[ce qu'elle fait]}}\n\nPropose-moi 3 clients idéaux.", apres: "Choisis-en un et réécris-le à la main." },
+        { titre: "Ta sous-niche et ta phrase", quand: "Tu hésites sur la sous-niche ou sur la phrase.", texte: "Ma cible :\n{{cible|[colle ta cible]}}\n\nPropose 5 sous-niches et 5 phrases.", apres: "Garde la plus petite sous-niche." },
+        { titre: "Tes mots-clés, depuis ta cible", quand: "Pour ta liste de départ.", texte: "Tu es un expert TikTok.\n\nMA CIBLE\n- Qui elle est : {{profil|[profil]}}\n- Son objectif n°1 : {{envie_objectif|[envie]}}\n\nMa cible en entier :\n{{cible|[colle ta cible]}}\n\nDonne-moi 15 recherches TikTok, une par ligne.", apres: "Garde celles qui sonnent comme ta cible." },
+      ],
+      3: [
+        { titre: "Tes angles, depuis tes 30 phrases", quand: "Tes 30 phrases sont dans ton dossier.", texte: "Mes phrases :\n{{phrases|[colle tes phrases]}}\n\nRange-les en angles.", apres: "Colle le bloc de code dans la première case." },
+        { titre: "Tes hooks, depuis tes phrases", quand: "Tu n'as pas encore Claude Code ?", texte: "Mon angle n°1 : {{angle1|[ton angle n°1]}}\n{{phrases|[colle tes phrases]}}", apres: "Note ceux que tu gardes." },
+      ],
+      4: [{ titre: "Ton app, tenue en main", quand: "Pour ton album « Démos de ton app ».", texte: "Crée une photo ultra-réaliste, au format vertical.\nLa scène se déroule [LIEU].", outil: "image", apres: "Vérifie l'écran et la main." }],
+    };
     return {
       async session() { const m = memoire.get("demo.session"); return m ? { email: m } : null; },
       async envoyerCode(email) { await attendre(); if (/refus/.test(email)) throw new Refus("pas_inscrit"); },
@@ -114,12 +127,13 @@
           taches: plein ? "Regarder la vidéo en entier\nÉcrire 5 idées de posts\nPublier ton premier post" : null,
           ressources: plein ? "Le Sheet du jour | https://docs.google.com/\nLes prompts (PDF) | https://example.com/prompts.pdf" : null,
           encart: plein ? "À savoir\n**Une règle en gras**, puis la suite de la phrase.\nUn second paragraphe, plus court." : null,
-          prompts: plein ? [
-            { titre: "Tes mots-clés, depuis ta cible", quand: "Pour ta liste de départ.", texte: "Tu es un expert TikTok.\n\nMA CIBLE\n- Qui elle est : {{profil|[profil]}}\n- Son objectif n°1 : {{envie_objectif|[envie]}}\n\nMa cible en entier :\n{{cible|[colle ta cible]}}\n\nDonne-moi 15 recherches TikTok, une par ligne.", apres: "Garde celles qui sonnent comme ta cible." },
-            { titre: "Ton app, tenue en main", texte: "Crée une photo ultra-réaliste, au format vertical.\nLa scène se déroule [LIEU].", outil: "image" },
-          ] : null };
+          prompts: plein ? promptsDemo[n] || null : null };
       },
-      async dossier() { await attendre(120); return { donnees: memoire.get("demo.dossier") || {}, modifie_le: null, exemples: memoire.get("demo.exemples"), checklist: memoire.get("demo.checklist"), cle_kit: "0123456789abcdef0123456789abcdef", kit_hooks: memoire.get("demo.kit") }; },
+      async dossier() {
+        await attendre(120);
+        const prompts = plein ? jours().filter((j) => j.ouvert || staff).flatMap((j) => (promptsDemo[j.numero] || []).map((p) => ({ jour: j.numero, ...p }))) : [];
+        return { donnees: memoire.get("demo.dossier") || {}, modifie_le: null, exemples: memoire.get("demo.exemples"), checklist: memoire.get("demo.checklist"), cle_kit: "0123456789abcdef0123456789abcdef", kit_hooks: memoire.get("demo.kit"), prompts };
+      },
       async enregistrerDossier(champs) { await attendre(300); memoire.set("demo.dossier", { ...(memoire.get("demo.dossier") || {}), ...champs }); return { modifie_le: new Date().toISOString() }; },
       async deconnexion() { memoire.del("demo.session"); },
     };
@@ -410,53 +424,14 @@
     angle1: (d) => lignes(d.angles)[0] || "",
   };
   const remplir = (t, d) => String(t).replace(/\{\{(\w+)\|([^}]*)\}\}/g, (_, k, repli) => (CALCULS[k] ? CALCULS[k](d) : String(d[k] ?? "").trim()) || repli);
-  const promptsDe = (liste, dos) => (Array.isArray(liste) ? liste : []).filter((p) => p && p.texte).map((p) => ({ ...p, texte: remplir(p.texte, dos || {}) }));
-  const brouillon = (n, i, base) => { const b = store.get(`stage.espace.p${n}`, {})[i]; return b && b.b === base && typeof b.v === "string" ? b.v : base; };
-
-  function blocPrompts(liste, n, dos) {
-    const ps = promptsDe(liste, dos);
+  /* Les prompts vivent dans Mon dossier, à côté de ce qu'ils remplissent. La page du jour ne fait que les nommer. */
+  function blocPrompts(liste) {
+    const ps = (Array.isArray(liste) ? liste : []).filter((p) => p && p.texte);
     if (!ps.length) return "";
-    return `<section class="prompts"><h2 class="jb-t">Les prompts du jour</h2><p class="prompts-aide">Ils reprennent ce que tu as écrit dans <a href="espace.html?dossier" data-go>ton dossier</a>. Ce qui reste entre [crochets], complète-le là-bas ou ici. Un prompt propose, c'est toi qui choisis.</p>${ps.map((p, i) => {
-      const texte = brouillon(n, i, p.texte);
-      return `<article class="prompt" data-i="${i}">
-        <h3>${esc(p.titre || `Prompt ${i + 1}`)}</h3>
-        ${p.quand ? `<p class="prompt-q"><b>Quand</b> ${esc(p.quand)}</p>` : ""}
-        <textarea spellcheck="false" aria-label="${esc(p.titre || "Prompt")}" rows="${Math.min(14, Math.max(5, Math.ceil(texte.length / 70)))}">${esc(texte)}</textarea>
-        <div class="prompt-b">
-          <button type="button" class="btn btn-ink" data-copier>Copier</button>
-          ${p.outil === "image" ? '<span class="prompt-n">À coller dans un outil qui génère des images, avec ta capture en pièce jointe.</span>' : '<button type="button" class="btn" data-claude>Ouvrir dans Claude ↗</button>'}
-          <button type="button" class="prompt-r" data-reset ${texte === p.texte ? "hidden" : ""}>Revenir au texte d'origine</button>
-        </div>
-        ${p.apres ? `<p class="prompt-a"><b>Avec la réponse</b> ${esc(p.apres)}</p>` : ""}
-      </article>`;
-    }).join("")}</section>`;
-  }
-  function brancherPrompts(liste, n, dos) {
-    const ps = promptsDe(liste, dos);
-    $$(".prompt").forEach((el) => {
-      const i = +el.dataset.i, p = ps[i], zone = $("textarea", el), reset = $("[data-reset]", el);
-      if (!p || !zone) return;
-      const garder = () => {
-        const b = store.get(`stage.espace.p${n}`, {});
-        if (zone.value === p.texte) delete b[i]; else b[i] = { b: p.texte, v: zone.value };
-        store.set(`stage.espace.p${n}`, b);
-        reset.hidden = zone.value === p.texte;
-      };
-      zone.addEventListener("input", garder);
-      reset.addEventListener("click", () => { zone.value = p.texte; garder(); });
-      $("[data-copier]", el).addEventListener("click", async (e) => {
-        const b = e.currentTarget;
-        try { await navigator.clipboard.writeText(zone.value); }
-        catch { zone.select(); try { document.execCommand("copy"); } catch {} }
-        b.textContent = "Copié";
-        setTimeout(() => { b.textContent = "Copier"; }, 1600);
-        track("espace_prompt", { jour: n, prompt: i, action: "copier" });
-      });
-      $("[data-claude]", el)?.addEventListener("click", () => {
-        window.open(`https://claude.ai/new?q=${encodeURIComponent(zone.value)}`, "_blank", "noopener");
-        track("espace_prompt", { jour: n, prompt: i, action: "claude" });
-      });
-    });
+    return `<section class="prompts"><h2 class="jb-t">Les prompts du jour</h2>
+      <p class="prompts-aide">Ils sont dans ton dossier, à côté de ce qu'ils remplissent, et reprennent ce que tu y as écrit :</p>
+      <ul class="prompts-l">${ps.map((p) => `<li>${esc(p.titre || "Un prompt")}</li>`).join("")}</ul>
+      <a class="btn btn-ink" href="espace.html?dossier" data-go>Ouvrir mon dossier</a></section>`;
   }
   function ressource(l) {
     const k = l.lastIndexOf("|");
@@ -466,9 +441,8 @@
   }
 
   async function vueJour(n, id) {
-    const [d, j, dr] = await Promise.all([api.espace(), api.jour(n), api.dossier().catch(() => null)]);
+    const [d, j] = await Promise.all([api.espace(), api.jour(n)]);
     if (id !== routeId) return;
-    const dos = (dr && dr.donnees) || {};
     caler(j.maintenant);
     const quand = ms(j), total = d.jours.length;
     document.title = `Jour ${n} · Le Stage`;
@@ -507,12 +481,11 @@
       </header>
       <div class="player">${player}</div>
       ${gauche || cote ? `<div class="jb ${gauche && cote ? "" : "is-seul"}">${gauche}${cote}</div>` : ""}
-      ${blocPrompts(j.prompts, n, dos)}
+      ${blocPrompts(j.prompts)}
       ${pager}
     </div>`;
     track("espace_jour", { jour: n });
     brancherPlan(n, taches.length);
-    brancherPrompts(j.prompts, n, dos);
     const prochain = apres && !apres.ouvert ? ms(apres) : 0;
     battre(prochain && !d.staff ? prochain : 0);
   }
@@ -539,7 +512,8 @@
   /* Tout ce que l'élève remplit vit ici : plus aucun Google Sheet à copier.
      g : un intertitre au-dessus du champ · court : une ligne · rows : hauteur de départ
      · liste : une case par entrée, avec ce bouton pour en ajouter · objectif : le nombre d'entrées visé
-     · prompt : le prompt du jour (titre qui contient ces mots) à lancer depuis ce champ, rempli au moment du clic
+     · prompt : le prompt (titre qui contient ces mots) affiché avec ce champ ou ce bloc, rempli au moment du clic.
+       Tous les prompts vivent dans le dossier : un prompt qu'aucun champ ne réclame a son bloc « Tes prompts » à son jour.
      · nom : comment on désigne le champ quand il manque au prompt
      · checklist : le champ devient la checklist « Feature TikTokable » quand Supabase la fournit (sinon une simple liste).
      Les exemples affichés sous chaque question viennent de Supabase (reglages.dossier_exemples). */
@@ -550,7 +524,7 @@
       { k: "app_probleme", l: "Le problème qu'elle règle, en une phrase" },
       { k: "feature", l: "Tes features, passées à la checklist « Feature TikTokable »", aide: "Celles qui ont eu 5 ou 6 oui à la checklist « Feature TikTokable ».", liste: "Ajouter une feature", min: 2, max: 300, checklist: true },
     ] },
-    { titre: "Ta cible", jour: 1, intro: "Une personne qu'on pourrait croiser dans la rue, pas « les gens qui veulent… ».", champs: [
+    { titre: "Ta cible", jour: 1, intro: "Une personne qu'on pourrait croiser dans la rue, pas « les gens qui veulent… ».", prompt: "client idéal", champs: [
       { k: "profil", g: "Son profil", l: "Qui est-ce ?", nom: "son profil", aide: "Prénom, âge, situation, débutante ou pas dans le sujet, métier, journée type.", rows: 2 },
       { k: "envie_objectif", g: "Ses envies", l: "Son objectif n°1" },
       { k: "envie_seule", l: "Ce qu'elle veut, mais n'arrive pas à avoir seule" },
@@ -558,14 +532,14 @@
       { k: "douleur_peur", l: "Sa plus grande peur" },
       { k: "douleur_essaye", l: "Ce qu'elle a déjà essayé" },
       { k: "sous_niche", g: "Ta sous-niche et ta phrase", l: "Ta sous-niche", aide: "La plus petite audience qui a ce problème tous les jours.", court: true },
-      { k: "phrase", l: "Ta phrase", ph: "Mon app aide les … à …, …" },
+      { k: "phrase", l: "Ta phrase", ph: "Mon app aide les … à …, …", prompt: "sous-niche" },
     ] },
     { titre: "Tes mots-clés", jour: 1, intro: "Ce que ta cible tape dans la recherche TikTok, avec ses mots à elle.", champs: [
       { k: "mots_cles", l: "10 à 15 recherches, une par case", liste: "Ajouter un mot-clé", objectif: 10, prompt: "mots-clés" },
     ] },
   ];
-  const ANGLES = { k: "angles", l: "Tes angles, ton angle n°1 dans la case 1", aide: "Entre 3 et 6. Avec le prompt des angles, colle son bloc de code dans la première case : chaque angle va dans sa case. Renomme ceux qui ne te parlent pas.", liste: "Ajouter un angle", min: 4, max: 120 };
-  const HOOKS = { k: "hooks", l: "Les hooks que tu gardes, réécrits à ta manière", aide: "Vise 12 : 3 par type de post.", liste: "Ajouter un hook", min: 4, max: 300 };
+  const ANGLES = { k: "angles", l: "Tes angles, ton angle n°1 dans la case 1", aide: "Entre 3 et 6. Avec le prompt des angles, colle son bloc de code dans la première case : chaque angle va dans sa case. Renomme ceux qui ne te parlent pas.", liste: "Ajouter un angle", min: 4, max: 120, prompt: "angles" };
+  const HOOKS = { k: "hooks", l: "Les hooks que tu gardes, réécrits à ta manière", aide: "Vise 12 : 3 par type de post.", liste: "Ajouter un hook", min: 4, max: 300, prompt: "hooks" };
   const N_PHRASES = 30, N_VIRAL = 20, N_HOOKS = 12, PAR_TYPE = 5;
   const TYPES = ["POV", "Storytelling", "Avant / Après", "Tips & conseils"];
   const rempli = (d, k) => !!String(d[k] ?? "").trim();
@@ -590,7 +564,7 @@
   addEventListener("visibilitychange", () => { if (document.hidden && viderDossier) viderDossier(); });
 
   async function vueDossier(id) {
-    const [e, r, j1] = await Promise.all([api.espace(), api.dossier(), api.jour(1).catch(() => null)]);
+    const [e, r] = await Promise.all([api.espace(), api.dossier()]);
     if (id !== routeId) return;
     caler(e.maintenant);
     const d = { ...(r.donnees || {}) }, ex = r.exemples || {};
@@ -605,20 +579,38 @@
         <div class="dos-st"><h2 class="jb-t">${esc(titre)}</h2><span class="dos-prog" data-prog="${sid}"></span></div>`;
     };
     const exemple = (k) => (ex[k] ? `<p class="dos-i dos-ex"><b class="mono">Ex.</b>${esc(ex[k])}</p>` : "");
-    /* Un prompt du jour lancé depuis le dossier : il se remplit au moment du clic, avec ce qui est écrit à cet instant. */
+    /* Les prompts des jours ouverts (tous, pour le staff), avec leur jour. Chacun s'affiche à côté de ce qu'il remplit,
+       et se remplit au moment du clic, avec ce qui est écrit à cet instant. */
+    const PROMPTS = (Array.isArray(r.prompts) ? r.prompts : []).filter((p) => p && p.texte);
     const TOUS = DOSSIER.flatMap((x) => x.champs);
-    const NOMS = { cible: "ta cible", ...Object.fromEntries(TOUS.map((c) => [c.k, c.nom || c.l.charAt(0).toLowerCase() + c.l.slice(1)])) };
-    const promptDe = (c) => (c && c.prompt ? (j1 && Array.isArray(j1.prompts) ? j1.prompts : []).find((p) => p && p.texte && String(p.titre || "").toLowerCase().includes(c.prompt)) : null);
-    const manquants = (p) => [...new Set([...p.texte.matchAll(/\{\{(\w+)\|/g)].map((m) => m[1]))]
-      .filter((k) => !String((CALCULS[k] ? CALCULS[k](d) : d[k]) ?? "").trim()).map((k) => NOMS[k] || k);
+    const MOTS = [...DOSSIER, ...TOUS, ANGLES, HOOKS].map((x) => x.prompt).filter(Boolean);
+    const titreDe = (p) => String(p.titre || "").toLowerCase();
+    const promptPour = (mot) => (mot ? PROMPTS.find((p) => titreDe(p).includes(mot)) : null);
+    const libres = PROMPTS.filter((p) => !MOTS.some((m) => titreDe(p).includes(m)));
+    const NOMS = { cible: "ta cible", phrases: "tes phrases", angle1: "ton angle n°1", ...Object.fromEntries(TOUS.map((c) => [c.k, c.nom || c.l.charAt(0).toLowerCase() + c.l.slice(1)])) };
+    const jetons = (p) => [...new Set([...p.texte.matchAll(/\{\{(\w+)\|/g)].map((m) => m[1]))];
+    const manquants = (p) => jetons(p).filter((k) => !String((CALCULS[k] ? CALCULS[k](d) : d[k]) ?? "").trim()).map((k) => NOMS[k] || k);
     const enListe = (l) => (l.length > 1 ? `${l.slice(0, -1).join(", ")} et ${l[l.length - 1]}` : l[0] || "");
-    const blocPrompt = (c) => (promptDe(c) ? `<div class="dos-pr" data-pr="${c.k}">
-        <p class="dos-pr-t"><b>Le prompt des ${esc(c.prompt)}</b> · il reprend ce que tu as écrit dans ton dossier.</p>
-        <p class="dos-pr-m" data-manque></p>
-        <div class="prompt-b"><button type="button" class="btn btn-ink" data-copier>Copier le prompt</button><button type="button" class="btn" data-claude>Ouvrir dans Claude ↗</button></div>
+    const PR = {};
+    const blocPrompt = (p, cle) => {
+      if (!p) return "";
+      PR[cle] = p;
+      return `<div class="dos-pr" data-pr="${esc(cle)}">
+        <p class="dos-pr-t"><b>${esc(p.titre || "Le prompt")}</b>${jetons(p).length ? " · il reprend ce que tu as écrit dans ton dossier." : ""}</p>
+        ${p.quand ? `<p class="dos-pr-q">${esc(p.quand)}</p>` : ""}
+        ${jetons(p).length ? `<p class="dos-pr-m" data-manque></p>` : ""}
+        <div class="prompt-b"><button type="button" class="btn btn-ink" data-copier>Copier le prompt</button>${p.outil === "image"
+          ? '<span class="prompt-n">À coller dans un outil qui génère des images, avec ta capture en pièce jointe.</span>'
+          : '<button type="button" class="btn" data-claude>Ouvrir dans Claude ↗</button>'}</div>
         <details class="dos-pr-v"><summary>Voir le prompt</summary><pre data-texte></pre></details>
-        <p class="dos-pr-a">Avec la réponse : garde celles qui sonnent comme ta cible, et colle-les dans la première case. Elles se rangent une par case.</p>
-      </div>` : "");
+        ${p.apres ? `<p class="dos-pr-a"><b>Avec la réponse</b> ${esc(p.apres)}</p>` : ""}
+      </div>`;
+    };
+    /* Les prompts qu'aucune partie ne réclame : un bloc « Tes prompts » à leur jour, après les autres parties. */
+    const blocsLibres = () => [...new Set(libres.map((p) => p.jour))].sort((a, b) => a - b).map((n) => `<section class="dos-s">
+        ${tete("Tes prompts", `p${n}`, n)}
+        ${libres.filter((p) => p.jour === n).map((p, i) => blocPrompt(p, `j${n}-${i}`)).join("")}
+      </section>`).join("");
     const champ = (c) => {
       if (c.checklist && ck) return `<div class="champ dos-c">
         <span class="dos-l sans-px">${esc(c.l)}</span>
@@ -633,7 +625,7 @@
         <span class="dos-l sans-px">${esc(c.l)}</span>
         ${c.aide ? `<small>${esc(c.aide)}</small>` : ""}
         ${ex[c.k] ? `<small class="dos-ex"><b class="mono">Ex.</b>${esc(ex[c.k])}</small>` : ""}
-        ${blocPrompt(c)}
+        ${blocPrompt(promptPour(c.prompt), c.k)}
         <div class="lst" id="l_${c.k}"></div></div>`;
       const v = String(d[c.k] ?? ""), ph = c.ph ? ` placeholder="${esc(c.ph)}"` : "";
       const boite = c.court
@@ -643,7 +635,7 @@
         <span class="dos-l">${esc(c.l)}</span>
         ${c.aide ? `<small>${esc(c.aide)}</small>` : ""}
         ${ex[c.k] ? `<small class="dos-ex"><b class="mono">Ex.</b>${esc(ex[c.k])}</small>` : ""}
-        ${boite}</label>`;
+        ${boite}</label>${blocPrompt(promptPour(c.prompt), c.k)}`;
     };
     const avecJ2 = ouvert(2), avecJ3 = ouvert(3);
     vue.innerHTML = `<div class="esp-w dos">
@@ -656,6 +648,7 @@
       <form id="fDos" novalidate>${DOSSIER.map((s, i) => `<section class="dos-s">
         ${tete(s.titre, `s${i}`, s.jour)}
         ${s.intro ? `<p class="dos-i">${esc(s.intro)}</p>` : ""}
+        ${blocPrompt(promptPour(s.prompt), `s${i}`)}
         ${s.champs.map(champ).join("")}
       </section>`).join("")}
       ${avecJ2 ? `<section class="dos-s">
@@ -686,6 +679,7 @@
         </div>` : ""}
         ${champ(HOOKS)}
       </section>` : ""}
+      ${blocsLibres()}
       </form>
       <p class="dos-etat mono" id="dEtat" role="status" aria-live="polite"></p>
     </div>`;
@@ -727,9 +721,13 @@
       const vt = $("#vt");
       if (vt) vt.innerHTML = TYPES.map((t) => { const n = parType(d, t); return `<span${n >= PAR_TYPE ? ' class="is-ok"' : ""}>${esc(t)}<b class="mono">${n} / ${PAR_TYPE}</b></span>`; }).join("");
       for (const el of $$("[data-pr]")) {
-        const p = promptDe(TOUS.find((c) => c.k === el.dataset.pr)), m = manquants(p), ligne = $("[data-manque]", el);
-        ligne.textContent = m.length ? `Il manque encore ${enListe(m)}. Le prompt marche quand même, mais il sera moins précis.` : "Ta cible est complète : le prompt est prêt.";
-        ligne.classList.toggle("is-pret", !m.length);
+        const p = PR[el.dataset.pr], ligne = $("[data-manque]", el);
+        if (!p) continue;
+        if (ligne) {
+          const m = manquants(p);
+          ligne.textContent = m.length ? `Il manque encore ${enListe(m)}. Le prompt marche quand même, mais il sera moins précis.` : "Ce dont il a besoin est dans ton dossier : le prompt est prêt.";
+          ligne.classList.toggle("is-pret", !m.length);
+        }
         if ($("details", el).open) $("[data-texte]", el).textContent = remplir(p.texte, d);
       }
     };
@@ -881,7 +879,7 @@
       });
     }
     for (const el of $$("[data-pr]")) {
-      const p = promptDe(TOUS.find((c) => c.k === el.dataset.pr)), texte = () => remplir(p.texte, d);
+      const p = PR[el.dataset.pr], texte = () => remplir(p.texte, d), suivi = { jour: p.jour, prompt: p.titre || el.dataset.pr };
       $("details", el).addEventListener("toggle", () => { $("[data-texte]", el).textContent = texte(); });
       $("[data-copier]", el).addEventListener("click", async (ev) => {
         const b = ev.currentTarget;
@@ -889,11 +887,11 @@
         catch { const t = document.createElement("textarea"); t.value = texte(); document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch {} t.remove(); }
         b.textContent = "Copié";
         setTimeout(() => { b.textContent = "Copier le prompt"; }, 1600);
-        track("espace_dossier_prompt", { champ: el.dataset.pr, action: "copier" });
+        track("espace_dossier_prompt", { ...suivi, action: "copier" });
       });
-      $("[data-claude]", el).addEventListener("click", () => {
+      $("[data-claude]", el)?.addEventListener("click", () => {
         window.open(`https://claude.ai/new?q=${encodeURIComponent(texte())}`, "_blank", "noopener");
-        track("espace_dossier_prompt", { champ: el.dataset.pr, action: "claude" });
+        track("espace_dossier_prompt", { ...suivi, action: "claude" });
       });
     }
     $("#fDos").addEventListener("submit", (ev) => ev.preventDefault());

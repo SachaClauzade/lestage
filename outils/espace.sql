@@ -178,7 +178,12 @@ begin
     'exemples', (select r.valeur::jsonb from public.reglages r where r.cle = 'dossier_exemples'),
     'checklist', (select r.valeur::jsonb from public.reglages r where r.cle = 'checklist_feature'),
     'cle_kit', e.cle_kit,
-    'kit_hooks', (select r.valeur from public.reglages r where r.cle = 'kit_hooks'));
+    'kit_hooks', (select r.valeur from public.reglages r where r.cle = 'kit_hooks'),
+    -- Les prompts des jours ouverts (tous, pour le staff) : ils s'affichent dans Mon dossier,
+    -- à côté de ce qu'ils remplissent. Chacun garde le numéro de son jour.
+    'prompts', (select coalesce(jsonb_agg(jsonb_build_object('jour', j.numero) || x.p order by j.numero, x.o), '[]'::jsonb)
+      from public.jours j, jsonb_array_elements(coalesce(j.prompts, '[]'::jsonb)) with ordinality as x(p, o)
+      where j.ouvre_le <= now() or e.staff));
 end $$;
 
 -- Le dossier d'un élève, pour le moteur à hooks : seulement avec sa clé, en lecture seule.
