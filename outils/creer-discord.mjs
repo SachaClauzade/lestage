@@ -21,8 +21,10 @@ const SITE = "https://stage.sachaclauzade.me/espace.html";
 const API = "https://discord.com/api/v10";
 const NB_JOURS = 10;
 
+/* Les jours de live (lundis et jeudis : jours 1, 4, 6 et 9) ont un point rouge dans leur nom. */
+const JOURS_LIVE = [1, 4, 6, 9];
 const jour = (n) => ({
-  nom: `jour-${n}`,
+  nom: JOURS_LIVE.includes(n) ? `jour-${n}-🔴-live` : `jour-${n}`,
   sujet: `La vidéo du jour ${n} tombe ici à 6 h. Tes questions, c'est ici aussi.`,
   cle: n,
 });
