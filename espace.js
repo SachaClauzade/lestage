@@ -614,7 +614,7 @@
   const N_PHRASES = 30, N_VIRAL = 20, N_HOOKS = 12, PAR_TYPE = 5;
   const TYPES = ["POV", "Storytelling", "Avant / Après", "Tips & conseils"];
   const rempli = (d, k) => !!String(d[k] ?? "").trim();
-  /* La Viral Bank : [{ u: le lien, n: ce qui inspire, y: le type de post (jour 3) }, …] */
+  /* La Viral Bank : [{ u: le lien, n: ce qui inspire, y: le type de post }, …], tout au jour 2 */
   const viralDe = (d) => (Array.isArray(d.viral) ? d.viral : []).filter((v) => v && (String(v.u ?? "").trim() || String(v.n ?? "").trim()));
   const parType = (d, t) => viralDe(d).filter((v) => v.y === t).length;
   const hooksOk = (d) => lignes(d.hooks).length >= N_HOOKS;
@@ -622,8 +622,8 @@
   const ETAPES = [
     ...DOSSIER.flatMap((s) => s.champs.map((c) => ({ jour: s.jour, ok: (d) => rempli(d, c.k) }))),
     { jour: 2, ok: (d) => viralDe(d).length >= N_VIRAL },
+    { jour: 2, ok: (d) => TYPES.every((t) => parType(d, t) >= PAR_TYPE) },
     { jour: 2, ok: (d) => phrasesDe(d).length >= N_PHRASES },
-    { jour: 3, ok: (d) => TYPES.every((t) => parType(d, t) >= PAR_TYPE) },
     { jour: 3, ok: (d) => lignes(d.angles).length >= 3 },
     { jour: 3, ok: hooksOk },
   ];
@@ -724,9 +724,9 @@
       </section>`).join("")}
       ${avecJ2 ? `<section class="dos-s">
         ${tete("Ta Viral Bank", "viral", 2)}
-        <p class="dos-i">Les vidéos de ta niche à plus de 10 000 vues qui t'inspirent, aussi rangées dans ta collection TikTok « Viral Bank ». Vise au moins ${N_VIRAL}, et ajoutes-en dès que tu en trouves d'autres.${avecJ3 ? ` Au jour 3, range-les dans les 4 types de posts : ${PAR_TYPE} par type.` : ""}</p>
+        <p class="dos-i">Les vidéos de ta niche à plus de 10 000 vues qui t'inspirent, aussi rangées dans ta collection TikTok « Viral Bank ». Pour chacune, note ce qui t'inspire et son type de post. Vise au moins ${N_VIRAL}, ${PAR_TYPE} par type, et ajoutes-en dès que tu en trouves d'autres.</p>
         ${exemple("viral")}
-        ${avecJ3 ? `<div class="vt" id="vt"></div>` : ""}
+        <div class="vt" id="vt"></div>
         <div class="lst" id="lViral"></div>
       </section>
       <section class="dos-s">
@@ -886,7 +886,7 @@
     liste($("#lViral"), "viral", [
       { f: "u", l: "Le lien de la vidéo", ph: "https://www.tiktok.com/…" },
       { f: "n", l: "Ce qui t'inspire", ph: "le hook, l'image, le format", w: "minmax(0, 1.3fr)" },
-      ...(avecJ3 ? [{ f: "y", l: "Type de post", ph: "Type…", options: TYPES, w: "160px" }] : []),
+      { f: "y", l: "Type de post", ph: "Type…", options: TYPES, w: "160px" },
     ], 5, "Ajouter une vidéo");
     liste($("#lPhrases"), "phrases", [{ f: "t", l: "La phrase, mot pour mot", max: 600 }], 10);
     /* Les champs du dossier en liste (features, mots-clés, angles, hooks) restent enregistrés en texte, une entrée par ligne :
