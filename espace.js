@@ -782,13 +782,13 @@
             <li><b>Range-les ici</b>, ${HOOKS_PAR_TYPE} dans chaque type de post, ${HOOKS_PAR_TYPE * TYPES.length} en tout.</li>
           </ol>
           ${r.cle_kit ? `<div class="kit">
-            <p class="kit-t"><b>Le moteur à hooks</b> · un kit Claude Code. Télécharge-le, ouvre-le dans Claude Code, tape /installer et colle ta clé.</p>
+            <p class="kit-t"><b>Le moteur à hooks</b> · un kit Claude Code. Télécharge-le, ouvre son dossier dans Claude Code, puis colle la commande d'installation : elle contient déjà ta clé.</p>
             <div class="prompt-b">
               ${r.kit_hooks ? `<a class="btn btn-ink" href="${esc(r.kit_hooks)}" download>Télécharger le kit ↓</a>` : ""}
-              <button type="button" class="btn" id="kitCle">Copier ma clé</button>
-              <span class="kit-c mono">${esc(r.cle_kit.slice(0, 4))}…${esc(r.cle_kit.slice(-4))}</span>
+              <button type="button" class="btn" id="kitCle">Copier la commande d'installation</button>
+              <span class="kit-c mono">/installer ${esc(r.cle_kit.slice(0, 4))}…${esc(r.cle_kit.slice(-4))}</span>
             </div>
-            <p class="kit-n">Ta clé ouvre ton dossier : ne la partage pas. Ensuite, pour chaque type, copie sa commande ci-dessous et colle-la dans Claude Code : elle vise déjà ton angle n°1.</p>
+            <p class="kit-n">La commande contient ta clé, qui ouvre ton dossier : ne la partage pas. Ensuite, pour chaque type, copie sa commande ci-dessous et colle-la dans Claude Code : elle vise déjà ton angle n°1.</p>
           </div>` : ""}
           <div class="vt" id="ht"></div>
           ${TYPES.map((t, k) => `<div class="hk-g">
@@ -975,11 +975,12 @@
     /* Le moteur à hooks : copier la clé du dossier, à coller dans le kit Claude Code. */
     const kitCle = $("#kitCle");
     if (kitCle) kitCle.addEventListener("click", async () => {
-      try { await navigator.clipboard.writeText(r.cle_kit); }
-      catch { const t = document.createElement("textarea"); t.value = r.cle_kit; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch {} t.remove(); }
-      kitCle.textContent = "Clé copiée";
-      setTimeout(() => { kitCle.textContent = "Copier ma clé"; }, 1600);
-      track("espace_kit_hooks", { action: "cle" });
+      const cmd = `/installer ${r.cle_kit}`;
+      try { await navigator.clipboard.writeText(cmd); }
+      catch { const t = document.createElement("textarea"); t.value = cmd; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch {} t.remove(); }
+      kitCle.textContent = "Commande copiée";
+      setTimeout(() => { kitCle.textContent = "Copier la commande d'installation"; }, 1600);
+      track("espace_kit_hooks", { action: "installer" });
     });
     const fx = $("#fx");
     if (fx && ck) {
