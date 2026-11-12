@@ -774,9 +774,10 @@
         ${tete("Tes angles et tes hooks", "angles", 3)}
         ${champ(ANGLES)}
         <div class="hk">
-          <div class="dos-st hk-st"><h3 class="hk-titre">Tes hooks · ${HOOKS_PAR_TYPE} par type de post</h3><span class="dos-prog" data-prog="hooks"></span></div>
+          <div class="dos-st hk-st"><h3 class="hk-titre">Tes hooks sur ton angle n°1 · ${HOOKS_PAR_TYPE} par type de post</h3><span class="dos-prog" data-prog="hooks"></span></div>
+          <p class="hk-angle">Ton angle n°1 : <b id="hkAngle"></b></p>
           <ol class="hk-etapes">
-            <li><b>Génère-les avec le moteur à hooks.</b> Le kit part de ton dossier et de 52 000 hooks qui ont marché sur TikTok.</li>
+            <li><b>Génère-les avec le moteur à hooks</b>, tous sur ton angle n°1 : c'est celui de tes premiers posts. Le kit part de ton dossier et de 52 000 hooks qui ont marché sur TikTok.</li>
             <li><b>Choisis et reformule.</b> Ce sont des pistes, pas tes hooks : réécris-les avec les mots de ta cible.</li>
             <li><b>Range-les ici</b>, ${HOOKS_PAR_TYPE} dans chaque type de post, ${HOOKS_PAR_TYPE * TYPES.length} en tout.</li>
           </ol>
@@ -787,13 +788,13 @@
               <button type="button" class="btn" id="kitCle">Copier ma clé</button>
               <span class="kit-c mono">${esc(r.cle_kit.slice(0, 4))}…${esc(r.cle_kit.slice(-4))}</span>
             </div>
-            <p class="kit-n">Ta clé ouvre ton dossier : ne la partage pas. Ensuite, pour chaque type, copie sa commande ci-dessous et colle-la dans Claude Code.</p>
+            <p class="kit-n">Ta clé ouvre ton dossier : ne la partage pas. Ensuite, pour chaque type, copie sa commande ci-dessous et colle-la dans Claude Code : elle vise déjà ton angle n°1.</p>
           </div>` : ""}
           <div class="vt" id="ht"></div>
           ${TYPES.map((t, k) => `<div class="hk-g">
             <div class="hk-h">
               <div><p class="hk-t">${esc(t)}</p><p class="hk-a">${esc(TYPES_AIDE[t])}</p></div>
-              ${r.cle_kit ? `<button type="button" class="hk-cmd mono" data-cmd="/hooks ${HOOKS_PAR_TYPE} hooks ${esc(t)}" title="Copier la commande pour le moteur à hooks">/hooks ${HOOKS_PAR_TYPE} hooks ${esc(t)}<span>Copier</span></button>` : ""}
+              ${r.cle_kit ? `<button type="button" class="hk-cmd mono" data-cmd="/hooks ${HOOKS_PAR_TYPE} hooks ${esc(t)} sur mon angle 1" title="Copier la commande pour le moteur à hooks">/hooks ${HOOKS_PAR_TYPE} hooks ${esc(t)} sur mon angle 1<span>Copier</span></button>` : ""}
             </div>
             <div class="lst" id="h_${k}"></div>
           </div>`).join("")}
@@ -956,6 +957,11 @@
     const garderHooks = (t) => Object.assign((propres) => { HK[t] = propres.map((x) => x.t); d.hooks = attente.hooks = hooksEnTexte(HK); }, { depart: HK[t].join("\n") });
     TYPES.forEach((t, k) => liste($(`#h_${k}`), `_h${k}`, [{ f: "t", l: `Hook ${t}`, ph: `Ton hook ${t}, réécrit à ta manière`, max: 300 }], HOOKS_PAR_TYPE, "Ajouter un hook", true, garderHooks(t)));
     liste($("#h_x"), "_hx", [{ f: "t", l: "Hook à ranger", max: 300 }], 1, null, true, garderHooks(""));
+    const nomAngle = $("#hkAngle");
+    const majAngle = () => { if (nomAngle) nomAngle.textContent = lignes(d.angles)[0] || "remplis d'abord tes angles, juste au-dessus"; };
+    const listeAngles = $("#l_angles");
+    if (listeAngles) listeAngles.addEventListener("input", () => setTimeout(majAngle, 0));
+    majAngle();
     $$("[data-cmd]").forEach((b) => b.addEventListener("click", async () => {
       const t = b.dataset.cmd, lab = $("span", b);
       try { await navigator.clipboard.writeText(t); } catch {}
