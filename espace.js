@@ -564,8 +564,8 @@
       { k: "mots_cles", l: "10 à 15 recherches, une par case", liste: "Ajouter un mot-clé", objectif: 10, prompt: "mots-clés" },
     ] },
   ];
-  const ANGLES = { k: "angles", l: "Tes angles, un par ligne, ton angle n°1 en premier", aide: "Entre 3 et 6. Colle le bloc de code du prompt des angles, et renomme ceux qui ne te parlent pas.", rows: 3, lignes: true };
-  const HOOKS = { k: "hooks", l: "Les hooks que tu gardes, un par ligne", aide: "Vise 12 : 3 par type de post.", rows: 4, lignes: true };
+  const ANGLES = { k: "angles", l: "Tes angles, ton angle n°1 dans la case 1", aide: "Entre 3 et 6. Avec le prompt des angles, colle son bloc de code dans la première case : chaque angle va dans sa case. Renomme ceux qui ne te parlent pas.", liste: "Ajouter un angle", min: 4, max: 120 };
+  const HOOKS = { k: "hooks", l: "Les hooks que tu gardes, réécrits à ta manière", aide: "Vise 12 : 3 par type de post.", liste: "Ajouter un hook", min: 4, max: 300 };
   const N_PHRASES = 30, N_VIRAL = 20, N_HOOKS = 12, PAR_TYPE = 5;
   const TYPES = ["POV", "Storytelling", "Avant / Après", "Tips & conseils"];
   const rempli = (d, k) => !!String(d[k] ?? "").trim();
@@ -640,7 +640,7 @@
         ? `<input name="${c.k}" type="text" autocomplete="off"${ph} maxlength="300" value="${esc(v)}">`
         : `<textarea name="${c.k}" rows="${c.rows || 1}"${ph} maxlength="4000" data-grow>${esc(v)}</textarea>`;
       return `${c.g ? `<p class="dos-g mono">${esc(c.g)}</p>` : ""}<label class="champ dos-c${v.trim() ? " is-ok" : ""}">
-        <span class="dos-l">${esc(c.l)}${c.lignes ? ' <i class="dos-nb" data-nb></i>' : ""}</span>
+        <span class="dos-l">${esc(c.l)}</span>
         ${c.aide ? `<small>${esc(c.aide)}</small>` : ""}
         ${ex[c.k] ? `<small class="dos-ex"><b class="mono">Ex.</b>${esc(ex[c.k])}</small>` : ""}
         ${boite}</label>`;
@@ -724,7 +724,6 @@
         el.setAttribute("aria-label", `${n} sur ${s.total}`);
         el.innerHTML = (s.total <= 8 ? Array.from({ length: s.total }, (_, i) => `<i${i < n ? ' class="on"' : ""}></i>`).join("") : "") + `<b class="mono">${n} / ${s.total}</b>`;
       }
-      $$("[data-nb]").forEach((el) => { const n = lignes(el.closest("label").querySelector("textarea").value).length; el.textContent = n ? `· ${n}` : ""; });
       const vt = $("#vt");
       if (vt) vt.innerHTML = TYPES.map((t) => { const n = parType(d, t); return `<span${n >= PAR_TYPE ? ' class="is-ok"' : ""}>${esc(t)}<b class="mono">${n} / ${PAR_TYPE}</b></span>`; }).join("");
       for (const el of $$("[data-pr]")) {
@@ -821,8 +820,9 @@
       ...(avecJ3 ? [{ f: "y", l: "Type de post", ph: "Type…", options: TYPES, w: "160px" }] : []),
     ], 5, "Ajouter une vidéo");
     liste($("#lPhrases"), "phrases", [{ f: "t", l: "La phrase, mot pour mot", max: 600 }], 10);
-    /* Les champs du dossier en liste (features, mots-clés) restent enregistrés en texte, une entrée par ligne. */
-    for (const c of DOSSIER.flatMap((x) => x.champs).filter((x) => x.liste && !(x.checklist && ck))) liste($(`#l_${c.k}`), c.k, [{ f: "t", l: c.l, ph: c.ph, max: c.max || 120 }], c.min || 5, c.liste, true);
+    /* Les champs du dossier en liste (features, mots-clés, angles, hooks) restent enregistrés en texte, une entrée par ligne :
+       le prompt des hooks et le moteur à hooks lisent les angles ainsi, l'angle n°1 en premier. */
+    for (const c of [...DOSSIER.flatMap((x) => x.champs), ANGLES, HOOKS].filter((x) => x.liste && !(x.checklist && ck))) liste($(`#l_${c.k}`), c.k, [{ f: "t", l: c.l, ph: c.ph, max: c.max || 120 }], c.min || 5, c.liste, true);
     compter();
 
     /* La checklist « Feature TikTokable » : une carte par feature, ses oui cochés, son score.

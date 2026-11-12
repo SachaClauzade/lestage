@@ -199,7 +199,6 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 .dos-ex b { margin-right: 6px; font-size: 11px; font-weight: 400; color: var(--c2); }
 .dos .dos-c input, .dos .dos-c textarea { margin-top: 10px; background: var(--paper); border-color: var(--line-2); padding: 11px 13px; }
 .dos-c textarea[data-grow] { resize: none; overflow: hidden; min-height: 46px; }
-.dos-nb { font-style: normal; font-family: var(--display); font-size: 12px; font-weight: 400; color: var(--g4); }
 .champ textarea { display: block; width: 100%; resize: vertical; font: inherit; line-height: 1.5; color: var(--ink); background: var(--card); border: 1px solid var(--line-2); border-radius: 8px; padding: 13px 14px; transition: border-color 150ms, box-shadow 150ms; }
 .champ textarea::placeholder { color: var(--g3); }
 .champ textarea:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--px-soft); }
