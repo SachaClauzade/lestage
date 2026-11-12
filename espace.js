@@ -119,7 +119,7 @@
             { titre: "Ton app, tenue en main", texte: "Crée une photo ultra-réaliste, au format vertical.\nLa scène se déroule [LIEU].", outil: "image" },
           ] : null };
       },
-      async dossier() { await attendre(120); return { donnees: memoire.get("demo.dossier") || {}, modifie_le: null, exemples: memoire.get("demo.exemples"), checklist: memoire.get("demo.checklist") }; },
+      async dossier() { await attendre(120); return { donnees: memoire.get("demo.dossier") || {}, modifie_le: null, exemples: memoire.get("demo.exemples"), checklist: memoire.get("demo.checklist"), cle_kit: "0123456789abcdef0123456789abcdef", kit_hooks: memoire.get("demo.kit") }; },
       async enregistrerDossier(champs) { await attendre(300); memoire.set("demo.dossier", { ...(memoire.get("demo.dossier") || {}), ...champs }); return { modifie_le: new Date().toISOString() }; },
       async deconnexion() { memoire.del("demo.session"); },
     };
@@ -674,6 +674,16 @@
       ${avecJ3 ? `<section class="dos-s">
         ${tete("Tes angles et tes hooks", "angles", 3)}
         ${champ(ANGLES)}
+        ${r.cle_kit ? `<div class="kit">
+          <p class="kit-t"><b>Le moteur à hooks</b> · un kit Claude Code qui part de ton dossier et de 52 000 hooks qui ont marché sur TikTok, et t'écrit 10 hooks par angle.</p>
+          <p class="kit-a">Ce sont des pistes, pas tes hooks. Choisis, réécris à ta manière, avec les mots de ta cible. Le risque, c'est de te laisser porter.</p>
+          <div class="prompt-b">
+            ${r.kit_hooks ? `<a class="btn btn-ink" href="${esc(r.kit_hooks)}" download>Télécharger le kit ↓</a>` : ""}
+            <button type="button" class="btn" id="kitCle">Copier ma clé</button>
+            <span class="kit-c mono">${esc(r.cle_kit.slice(0, 4))}…${esc(r.cle_kit.slice(-4))}</span>
+          </div>
+          <p class="kit-n">Dans le kit, tape /installer et colle ta clé. Elle ouvre ton dossier : ne la partage pas.</p>
+        </div>` : ""}
         ${champ(HOOKS)}
       </section>` : ""}
       </form>
@@ -817,6 +827,15 @@
 
     /* La checklist « Feature TikTokable » : une carte par feature, ses oui cochés, son score.
        d.features_check garde toutes les cartes ; d.feature ne garde que les noms TikTokables, un par ligne. */
+    /* Le moteur à hooks : copier la clé du dossier, à coller dans le kit Claude Code. */
+    const kitCle = $("#kitCle");
+    if (kitCle) kitCle.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(r.cle_kit); }
+      catch { const t = document.createElement("textarea"); t.value = r.cle_kit; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch {} t.remove(); }
+      kitCle.textContent = "Clé copiée";
+      setTimeout(() => { kitCle.textContent = "Copier ma clé"; }, 1600);
+      track("espace_kit_hooks", { action: "cle" });
+    });
     const fx = $("#fx");
     if (fx && ck) {
       const NQ = ck.questions.length, seuil = +ck.seuil || NQ - 1;

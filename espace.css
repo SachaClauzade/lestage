@@ -243,6 +243,14 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 .dos-c small.fx-r + small.fx-r { margin-top: 4px; }
 .fx-r b { font-weight: 500; color: var(--ink); }
 @media (max-width: 700px) { .fx-q, .fx-v { margin-left: 0; } }
+/* Le moteur à hooks : le kit Claude Code et la clé du dossier. */
+.kit { margin-top: 20px; padding: 14px 16px; background: var(--paper); border: 1px solid var(--line-2); border-left: 3px solid var(--px); border-radius: 10px; }
+.kit-t { margin: 0; font-size: 14px; line-height: 1.45; color: var(--g4); }
+.kit-t b { font-weight: 600; color: var(--ink); }
+.kit-a { margin: 6px 0 12px; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.kit .prompt-b .btn { padding: 9px 14px; }
+.kit-c { font-size: 12px; color: var(--g4); }
+.kit-n { margin: 10px 0 0; font-size: 12px; line-height: 1.45; color: var(--g4); }
 /* Un prompt lancé depuis le dossier (les mots-clés) : il se remplit avec ce qui est écrit. */
 .dos-pr { margin-top: 14px; padding: 14px 16px; background: var(--paper); border: 1px solid var(--line-2); border-radius: 10px; }
 .dos-pr-t { margin: 0; font-size: 14px; line-height: 1.45; color: var(--g4); }

@@ -45,6 +45,7 @@ alter table public.jours add column if not exists prompts jsonb;
 --                      sous chaque question de Mon dossier.
 --   checklist_feature : la checklist « Feature TikTokable » de Mon dossier
 --                       { questions: [{ q, note }], seuil, oui, non, retenir }.
+--   kit_hooks : le lien de téléchargement du moteur à hooks (kit Claude Code).
 create table if not exists public.reglages (
   cle    text primary key,
   valeur text
@@ -157,6 +158,11 @@ create table if not exists public.dossiers (
 );
 alter table public.dossiers enable row level security;
 
+-- La clé du moteur à hooks : elle ouvre le dossier de son élève, en lecture seule, depuis le kit
+-- Claude Code (fonction dossier_kit). Aléatoire, une par élève, affichée dans Mon dossier.
+alter table public.eleves add column if not exists cle_kit text unique default replace(gen_random_uuid()::text, '-', '');
+update public.eleves set cle_kit = replace(gen_random_uuid()::text, '-', '') where cle_kit is null;
+
 create or replace function public.dossier() returns jsonb
 language plpgsql stable security definer set search_path = '' as $$
 declare
@@ -170,7 +176,27 @@ begin
   select * into d from public.dossiers where email = e.email;
   return jsonb_build_object('donnees', coalesce(d.donnees, '{}'::jsonb), 'modifie_le', d.modifie_le,
     'exemples', (select r.valeur::jsonb from public.reglages r where r.cle = 'dossier_exemples'),
-    'checklist', (select r.valeur::jsonb from public.reglages r where r.cle = 'checklist_feature'));
+    'checklist', (select r.valeur::jsonb from public.reglages r where r.cle = 'checklist_feature'),
+    'cle_kit', e.cle_kit,
+    'kit_hooks', (select r.valeur from public.reglages r where r.cle = 'kit_hooks'));
+end $$;
+
+-- Le dossier d'un élève, pour le moteur à hooks : seulement avec sa clé, en lecture seule.
+create or replace function public.dossier_kit(cle text) returns jsonb
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  e public.eleves;
+  d public.dossiers;
+begin
+  if cle is null or length(cle) < 24 then
+    raise exception 'cle_inconnue';
+  end if;
+  select * into e from public.eleves where cle_kit = cle;
+  if not found then
+    raise exception 'cle_inconnue';
+  end if;
+  select * into d from public.dossiers where email = e.email;
+  return jsonb_build_object('prenom', e.prenom, 'donnees', coalesce(d.donnees, '{}'::jsonb));
 end $$;
 
 -- Enregistre les champs reçus par-dessus ceux déjà là. Les autres ne bougent pas.
@@ -200,6 +226,8 @@ revoke all on function public.dossier() from public, anon;
 revoke all on function public.dossier_enregistrer(jsonb) from public, anon;
 grant execute on function public.dossier() to authenticated;
 grant execute on function public.dossier_enregistrer(jsonb) to authenticated;
+revoke all on function public.dossier_kit(text) from public;
+grant execute on function public.dossier_kit(text) to anon, authenticated;
 
 -- Une adresse hors de la liste ne reçoit aucun code.
 create or replace function public.hook_avant_inscription(event jsonb) returns jsonb
