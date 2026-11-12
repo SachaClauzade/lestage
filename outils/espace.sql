@@ -81,6 +81,11 @@ insert into public.jours (numero, ouvre_le) values
   (10, '2026-11-27 06:00:00+01')
 on conflict (numero) do nothing;
 
+-- Le serveur Discord s'ouvre 48 h avant le départ. Le lien d'invitation (discord_invitation)
+-- et la vidéo d'introduction (intro_video) se posent à la main dans reglages, jamais dans le dépôt.
+insert into public.reglages (cle, valeur) values ('discord_ouvre_le', '2026-11-13 06:00:00+01')
+on conflict (cle) do nothing;
+
 insert into public.eleves (email, prenom, staff)
 values ('sacha.clauzade@gmail.com', 'Sacha', true)
 on conflict (email) do nothing;
@@ -100,6 +105,16 @@ begin
     'staff', e.staff,
     'maintenant', now(),
     'coaching', (select r.valeur from public.reglages r where r.cle = 'coaching'),
+    -- La vidéo d'introduction : ouverte à tous les inscrits, tout de suite.
+    'intro', (select r.valeur from public.reglages r where r.cle = 'intro_video'),
+    -- Le serveur Discord : le lien d'invitation ne part qu'à partir de discord_ouvre_le (le staff l'a toujours).
+    'discord', jsonb_build_object(
+      'ouvre_le', (select r.valeur from public.reglages r where r.cle = 'discord_ouvre_le'),
+      'invitation', case
+        when e.staff or coalesce((select r.valeur::timestamptz from public.reglages r where r.cle = 'discord_ouvre_le'), '-infinity') <= now()
+        then (select r.valeur from public.reglages r where r.cle = 'discord_invitation')
+      end
+    ),
     'jours', coalesce((
       select jsonb_agg(jsonb_build_object(
         'numero', j.numero,

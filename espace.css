@@ -336,3 +336,67 @@ a.j:hover .j-s { transform: rotate(45deg); transition: transform 300ms var(--spr
 @media (prefers-reduced-motion: reduce) {
   .espace *, .espace *::before, .espace *::after { animation: none !important; transition: none !important; }
 }
+
+/* --- l'accueil : la vidéo d'introduction ------------------ */
+.vintro { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.6fr); gap: 28px; align-items: center; margin-top: 10px; padding: clamp(20px, 3vw, 28px); background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); animation: esp-in .7s var(--spring-soft) both; }
+.vintro .eyebrow { margin-bottom: 12px; }
+.vintro-h { margin: 0 0 10px; font-size: clamp(26px, 3.2vw, 36px); line-height: 1.05; letter-spacing: -.035em; font-weight: 600; text-wrap: balance; }
+.vintro-h .px-dot { width: .2em; height: .2em; margin-left: .08em; }
+.vintro .p { margin: 0; font-size: 15px; }
+.vintro .player { margin-top: 0; box-shadow: none; }
+.vintro-cd { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.vintro-cd p { margin: 0 0 10px; font-size: 11px; color: var(--g4); }
+.cd-md { font-size: clamp(30px, 3.6vw, 42px); letter-spacing: -.04em; }
+.vintro-mini { margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+.vintro-mini summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; cursor: pointer; list-style: none; }
+.vintro-mini summary::-webkit-details-marker { display: none; }
+.vintro-mini-t { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; }
+.vintro-mini[open] summary .mono { visibility: hidden; }
+.vintro-mini .player { margin: 0 20px 20px; box-shadow: none; }
+
+/* --- l'accueil : les trois raccourcis --------------------- */
+.hub { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 10px; margin-top: 10px; }
+.tile { display: flex; flex-direction: column; gap: 8px; padding: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; color: inherit; text-decoration: none; animation: esp-in .7s var(--spring-soft) both; }
+.tile:nth-child(2) { animation-delay: 60ms; } .tile:nth-child(3) { animation-delay: 120ms; }
+.tile-k { font-size: 11px; color: var(--g4); display: flex; align-items: center; gap: 8px; }
+.tile-k::before { content: ""; width: 8px; height: 8px; background: var(--px); flex: none; }
+.tile-dc .tile-k::before { background: #5865F2; }
+.tile-rdv .tile-k::before { background: var(--c1); }
+.tile-t { font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+.tile-p { font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.tile-n { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; font-size: 12px; color: var(--g4); }
+.tile-n .cd { font-size: 20px; }
+.tile-bar { display: flex; flex-wrap: wrap; gap: 3px; }
+.tile-bar i { width: 9px; height: 9px; background: var(--line-2); transition: background 200ms; }
+.tile-bar i.on { background: var(--px); }
+.tile-cta, .tile-pied, .tile-btns { margin-top: auto; }
+.tile-pied { display: grid; gap: 8px; }
+.tile-pied .tile-btns { margin-top: 0; }
+.tile-join { justify-content: center; }
+.tile .tile-cta { padding-top: 0; align-self: flex-start; }
+.tile-dos .tile-cta { margin-top: auto; }
+.tile-btns { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 2px; }
+.tile-btns .btn { font-size: 12px; padding: 6px 10px; gap: 6px; }
+.tile-btns .ico-dc { width: 14px; height: 14px; }
+.tile-dos { border-color: var(--ink); box-shadow: var(--shadow); }
+a.tile-dos:hover .btn-ink { background: var(--px); border-color: var(--px); color: #fff; }
+a.tile-dos:hover .arrow { translate: 3px 0; }
+.tile-dos .arrow { display: inline-block; transition: translate 200ms var(--spring); }
+
+/* --- l'accueil : le calendrier ----------------------------- */
+.home-cal { margin-top: 34px; }
+.home-t { margin: 0 0 10px; font-size: 12px; color: var(--g4); }
+.home-cal .cal { margin-top: 0; }
+
+@media (max-width: 900px) {
+  .vintro { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .hub { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .tile-dos { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  .hub { grid-template-columns: minmax(0, 1fr); }
+  .tile { padding: 18px; }
+  .tile .tile-cta, .tile-btns .btn { width: 100%; justify-content: center; align-self: stretch; }
+  .vintro-mini .player { margin: 0 12px 12px; }
+  .home-cal { margin-top: 26px; }
+}

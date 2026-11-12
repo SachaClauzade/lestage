@@ -12,6 +12,7 @@
      ?le=2026-11-18T08:00:00%2B01:00   voir la page à cette date
      ?plein                            des jours remplis
      ?staff                            la vue de Sacha
+     ?demo                             le mode démo même avec Supabase branché
    ============================================================ */
 (() => {
   "use strict";
@@ -114,7 +115,13 @@
       async session() { const m = memoire.get("demo.session"); return m ? { email: m } : null; },
       async envoyerCode(email) { await attendre(); if (/refus/.test(email)) throw new Refus("pas_inscrit"); },
       async verifierCode(email, code) { await attendre(700); if (code !== "123456") throw new Refus("code_invalide"); memoire.set("demo.session", email); },
-      async espace() { await attendre(120); return { prenom: "Sacha", staff, maintenant: new Date(horloge()).toISOString(), coaching: "https://calendly.com/", jours: jours() }; },
+      async espace() {
+        await attendre(120);
+        const ouvre = "2026-11-13T06:00:00+01:00", dcOuvert = staff || Date.parse(ouvre) <= horloge();
+        return { prenom: "Sacha", staff, maintenant: new Date(horloge()).toISOString(), coaching: "https://calendly.com/",
+          intro: plein ? "https://youtu.be/aqz-KE-bpKQ" : null,
+          discord: { ouvre_le: ouvre, invitation: dcOuvert ? "https://discord.gg/exemple" : null }, jours: jours() };
+      },
       async jour(n) {
         await attendre(120);
         const j = jours().find((x) => x.numero === n);
@@ -140,7 +147,10 @@
   }
 
   const pret = !!(CFG.supabaseUrl && CFG.supabaseCle && window.supabase);
-  const api = pret ? apiSupabase() : local ? apiDemo() : null;
+  /* En local, ?demo force le mode démo même si Supabase est branché (pour voir les pages sans code par mail). */
+  if (local && new URLSearchParams(location.search).has("demo")) memoire.set("demo.force", 1);
+  const demoForce = local && !!memoire.get("demo.force");
+  const api = pret && !demoForce ? apiSupabase() : local ? apiDemo() : null;
 
   const MESSAGES = {
     pas_inscrit: "Cette adresse n'est pas sur la liste de la promo. Utilise celle de ton paiement, ou réponds au mail de ton invitation.",
@@ -328,31 +338,86 @@
       : `<div class="j ${etat}" style="--i:${j.numero - 1}" aria-label="${esc(nom)}" title="S'ouvre ${esc(long(ms(j)))} à ${esc(heure(ms(j)))}">${corps}</div>`}</li>`;
   }
 
+  /* La vidéo d'introduction : en grand avant le jour 1, repliée ensuite. */
+  function blocIntro(url, replie, tete = "") {
+    const src = adresseVideo(url);
+    const player = src
+      ? `<iframe src="${esc(src)}" title="La vidéo d'introduction" loading="lazy" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`
+      : `<div class="player-vide">${pixelPlay()}<p>La vidéo d'introduction arrive.</p></div>`;
+    if (replie) return src ? `<details class="vintro-mini" id="videoIntro">
+        <summary><span class="vintro-mini-t"><i class="px-dot" aria-hidden="true"></i>Revoir la vidéo d'introduction</span><span class="mono dim">Ouvrir</span></summary>
+        <div class="player">${player}</div>
+      </details>` : "";
+    return `<section class="vintro" id="videoIntro">
+        <div class="vintro-txt">
+          <p class="eyebrow mono">Commence ici</p>
+          <h1 class="vintro-h">La vidéo d'introduction${point}</h1>
+          <p class="p">Ce qu'on va faire en dix jours, comment marche ton espace, et par quoi commencer avant lundi.</p>
+          ${tete}
+        </div>
+        <div class="player">${player}</div>
+      </section>`;
+  }
+
+  /* Les trois raccourcis de l'accueil : le dossier, le Discord, le coaching. */
+  function tuiles(d, dr, dernier) {
+    const etapes = etapesDe(d), faits = dr ? remplis(dr.donnees || {}, etapes) : 0, total = etapes.length;
+    const barre = total ? `<span class="tile-bar" aria-hidden="true">${etapes.map((_, k) => `<i class="${k < faits ? "on" : ""}"></i>`).join("")}</span>` : "";
+    const dossier = dr ? `<a class="tile tile-dos" href="espace.html?dossier" data-go>
+        <span class="tile-k mono">Ton travail</span>
+        <span class="tile-t">Mon dossier</span>
+        <span class="tile-p">Ton app, ta cible, tes mots-clés. Tes prompts s'en servent, et de nouvelles parties s'ajoutent au fil des jours.</span>
+        <span class="tile-n">${total ? `${barre}<span class="mono">${faits} / ${total}${faits === total ? " · complet" : ""}</span>` : `<span class="mono">Ses premières cases s'ouvrent avec le jour 1.</span>`}</span>
+        <span class="btn btn-ink tile-cta">Ouvrir mon dossier <span class="arrow">→</span></span>
+      </a>` : "";
+
+    const dc = d.discord || {}, ouvreDc = Date.parse(dc.ouvre_le || "");
+    const salonJour = dernier && DISCORD.jours && DISCORD.jours[dernier.numero];
+    const salons = [
+      salonJour && lien(salonJour, "btn btn-sm", `${ICONE_DISCORD}#jour-${dernier.numero}`),
+      DISCORD.contenu && lien(DISCORD.contenu, "btn btn-sm", `${ICONE_DISCORD}#montre-ton-contenu`),
+      DISCORD.general && lien(DISCORD.general, "btn btn-sm", `${ICONE_DISCORD}#général`),
+    ].filter(Boolean);
+    let dcCorps;
+    if (dc.invitation) {
+      dcCorps = `<span class="tile-p">Les lives, les questions, et tes posts relus par le groupe. Rejoins le serveur une fois, puis les salons s'ouvrent ici.</span>
+        <span class="tile-pied">${lien(dc.invitation, "btn btn-ink tile-join", `${ICONE_DISCORD}Rejoindre le Discord`)}
+        ${salons.length ? `<span class="tile-btns">${salons.join("")}</span>` : ""}</span>`;
+    } else if (!isNaN(ouvreDc) && ouvreDc > maintenant()) {
+      dcCorps = `<span class="tile-p">Le serveur ouvre ${esc(long(ouvreDc))} à ${esc(heure(ouvreDc))}, 48 h avant le départ. Ton bouton pour le rejoindre apparaîtra ici.</span>
+        <span class="tile-n">${compte(ouvreDc)}</span>`;
+    } else {
+      dcCorps = `<span class="tile-p">Les lives, les questions, et tes posts relus par le groupe.</span>
+        ${salons.length ? `<span class="tile-btns">${salons.join("")}</span>` : ""}`;
+    }
+    const discord = `<div class="tile tile-dc">
+        <span class="tile-k mono">Le groupe</span>
+        <span class="tile-t">Le Discord</span>
+        ${dcCorps}
+      </div>`;
+
+    const coaching = d.coaching ? `<div class="tile tile-rdv">
+        <span class="tile-k mono">Avec moi</span>
+        <span class="tile-t">Coaching one-to-one</span>
+        <span class="tile-p">On regarde ensemble ton app, tes chiffres, ton onboarding et ton paywall. Réserve quand tu veux, pendant toute la promo.</span>
+        ${lien(d.coaching, "btn tile-cta", "Réserver mon appel ↗")}
+      </div>` : "";
+    return `<section class="hub">${dossier}${discord}${coaching}</section>`;
+  }
+
   async function vueParcours(id) {
     const [d, dr] = await Promise.all([api.espace(), api.dossier().catch(() => null)]);
     if (id !== routeId) return;
     caler(d.maintenant);
-    const etapes = etapesDe(d), faits = dr ? remplis(dr.donnees || {}, etapes) : 0;
-    const carte = dr ? `<a class="dos-carte" href="espace.html?dossier" data-go>
-        <span class="dos-carte-t">Mon dossier</span>
-        <span class="dos-carte-p">Ton app, ta cible, tes mots-clés. De nouvelles parties s'ajoutent au fil des jours, et tes prompts s'en servent.</span>
-        <span class="dos-carte-n mono">${faits} / ${etapes.length}${faits === etapes.length ? " · complet" : ""}</span>
-      </a>` : "";
-    const coaching = d.coaching ? lien(d.coaching, "dos-carte", `
-        <span class="dos-carte-t">Coaching one-to-one</span>
-        <span class="dos-carte-p">On regarde ton app, tes chiffres, ton onboarding et ton paywall. Réserve ton appel quand tu veux.</span>
-        <span class="dos-carte-n mono">Réserver ↗</span>`) : "";
     const ouverts = d.jours.filter((j) => j.ouvert);
     const dernier = ouverts[ouverts.length - 1];
     const suivant = d.jours.find((j) => !j.ouvert);
     const salut = d.prenom ? `Bienvenue, ${d.prenom}` : "Bienvenue";
-    let une;
+    let une = "", avant = "";
     if (!dernier) {
+      /* Avant le jour 1 : le compte à rebours rejoint la vidéo d'introduction, pour que tout tienne sur le premier écran. */
       const premier = d.jours[0];
-      une = `<section class="une"><div class="une-main">
-        <p class="eyebrow mono">${esc(salut)} · première vidéo ${esc(long(ms(premier)))} à ${esc(heure(ms(premier)))}</p>
-        ${compte(ms(premier), "cd-xl")}
-      </div></section>`;
+      avant = `<div class="vintro-cd"><p class="mono">${esc(salut)} · jour 1 ${esc(long(ms(premier)))} à ${esc(heure(ms(premier)))}</p>${compte(ms(premier), "cd-md")}</div>`;
     } else {
       const auj = memeJour(ms(dernier), maintenant());
       const bas = suivant
@@ -360,7 +425,7 @@
         : `<div class="une-bas"><span>Les ${d.jours.length} jours sont ouverts. Reviens-y quand tu veux.</span></div>`;
       une = `<section class="une">
         <a class="une-main" href="espace.html?jour=${dernier.numero}" data-go>
-          <p class="eyebrow mono">${auj ? "Aujourd'hui" : "Dernière vidéo"} · ${esc(long(ms(dernier)))}</p>
+          <p class="eyebrow mono">${esc(salut)} · ${auj ? "aujourd'hui" : "dernière vidéo"}, ${esc(long(ms(dernier)))}</p>
           <div class="une-rang">
             <h1 class="une-h">Jour ${dernier.numero}<span class="px-dot" aria-hidden="true"></span></h1>
             <span class="btn btn-ink btn-lg">Regarder <span class="arrow">→</span></span>
@@ -370,15 +435,21 @@
       </section>`;
     }
     const aujCase = dernier && memeJour(ms(dernier), maintenant()) ? dernier : null;
-    const sall = [DISCORD.general && lien(DISCORD.general, "btn", `${ICONE_DISCORD}#général`), DISCORD.contenu && lien(DISCORD.contenu, "btn", `${ICONE_DISCORD}#montre-ton-contenu`)].filter(Boolean).join("");
+    const calendrier = `<section class="home-cal"><p class="home-t mono">Tes ${d.jours.length} jours · une vidéo chaque matin à 6 h</p>
+      <ul class="cal">${d.jours.map((j) => caseJour(j, d, aujCase)).join("")}</ul></section>`;
     vue.innerHTML = `<div class="esp-w">${une}
-      <ul class="cal">${d.jours.map((j) => caseJour(j, d, aujCase)).join("")}</ul>
-      ${carte}
-      ${coaching}
-      ${sall ? `<section class="dsc"><p>Sur le Discord</p>${sall}</section>` : ""}
+      ${dernier ? "" : blocIntro(d.intro, false, avant)}
+      ${tuiles(d, dr, dernier)}
+      ${calendrier}
+      ${dernier ? blocIntro(d.intro, true) : ""}
     </div>`;
+    const mini = $("#videoIntro.vintro-mini");
+    if (mini) mini.addEventListener("toggle", () => { if (mini.open) track("espace_intro", { replie: 1 }); });
     document.title = "Ton espace · Le Stage";
-    battre(suivant ? ms(suivant) : 0);
+    /* La page se redessine à la prochaine échéance : le jour suivant, ou l'ouverture du Discord. */
+    const ouvreDc = Date.parse((d.discord || {}).ouvre_le || "");
+    const echeances = [suivant && ms(suivant), !isNaN(ouvreDc) && ouvreDc > maintenant() && ouvreDc].filter(Boolean);
+    battre(echeances.length ? Math.min(...echeances) : 0);
   }
 
   /* ---------- un jour ---------------------------------------------------- */
