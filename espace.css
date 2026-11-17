@@ -437,3 +437,17 @@ a.tile-dos:hover .arrow { translate: 3px 0; }
   .hk-g { padding: 12px 10px 10px; }
   .hk-cmd { width: 100%; justify-content: space-between; }
 }
+
+/* --- un jour : le résumé du live ------------------------------ */
+.live-r { margin-top: 18px; padding: 20px 22px 22px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid #F23F43; border-radius: 10px; }
+.live-r-k { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--g4); }
+.live-r-k i { width: 8px; height: 8px; border-radius: 50%; background: #F23F43; }
+.live-r h2 { margin: 0 0 10px; font-size: 19px; font-weight: 600; letter-spacing: -.015em; }
+.live-r h3 { margin: 18px 0 6px; font-size: 15px; font-weight: 600; }
+.live-r p, .live-r li { font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.live-r p { margin: 0; }
+.live-r p + p { margin-top: 8px; }
+.live-r ul { margin: 6px 0 0; padding-left: 20px; }
+.live-r li + li { margin-top: 5px; }
+.live-r b { color: var(--ink); font-weight: 600; }
+@media (max-width: 560px) { .live-r { padding: 16px 14px 18px; } }

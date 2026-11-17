@@ -37,6 +37,8 @@ create table if not exists public.jours (
 alter table public.jours add column if not exists encart text;
 -- Les prompts du jour : [{ "titre", "quand", "texte", "apres", "outil" }, …]
 alter table public.jours add column if not exists prompts jsonb;
+-- Le résumé du live du jour, affiché sous la vidéo (1re ligne = titre, « ## » intertitre, « - » puce).
+alter table public.jours add column if not exists live text;
 
 -- Les réglages de la promo, une ligne par clé. Les valeurs ne vivent que
 -- dans Supabase, jamais dans ce dépôt public.
@@ -152,7 +154,7 @@ begin
     'numero', j.numero, 'titre', j.titre, 'ouvre_le', j.ouvre_le,
     'objectif', j.objectif, 'video', j.video,
     'taches', j.taches, 'ressources', j.ressources, 'encart', j.encart,
-    'prompts', j.prompts,
+    'prompts', j.prompts, 'live', j.live,
     'ouvert', j.ouvre_le <= now(),
     'apercu', j.ouvre_le > now(),
     'maintenant', now()
