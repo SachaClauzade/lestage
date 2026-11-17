@@ -451,3 +451,6 @@ a.tile-dos:hover .arrow { translate: 3px 0; }
 .live-r li + li { margin-top: 5px; }
 .live-r b { color: var(--ink); font-weight: 600; }
 @media (max-width: 560px) { .live-r { padding: 16px 14px 18px; } }
+.live-r-a { margin: 4px 0 16px; padding: 12px 14px; background: var(--paper); border: 1px solid var(--line-2); border-radius: 8px; }
+.live-r-a p { margin: 0 0 8px; font-size: 11px; color: var(--g4); }
+.live-r-a audio { display: block; width: 100%; height: 40px; }

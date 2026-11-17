@@ -134,6 +134,7 @@
           taches: plein ? "Regarder la vidéo en entier\nÉcrire 5 idées de posts\nPublier ton premier post" : null,
           ressources: plein ? "Le Sheet du jour | https://docs.google.com/\nLes prompts (PDF) | https://example.com/prompts.pdf" : null,
           encart: plein ? "À savoir\n**Une règle en gras**, puis la suite de la phrase.\nUn second paragraphe, plus court." : null,
+          live_audio: plein && n === 1 ? "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3" : null,
           live: plein && n === 1 ? "Le live du lundi 16 novembre, en résumé\nUn paragraphe d'introduction.\n## Ce qu'on a vu\n- **Un point** en gras\n- Un autre point\n## À faire\nUne phrase." : null,
           prompts: plein ? promptsDemo[n] || null : null };
       },
@@ -488,9 +489,10 @@
   }
   /* Le résumé du live du jour (colonne jours.live) : 1re ligne = titre, « ## » = intertitre,
      « - » = puce, le reste = paragraphe, **gras**. */
-  function blocLive(s) {
+  function blocLive(s, audio) {
     const [titre, ...corps] = lignes(s);
     if (!titre) return "";
+    const src = /^https:\/\//.test(String(audio || "")) ? String(audio) : "";
     const gras = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
     let html = "", liste = false;
     for (const l of corps) {
@@ -501,7 +503,8 @@
       else html += `<p>${gras(l)}</p>`;
     }
     if (liste) html += "</ul>";
-    return `<section class="live-r"><p class="live-r-k mono"><i aria-hidden="true"></i>Le live</p><h2>${esc(titre)}</h2>${html}</section>`;
+    const lecteur = src ? `<div class="live-r-a"><p class="mono">Le replay audio</p><audio controls preload="metadata" src="${esc(src)}"></audio></div>` : "";
+    return `<section class="live-r"><p class="live-r-k mono"><i aria-hidden="true"></i>Le live</p><h2>${esc(titre)}</h2>${lecteur}${html}</section>`;
   }
   /* Les prompts : le texte se remplit sur place, puis part dans le presse-papiers ou dans Claude. */
   /* Dans un prompt, {{cle|texte de repli}} prend la valeur du dossier, ou le repli s'il est vide. */
@@ -575,7 +578,7 @@
         ${j.apercu ? `<p class="apercu">Aperçu : s'ouvre pour la promo ${esc(court(quand))} à ${esc(heure(quand))}</p>` : ""}
       </header>
       <div class="player">${player}</div>
-      ${blocLive(j.live)}
+      ${blocLive(j.live, j.live_audio)}
       ${gauche || cote ? `<div class="jb ${gauche && cote ? "" : "is-seul"}">${gauche}${cote}</div>` : ""}
       ${blocPrompts(j.prompts)}
       ${pager}

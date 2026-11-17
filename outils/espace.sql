@@ -39,6 +39,8 @@ alter table public.jours add column if not exists encart text;
 alter table public.jours add column if not exists prompts jsonb;
 -- Le résumé du live du jour, affiché sous la vidéo (1re ligne = titre, « ## » intertitre, « - » puce).
 alter table public.jours add column if not exists live text;
+-- L'adresse du replay audio du live (fichier dans le bucket « supports », jamais dans le dépôt).
+alter table public.jours add column if not exists live_audio text;
 
 -- Les réglages de la promo, une ligne par clé. Les valeurs ne vivent que
 -- dans Supabase, jamais dans ce dépôt public.
@@ -154,7 +156,7 @@ begin
     'numero', j.numero, 'titre', j.titre, 'ouvre_le', j.ouvre_le,
     'objectif', j.objectif, 'video', j.video,
     'taches', j.taches, 'ressources', j.ressources, 'encart', j.encart,
-    'prompts', j.prompts, 'live', j.live,
+    'prompts', j.prompts, 'live', j.live, 'live_audio', j.live_audio,
     'ouvert', j.ouvre_le <= now(),
     'apercu', j.ouvre_le > now(),
     'maintenant', now()
